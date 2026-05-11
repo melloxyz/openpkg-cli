@@ -26,5 +26,19 @@ export const getDefaultProjectRoots = async (cwd: string): Promise<string[]> => 
     candidates.map(async (candidate) => ((await pathExists(candidate)) ? candidate : undefined))
   );
 
-  return [...new Set(available.filter((value): value is string => Boolean(value)))];
+  const unique = [...new Set(available.filter((value): value is string => Boolean(value)))];
+
+  return unique.filter((candidate, index) => {
+    if (candidate === cwd) {
+      return true;
+    }
+
+    return !unique.some((otherCandidate, otherIndex) => {
+      if (otherIndex === index || otherCandidate !== cwd) {
+        return false;
+      }
+
+      return cwd.startsWith(`${candidate}${path.sep}`);
+    });
+  });
 };

@@ -15,13 +15,15 @@ type OverviewScreenProps = {
   cleanupTargets: CleanupTargetRecord[];
   health: EnvironmentHealthSnapshot | undefined;
   statusLine: string;
+  helpLines?: string[];
 };
 
 export const OverviewScreen = ({
   projects,
   cleanupTargets,
   health,
-  statusLine
+  statusLine,
+  helpLines
 }: OverviewScreenProps) => {
   const cleanupBytes = cleanupTargets.reduce(
     (total, record) => total + (record.sizeInBytes ?? 0),
@@ -64,6 +66,24 @@ export const OverviewScreen = ({
         <Text color={theme.text}>
           /cleanup shows heavyweight artifacts with safe-review recommendations.
         </Text>
+      </Panel>
+      <Panel
+        title="Command Deck"
+        footer="Keyboard: Tab switches focus, r refreshes, and cleanup uses space/x/y for live deletions."
+      >
+        <Box flexDirection="column">
+          {(helpLines && helpLines.length > 0 ? helpLines : [
+            '/scan  refresh projects, caches, and doctor',
+            '/projects  discover local repositories',
+            '/cleanup  inspect cleanup candidates',
+            '/cleanup --delete-safe  remove only safe items',
+            '/doctor  check tools and runtimes'
+          ]).map((line) => (
+            <Text key={line} color={theme.muted}>
+              {line}
+            </Text>
+          ))}
+        </Box>
       </Panel>
     </Box>
   );

@@ -32,6 +32,10 @@ export type CommandExecutionStatus = 'idle' | 'running' | 'success' | 'error';
 
 export type CommandArgumentValue = string | boolean | number | undefined;
 
+export type CommandCachePolicy = 'prefer-cache' | 'force';
+
+export type CleanupDeletionMode = 'safe' | 'selected';
+
 export type CommandExecutionContext = {
   cwd: string;
   homeDir: string;
@@ -43,6 +47,10 @@ export type CommandResult = {
   triggerProjectScan?: boolean;
   triggerCleanupScan?: boolean;
   triggerDoctorScan?: boolean;
+  cachePolicy?: CommandCachePolicy;
+  cleanupDeletionMode?: CleanupDeletionMode;
+  showHelp?: boolean;
+  scope?: ScanScope;
 };
 
 export type CommandDefinition = {
@@ -79,6 +87,7 @@ export type ProjectRecord = {
   packageManager: PackageManager;
   sizeInBytes?: number;
   lastActivityAt?: string;
+  activityStatus: 'active' | 'stale' | 'inactive';
 };
 
 export type CleanupTargetRecord = {
@@ -109,7 +118,34 @@ export type EnvironmentHealthSnapshot = {
   nodeVersion: string;
   platform: NodeJS.Platform;
   packageManagers: Partial<Record<Exclude<PackageManager, 'unknown'>, boolean>>;
+  toolVersions: Record<string, string>;
+  toolAvailability: Array<{
+    name: string;
+    available: boolean;
+    version?: string;
+    category: 'package-manager' | 'runtime' | 'container';
+  }>;
   recommendations: string[];
+};
+
+export type CleanupExecutionResult = {
+  deleted: CleanupTargetRecord[];
+  failed: Array<{
+    target: CleanupTargetRecord;
+    reason: string;
+  }>;
+  reclaimedBytes: number;
+};
+
+export type DashboardDataSnapshot = {
+  roots: string[];
+  projects?: ProjectRecord[];
+  cleanupTargets?: CleanupTargetRecord[];
+  health?: EnvironmentHealthSnapshot;
+  activeSection?: NavigationSection;
+  statusLine: string;
+  helpLines?: string[];
+  cleanupExecution?: CleanupExecutionResult;
 };
 
 export type ThemePalette = {
