@@ -19,7 +19,7 @@ const bootstrap = async () => {
       renderBrandTitle('OpenPgk'),
       '',
       chalk.hex(theme.text)('Interactive mode requires a TTY-enabled terminal.'),
-      chalk.hex(theme.muted)('Try `openpgk /doctor` or run `pnpm dev` in your terminal.')
+      chalk.hex(theme.muted)('Try `openpkg /doctor` or run `pnpm dev` in your terminal.')
     ].join('\n');
 
     process.stdout.write(

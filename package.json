@@ -1,11 +1,11 @@
 {
-  "name": "openpgk",
+  "name": "openpkg",
   "version": "0.1.0",
   "description": "Developer operating center for environment health, projects, caches, and tooling.",
   "type": "module",
   "bin": {
-    "openpgk": "./dist/cli.js",
-    "opgk": "./dist/cli.js"
+    "openpkg": "./dist/cli.js",
+    "opkg": "./dist/cli.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -27,7 +27,7 @@
     "cleanup",
     "terminal"
   ],
-  "author": "",
+  "author": "João Vitor de Mello <joaovdmello@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
