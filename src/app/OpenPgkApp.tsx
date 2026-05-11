@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
+import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { Spinner } from '@inkjs/ui';
 import { DashboardController } from '../modules/dashboard/dashboard-controller.js';
 import { NAVIGATION_ITEMS } from '../shared/constants.js';
@@ -9,11 +9,14 @@ import type {
   DashboardDataSnapshot,
   EnvironmentHealthSnapshot,
   NavigationSection,
-  ProjectRecord
+  OperationProgress,
+  ProjectRecord,
+  ScanScope
 } from '../types/index.js';
 import { useCommandSuggestions } from '../hooks/useCommandInput.js';
 import { AppShell } from '../ui/layout/AppShell.js';
 import { CommandPalette } from '../ui/components/CommandPalette.js';
+import { ProgressBar } from '../ui/components/ProgressBar.js';
 import { CleanupScreen } from '../ui/screens/CleanupScreen.js';
 import { DoctorScreen } from '../ui/screens/DoctorScreen.js';
 import { OverviewScreen } from '../ui/screens/OverviewScreen.js';
@@ -40,6 +43,7 @@ const nextSection = (current: NavigationSection, direction: 1 | -1) => {
 
 export const OpenPgkApp = () => {
   const { exit } = useApp();
+  const { stdout } = useStdout();
   const [activeSection, setActiveSection] = useState<NavigationSection>('overview');
   const [focusArea, setFocusArea] = useState<'sidebar' | 'content' | 'command'>('sidebar');
   const [statusLine, setStatusLine] = useState('Ready. Press / to open the command palette.');
@@ -47,7 +51,9 @@ export const OpenPgkApp = () => {
   const [commandPaletteVisible, setCommandPaletteVisible] = useState(false);
   const [commandSuggestionIndex, setCommandSuggestionIndex] = useState(0);
   const [isBusy, setIsBusy] = useState(false);
+  const [operationProgress, setOperationProgress] = useState<OperationProgress>();
   const [roots, setRoots] = useState<string[]>([]);
+  const [scope, setScope] = useState<ScanScope>('developer-home');
   const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [cleanupTargets, setCleanupTargets] = useState<CleanupTargetRecord[]>([]);
   const [health, setHealth] = useState<EnvironmentHealthSnapshot>();
@@ -56,9 +62,14 @@ export const OpenPgkApp = () => {
   const [cleanupCursor, setCleanupCursor] = useState(0);
   const [selectedCleanupIds, setSelectedCleanupIds] = useState<string[]>([]);
   const [pendingDeletionIds, setPendingDeletionIds] = useState<string[] | null>(null);
+  const [terminalWidth, setTerminalWidth] = useState(stdout?.columns ?? 120);
+  const [terminalHeight, setTerminalHeight] = useState(stdout?.rows ?? 40);
 
   const suggestions = useCommandSuggestions(controller.commandRegistry, commandInput);
   const activeTitle = renderBrandTitle(`OpenPgk\nDeveloper Operating Center`);
+  const compactLayout = terminalWidth < 110;
+  const sidebarWidth = compactLayout ? Math.max(24, terminalWidth - 4) : 24;
+  const visibleRows = Math.max(5, Math.min(14, terminalHeight - (compactLayout ? 22 : 14)));
   const selectedCleanupIdSet = useMemo(() => new Set(selectedCleanupIds), [selectedCleanupIds]);
   const visibleCleanupTargets = useMemo(
     () =>
@@ -67,10 +78,21 @@ export const OpenPgkApp = () => {
         : cleanupTargets,
     [activeSection, cleanupTargets]
   );
+  const previewReclaimableBytes = useMemo(
+    () =>
+      cleanupTargets
+        .filter((target) => selectedCleanupIdSet.has(target.id))
+        .reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
+    [cleanupTargets, selectedCleanupIdSet]
+  );
 
   const applySnapshot = (snapshot: DashboardDataSnapshot) => {
     setRoots(snapshot.roots);
     setStatusLine(snapshot.statusLine);
+
+    if (snapshot.scope) {
+      setScope(snapshot.scope);
+    }
 
     if (snapshot.projects) {
       setProjects(snapshot.projects);
@@ -97,12 +119,15 @@ export const OpenPgkApp = () => {
     setIsBusy(true);
 
     try {
-      const snapshot = await controller.runCommand(value);
+      const snapshot = await controller.runCommand(value, {
+        onProgress: setOperationProgress
+      });
       applySnapshot(snapshot);
     } catch (error) {
       setStatusLine(error instanceof Error ? error.message : 'Command failed unexpectedly.');
     } finally {
       setIsBusy(false);
+      setOperationProgress(undefined);
       setCommandPaletteVisible(false);
       setCommandInput('');
       setCommandSuggestionIndex(0);
@@ -114,12 +139,13 @@ export const OpenPgkApp = () => {
     setIsBusy(true);
 
     try {
-      const snapshot = await controller.refreshSection(activeSection);
+      const snapshot = await controller.refreshSection(activeSection, scope, setOperationProgress);
       applySnapshot(snapshot);
     } catch (error) {
       setStatusLine(error instanceof Error ? error.message : 'Refresh failed unexpectedly.');
     } finally {
       setIsBusy(false);
+      setOperationProgress(undefined);
     }
   };
 
@@ -130,7 +156,7 @@ export const OpenPgkApp = () => {
     setIsBusy(true);
 
     try {
-      const snapshot = await controller.deleteCleanupTargets(targets);
+      const snapshot = await controller.deleteCleanupTargets(targets, scope, setOperationProgress);
       applySnapshot(snapshot);
       if (activeSection === 'cache') {
         setActiveSection('cache');
@@ -141,6 +167,7 @@ export const OpenPgkApp = () => {
       setStatusLine(error instanceof Error ? error.message : 'Deletion failed unexpectedly.');
     } finally {
       setIsBusy(false);
+      setOperationProgress(undefined);
     }
   };
 
@@ -164,7 +191,8 @@ export const OpenPgkApp = () => {
     }
   };
 
-  const currentCleanupTarget = visibleCleanupTargets[clampIndex(cleanupCursor, visibleCleanupTargets.length)];
+  const currentCleanupTarget =
+    visibleCleanupTargets[clampIndex(cleanupCursor, visibleCleanupTargets.length)];
 
   const toggleCleanupSelection = () => {
     if (!currentCleanupTarget) {
@@ -186,8 +214,18 @@ export const OpenPgkApp = () => {
     );
   };
 
+  const selectAllCleanupTargets = () => {
+    setSelectedCleanupIds(visibleCleanupTargets.map((target) => target.id));
+    setStatusLine(`Selected ${visibleCleanupTargets.length} cleanup target(s).`);
+  };
+
   const armDeletion = () => {
-    const ids = selectedCleanupIds.length > 0 ? selectedCleanupIds : currentCleanupTarget ? [currentCleanupTarget.id] : [];
+    const ids =
+      selectedCleanupIds.length > 0
+        ? selectedCleanupIds
+        : currentCleanupTarget
+          ? [currentCleanupTarget.id]
+          : [];
 
     if (ids.length === 0) {
       setStatusLine('Select at least one cleanup target before deleting.');
@@ -195,8 +233,28 @@ export const OpenPgkApp = () => {
     }
 
     setPendingDeletionIds(ids);
-    setStatusLine(`Deletion armed for ${ids.length} target(s). Press y to confirm or Esc to cancel.`);
+    setStatusLine(
+      `Deletion armed for ${ids.length} target(s). Preview reclaimable size prepared. Press y to confirm or Esc to cancel.`
+    );
   };
+
+  useEffect(() => {
+    if (!stdout) {
+      return;
+    }
+
+    const handleResize = () => {
+      setTerminalWidth(stdout.columns ?? 120);
+      setTerminalHeight(stdout.rows ?? 40);
+    };
+
+    handleResize();
+    stdout.on('resize', handleResize);
+
+    return () => {
+      stdout.off('resize', handleResize);
+    };
+  }, [stdout]);
 
   useEffect(() => {
     void controller.hydrateFromCache().then((snapshot) => {
@@ -205,7 +263,7 @@ export const OpenPgkApp = () => {
 
     setIsBusy(true);
     void controller
-      .runCommand('/doctor')
+      .runCommand('/doctor', { onProgress: setOperationProgress })
       .then((snapshot) => {
         applySnapshot(snapshot);
       })
@@ -214,6 +272,7 @@ export const OpenPgkApp = () => {
       })
       .finally(() => {
         setIsBusy(false);
+        setOperationProgress(undefined);
       });
   }, []);
 
@@ -379,6 +438,11 @@ export const OpenPgkApp = () => {
         return;
       }
 
+      if ((activeSection === 'cleanup' || activeSection === 'cache') && input === 's') {
+        selectAllCleanupTargets();
+        return;
+      }
+
       if ((activeSection === 'cleanup' || activeSection === 'cache') && input === 'c') {
         setSelectedCleanupIds([]);
         setStatusLine('Cleanup selection cleared.');
@@ -399,6 +463,8 @@ export const OpenPgkApp = () => {
             projects={projects}
             selectedIndex={clampIndex(projectCursor, projects.length)}
             isFocused={focusArea === 'content'}
+            compact={compactLayout}
+            visibleRows={visibleRows}
           />
         );
       case 'cache':
@@ -410,6 +476,9 @@ export const OpenPgkApp = () => {
             selectedIds={selectedCleanupIdSet}
             isFocused={focusArea === 'content'}
             pendingDeletionCount={pendingDeletionIds?.length ?? 0}
+            compact={compactLayout}
+            visibleRows={visibleRows}
+            previewReclaimableBytes={previewReclaimableBytes}
           />
         );
       case 'cleanup':
@@ -420,6 +489,9 @@ export const OpenPgkApp = () => {
             selectedIds={selectedCleanupIdSet}
             isFocused={focusArea === 'content'}
             pendingDeletionCount={pendingDeletionIds?.length ?? 0}
+            compact={compactLayout}
+            visibleRows={visibleRows}
+            previewReclaimableBytes={previewReclaimableBytes}
           />
         );
       case 'doctor':
@@ -433,7 +505,7 @@ export const OpenPgkApp = () => {
             projects={projects}
             cleanupTargets={cleanupTargets}
             health={health}
-            statusLine={`${statusLine} Roots: ${roots.length}.`}
+            statusLine={`${statusLine} Scope: ${scope}. Roots: ${roots.length}.`}
             helpLines={helpLines}
           />
         );
@@ -446,11 +518,19 @@ export const OpenPgkApp = () => {
       focusArea={focusArea}
       title={activeTitle}
       subtitle="Fast scans, modular services, and premium keyboard-first workflows."
+      compact={compactLayout}
+      sidebarWidth={sidebarWidth}
       footer={
         <Box flexDirection="column" width="100%">
           {isBusy ? (
-            <Box>
+            <Box flexDirection="column">
               <Spinner label="Working..." />
+              {operationProgress ? (
+                <ProgressBar
+                  progress={operationProgress}
+                  width={Math.max(20, terminalWidth - 4)}
+                />
+              ) : null}
             </Box>
           ) : (
             <Text color={pendingDeletionIds ? theme.danger : theme.muted}>{statusLine}</Text>

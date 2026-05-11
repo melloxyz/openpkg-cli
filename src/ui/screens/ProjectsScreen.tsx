@@ -9,6 +9,8 @@ type ProjectsScreenProps = {
   projects: ProjectRecord[];
   selectedIndex: number;
   isFocused: boolean;
+  compact: boolean;
+  visibleRows: number;
 };
 
 const truncate = (value: string, length: number) =>
@@ -27,15 +29,22 @@ const getWindowedRows = <TValue,>(values: TValue[], selectedIndex: number, size:
   }));
 };
 
-export const ProjectsScreen = ({ projects, selectedIndex, isFocused }: ProjectsScreenProps) => {
+export const ProjectsScreen = ({
+  projects,
+  selectedIndex,
+  isFocused,
+  compact,
+  visibleRows
+}: ProjectsScreenProps) => {
   const selectedProject = projects[selectedIndex];
-  const visibleRows = getWindowedRows(projects, selectedIndex, 10);
+  const rows = getWindowedRows(projects, selectedIndex, visibleRows);
 
   return (
-    <Box gap={1}>
+    <Box gap={1} flexDirection={compact ? 'column' : 'row'}>
       <Panel
         title={`Projects (${projects.length})`}
-        width="58%"
+        {...(compact ? {} : { width: '58%' })}
+        flexGrow={1}
         footer={
           isFocused
             ? 'Focused: j/k move, r refresh, / command palette.'
@@ -46,8 +55,10 @@ export const ProjectsScreen = ({ projects, selectedIndex, isFocused }: ProjectsS
           <Text color={theme.muted}>Run /projects or /scan to discover repositories.</Text>
         ) : (
           <Box flexDirection="column">
-            <Text color={theme.muted}>Name                 Framework  PM      Status    Last Active</Text>
-            {visibleRows.map(({ value: project, index }) => {
+            <Text color={theme.muted}>
+              {compact ? 'Name             PM      Status    Last Active' : 'Name                 Framework  PM      Status    Last Active'}
+            </Text>
+            {rows.map(({ value: project, index }) => {
               const isActive = index === selectedIndex;
               const tone =
                 project.activityStatus === 'active'
@@ -58,17 +69,32 @@ export const ProjectsScreen = ({ projects, selectedIndex, isFocused }: ProjectsS
 
               return (
                 <Text key={project.id} color={isActive ? theme.accent : theme.text}>
-                  {isActive ? '›' : ' '} {truncate(project.name.padEnd(20), 20)}{' '}
-                  {project.framework.padEnd(9)} {project.packageManager.padEnd(7)}{' '}
-                  <Text color={tone}>{project.activityStatus.padEnd(8)}</Text>{' '}
-                  {formatRelativeDate(project.lastActivityAt)}
+                  {compact ? (
+                    <>
+                      {isActive ? '›' : ' '} {truncate(project.name.padEnd(16), 16)}{' '}
+                      {project.packageManager.padEnd(7)} <Text color={tone}>{project.activityStatus.padEnd(8)}</Text>{' '}
+                      {formatRelativeDate(project.lastActivityAt)}
+                    </>
+                  ) : (
+                    <>
+                      {isActive ? '›' : ' '} {truncate(project.name.padEnd(20), 20)}{' '}
+                      {project.framework.padEnd(9)} {project.packageManager.padEnd(7)}{' '}
+                      <Text color={tone}>{project.activityStatus.padEnd(8)}</Text>{' '}
+                      {formatRelativeDate(project.lastActivityAt)}
+                    </>
+                  )}
                 </Text>
               );
             })}
           </Box>
         )}
       </Panel>
-      <Panel title="Project Detail" width="42%" footer="Framework and runtime signals come from package manifests and lockfiles.">
+      <Panel
+        title="Project Detail"
+        {...(compact ? {} : { width: '42%' })}
+        flexGrow={1}
+        footer="Framework and runtime signals come from package manifests and lockfiles."
+      >
         {selectedProject ? (
           <Box flexDirection="column">
             <Text color={theme.primary}>{selectedProject.name}</Text>

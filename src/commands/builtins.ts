@@ -13,7 +13,15 @@ const resolveCachePolicy = (forceOption: unknown, cachedOption: unknown) => {
 };
 
 const resolveScope = (scopeOption: unknown) => {
-  return scopeOption === 'workspace' ? 'workspace' : 'developer-home';
+  if (scopeOption === 'workspace') {
+    return 'workspace' as const;
+  }
+
+  if (scopeOption === 'machine') {
+    return 'machine' as const;
+  }
+
+  return 'developer-home' as const;
 };
 
 export const createBuiltInCommands = (): CommandDefinition[] => [
@@ -21,8 +29,8 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'scan',
     description: 'Run project and cache discovery across your developer roots.',
     aliases: ['rescan', 'refresh'],
-    usage: '/scan [--scope=workspace] [--cached] [--force]',
-    examples: ['/scan', '/scan --scope=workspace'],
+    usage: '/scan [--scope=workspace|machine] [--cached] [--force]',
+    examples: ['/scan', '/scan --scope=machine'],
     execute: async (parsed) => ({
       message: 'Started a full environment scan.',
       targetSection: 'overview',
@@ -49,7 +57,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'projects',
     description: 'Open the project inventory and trigger project discovery.',
     aliases: ['repos', 'apps'],
-    usage: '/projects [--scope=workspace] [--cached] [--force]',
+    usage: '/projects [--scope=workspace|machine] [--cached] [--force]',
     execute: async (parsed) => ({
       message: 'Loading local projects.',
       targetSection: 'projects',
@@ -62,7 +70,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'cache',
     description: 'Inspect cache-heavy directories and build artifacts.',
     aliases: ['caches'],
-    usage: '/cache [--scope=workspace] [--cached] [--force]',
+    usage: '/cache [--scope=workspace|machine] [--cached] [--force]',
     execute: async (parsed) => ({
       message: 'Scanning cache and artifact directories.',
       targetSection: 'cache',
@@ -75,8 +83,8 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'cleanup',
     description: 'Review safe cleanup candidates across your machine.',
     aliases: ['clean'],
-    usage: '/cleanup [--scope=workspace] [--cached] [--force] [--delete-safe]',
-    examples: ['/cleanup', '/cleanup --scope=workspace --delete-safe'],
+    usage: '/cleanup [--scope=workspace|machine] [--cached] [--force] [--delete-safe]',
+    examples: ['/cleanup', '/cleanup --scope=machine --delete-safe'],
     execute: async (parsed) => ({
       message:
         parsed.options['delete-safe'] === true

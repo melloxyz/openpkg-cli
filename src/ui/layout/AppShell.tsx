@@ -9,6 +9,8 @@ type AppShellProps = {
   focusArea: 'sidebar' | 'content' | 'command';
   title: string;
   subtitle: string;
+  compact: boolean;
+  sidebarWidth: number;
   children: React.ReactNode;
   footer: React.ReactNode;
 };
@@ -18,6 +20,8 @@ export const AppShell = ({
   focusArea,
   title,
   subtitle,
+  compact,
+  sidebarWidth,
   children,
   footer
 }: AppShellProps) => (
@@ -26,8 +30,13 @@ export const AppShell = ({
     <Text color={theme.muted}>
       {subtitle} Focus: {focusArea}
     </Text>
-    <Box marginTop={1} gap={1}>
-      <Sidebar activeSection={activeSection} hasFocus={focusArea === 'sidebar'} />
+    <Box marginTop={1} gap={1} flexDirection={compact ? 'column' : 'row'} alignItems="flex-start">
+      <Sidebar
+        activeSection={activeSection}
+        hasFocus={focusArea === 'sidebar'}
+        width={sidebarWidth}
+        compact={compact}
+      />
       <Box flexDirection="column" flexGrow={1}>
         {children}
       </Box>

@@ -1,8 +1,22 @@
 import os from 'node:os';
-import type { CleanupTargetRecord, CommandExecutionContext, CommandResult, DashboardDataSnapshot } from '../../types/index.js';
+import type {
+  CleanupTargetRecord,
+  CommandExecutionContext,
+  CommandResult,
+  DashboardDataSnapshot,
+  OperationProgress,
+  ScanScope
+} from '../../types/index.js';
 import { createAppContainer } from '../../core/container.js';
 import { formatBytes } from '../../utils/format.js';
-import { getDefaultProjectRoots } from '../../utils/filesystem.js';
+import { getDefaultProjectRoots, getMachineScanRoots } from '../../utils/filesystem.js';
+
+type ProgressListener = (progress: OperationProgress | undefined) => void;
+
+type RunOptions = {
+  onProgress?: ProgressListener;
+  scopeOverride?: ScanScope;
+};
 
 export class DashboardController {
   readonly #container = createAppContainer();
@@ -17,6 +31,7 @@ export class DashboardController {
 
     return {
       roots,
+      scope: 'developer-home',
       ...(projects ? { projects: projects.records } : {}),
       ...(cleanupTargets ? { cleanupTargets: cleanupTargets.records } : {}),
       ...(health ? { health } : {}),
@@ -27,12 +42,13 @@ export class DashboardController {
     };
   }
 
-  async runCommand(commandInput: string): Promise<DashboardDataSnapshot> {
+  async runCommand(commandInput: string, options: RunOptions = {}): Promise<DashboardDataSnapshot> {
     const command = this.#container.commandRegistry.resolve(commandInput);
 
     if (!command) {
       return {
-        roots: await this.#getRoots(),
+        roots: await this.#getRoots(options.scopeOverride),
+        scope: options.scopeOverride ?? 'developer-home',
         statusLine: `Unknown command: ${commandInput}`
       };
     }
@@ -45,19 +61,39 @@ export class DashboardController {
     const parsedCommand = this.#container.commandRegistry.parse(commandInput);
     const result = await command.execute(parsedCommand, context);
 
-    return this.#applyCommandResult(result);
+    return this.#applyCommandResult(result, options);
   }
 
-  async deleteCleanupTargets(targets: CleanupTargetRecord[]): Promise<DashboardDataSnapshot> {
+  async deleteCleanupTargets(
+    targets: CleanupTargetRecord[],
+    scope: ScanScope = 'developer-home',
+    onProgress?: ProgressListener
+  ): Promise<DashboardDataSnapshot> {
     if (targets.length === 0) {
       return {
-        roots: await this.#getRoots(),
+        roots: await this.#getRoots(scope),
+        scope,
         statusLine: 'No cleanup targets selected.'
       };
     }
 
+    onProgress?.({
+      label: 'Deleting selected targets',
+      current: 0,
+      total: Math.max(1, targets.length),
+      detail: `Preparing ${targets.length} target(s)`
+    });
+
     const cleanupExecution = await this.#container.cleanupExecutor.deleteTargets(targets);
-    const cleanupSummary = await this.#scanCleanup(await this.#getRoots(), 'force');
+
+    onProgress?.({
+      label: 'Refreshing cleanup inventory',
+      current: targets.length,
+      total: Math.max(1, targets.length + 1),
+      detail: 'Rebuilding candidate list'
+    });
+
+    const cleanupSummary = await this.#scanCleanup(await this.#getRoots(scope), 'force');
     const deletedCount = cleanupExecution.deleted.length;
     const failedCount = cleanupExecution.failed.length;
     const parts = [
@@ -69,8 +105,11 @@ export class DashboardController {
       parts.push(`${failedCount} failed`);
     }
 
+    onProgress?.(undefined);
+
     return {
       roots: cleanupSummary.roots,
+      scope,
       cleanupTargets: cleanupSummary.records,
       cleanupExecution,
       activeSection: 'cleanup',
@@ -85,34 +124,44 @@ export class DashboardController {
     });
   }
 
-  async refreshSection(section: DashboardDataSnapshot['activeSection']) {
-    switch (section) {
-      case 'projects':
-        return this.runCommand('/projects');
-      case 'cache':
-        return this.runCommand('/cache');
-      case 'cleanup':
-        return this.runCommand('/cleanup');
-      case 'doctor':
-        return this.runCommand('/doctor');
-      case 'settings':
-        return {
-          roots: await this.#getRoots(),
-          activeSection: 'settings',
-          statusLine: 'Settings panel refreshed.'
-        } satisfies DashboardDataSnapshot;
-      case 'overview':
-      default:
-        return this.runCommand('/scan');
+  async refreshSection(
+    section: DashboardDataSnapshot['activeSection'],
+    scope: ScanScope = 'developer-home',
+    onProgress?: ProgressListener
+  ) {
+    const commandMap: Record<string, string> = {
+      overview: `/scan --scope=${scope}`,
+      projects: `/projects --scope=${scope}`,
+      cache: `/cache --scope=${scope}`,
+      cleanup: `/cleanup --scope=${scope}`,
+      doctor: '/doctor'
+    };
+
+    if (section === 'settings') {
+      return {
+        roots: await this.#getRoots(scope),
+        scope,
+        activeSection: 'settings',
+        statusLine: 'Settings panel refreshed.'
+      } satisfies DashboardDataSnapshot;
     }
+
+    return this.runCommand(commandMap[section ?? 'overview'] ?? `/scan --scope=${scope}`, {
+      scopeOverride: scope,
+      ...(onProgress ? { onProgress } : {})
+    });
   }
 
   get commandRegistry() {
     return this.#container.commandRegistry;
   }
 
-  async #applyCommandResult(result: CommandResult): Promise<DashboardDataSnapshot> {
-    const roots = await this.#getRoots(result.scope);
+  async #applyCommandResult(
+    result: CommandResult,
+    options: RunOptions = {}
+  ): Promise<DashboardDataSnapshot> {
+    const scope = options.scopeOverride ?? result.scope ?? 'developer-home';
+    const roots = await this.#getRoots(scope);
     const cachePolicy = result.cachePolicy ?? 'force';
     let statusLine = result.message;
     let projects = undefined;
@@ -120,19 +169,39 @@ export class DashboardController {
     let health = undefined;
     let cleanupExecution = undefined;
 
+    const totalStages =
+      Number(Boolean(result.triggerProjectScan)) +
+      Number(Boolean(result.triggerCleanupScan)) +
+      Number(Boolean(result.triggerDoctorScan)) +
+      Number(Boolean(result.cleanupDeletionMode === 'safe'));
+    let currentStage = 0;
+
+    const pushStage = (label: string, detail?: string) => {
+      currentStage += 1;
+      options.onProgress?.({
+        label,
+        current: currentStage,
+        total: Math.max(1, totalStages),
+        ...(detail ? { detail } : {})
+      });
+    };
+
     if (result.triggerProjectScan) {
+      pushStage('Scanning projects', `${roots.length} root(s)`);
       const summary = await this.#scanProjects(roots, cachePolicy);
       projects = summary.records;
       statusLine = `${statusLine} Found ${summary.records.length} project(s).`;
     }
 
     if (result.triggerCleanupScan) {
+      pushStage('Scanning cleanup targets', `${roots.length} root(s)`);
       const summary = await this.#scanCleanup(roots, cachePolicy);
       cleanupTargets = summary.records;
       statusLine = `Cleanup inventory ready with ${summary.records.length} target(s).`;
     }
 
     if (result.cleanupDeletionMode === 'safe') {
+      pushStage('Deleting safe cleanup targets');
       const deletionCandidates =
         cleanupTargets?.filter((target) => target.recommendation === 'safe') ??
         (await this.#scanCleanup(roots, 'force')).records.filter(
@@ -151,14 +220,18 @@ export class DashboardController {
     }
 
     if (result.triggerDoctorScan) {
+      pushStage('Collecting diagnostics');
       health = await this.#scanHealth(cachePolicy);
       statusLine = `${result.message} ${
         Object.values(health.packageManagers).filter(Boolean).length
       } package managers detected.`;
     }
 
+    options.onProgress?.(undefined);
+
     return {
       roots,
+      scope,
       ...(projects ? { projects } : {}),
       ...(cleanupTargets ? { cleanupTargets } : {}),
       ...(health ? { health } : {}),
@@ -208,9 +281,13 @@ export class DashboardController {
     return snapshot;
   }
 
-  async #getRoots(scope: CommandResult['scope'] = 'developer-home') {
+  async #getRoots(scope: ScanScope = 'developer-home') {
     if (scope === 'workspace') {
       return [process.cwd()];
+    }
+
+    if (scope === 'machine') {
+      return getMachineScanRoots();
     }
 
     return getDefaultProjectRoots(process.cwd());

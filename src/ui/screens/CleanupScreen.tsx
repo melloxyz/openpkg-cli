@@ -12,6 +12,9 @@ type CleanupScreenProps = {
   selectedIds: Set<string>;
   isFocused: boolean;
   pendingDeletionCount: number;
+  compact: boolean;
+  visibleRows: number;
+  previewReclaimableBytes: number;
 };
 
 const truncate = (value: string, length: number) =>
@@ -36,21 +39,25 @@ export const CleanupScreen = ({
   selectedIndex,
   selectedIds,
   isFocused,
-  pendingDeletionCount
+  pendingDeletionCount,
+  compact,
+  visibleRows,
+  previewReclaimableBytes
 }: CleanupScreenProps) => {
   const selectedTarget = cleanupTargets[selectedIndex];
-  const visibleRows = getWindowedRows(cleanupTargets, selectedIndex, 10);
+  const rows = getWindowedRows(cleanupTargets, selectedIndex, visibleRows);
   const safeCount = cleanupTargets.filter((record) => record.recommendation === 'safe').length;
   const selectedCount = cleanupTargets.filter((record) => selectedIds.has(record.id)).length;
 
   return (
-    <Box gap={1}>
+    <Box gap={1} flexDirection={compact ? 'column' : 'row'}>
       <Panel
         title={`${title} (${cleanupTargets.length})`}
-        width="60%"
+        {...(compact ? {} : { width: '60%' })}
+        flexGrow={1}
         footer={
           isFocused
-            ? 'Focused: j/k move, space select, a select safe, c clear, x delete, r refresh.'
+            ? 'Focused: j/k move, space toggle, s select all, a select safe, c clear, x delete.'
             : 'Tab into content to manage cleanup targets.'
         }
       >
@@ -58,8 +65,10 @@ export const CleanupScreen = ({
           <Text color={theme.muted}>Run /cleanup or /cache to populate cleanup candidates.</Text>
         ) : (
           <Box flexDirection="column">
-            <Text color={theme.muted}>Sel Kind         Recommendation Size      Modified   Path</Text>
-            {visibleRows.map(({ value: record, index }) => {
+            <Text color={theme.muted}>
+              {compact ? 'Sel Kind         Size      Modified   Path' : 'Sel Kind         Recommendation Size      Modified   Path'}
+            </Text>
+            {rows.map(({ value: record, index }) => {
               const isActive = index === selectedIndex;
               const isSelected = selectedIds.has(record.id);
               const tone =
@@ -71,11 +80,22 @@ export const CleanupScreen = ({
 
               return (
                 <Text key={record.id} color={isActive ? theme.accent : theme.text}>
-                  {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'} {record.kind.padEnd(12)}{' '}
-                  <Text color={tone}>{record.recommendation.padEnd(14)}</Text>{' '}
-                  {formatBytes(record.sizeInBytes).padEnd(9)}{' '}
-                  {formatRelativeDate(record.lastModifiedAt).padEnd(10)}{' '}
-                  {truncate(record.path, 28)}
+                  {compact ? (
+                    <>
+                      {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'} {record.kind.padEnd(12)}{' '}
+                      {formatBytes(record.sizeInBytes).padEnd(9)}{' '}
+                      {formatRelativeDate(record.lastModifiedAt).padEnd(10)}{' '}
+                      {truncate(record.path, 20)}
+                    </>
+                  ) : (
+                    <>
+                      {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'} {record.kind.padEnd(12)}{' '}
+                      <Text color={tone}>{record.recommendation.padEnd(14)}</Text>{' '}
+                      {formatBytes(record.sizeInBytes).padEnd(9)}{' '}
+                      {formatRelativeDate(record.lastModifiedAt).padEnd(10)}{' '}
+                      {truncate(record.path, 28)}
+                    </>
+                  )}
                 </Text>
               );
             })}
@@ -84,11 +104,12 @@ export const CleanupScreen = ({
       </Panel>
       <Panel
         title="Deletion Review"
-        width="40%"
+        {...(compact ? {} : { width: '40%' })}
+        flexGrow={1}
         footer={
           pendingDeletionCount > 0
-            ? `Deletion armed for ${pendingDeletionCount} target(s). Press y to confirm or Esc to cancel.`
-            : `${safeCount} safe candidate(s). ${selectedCount} currently selected.`
+            ? `Deletion armed for ${pendingDeletionCount} target(s). Preview: ${formatBytes(previewReclaimableBytes)}. Press y to confirm or Esc to cancel.`
+            : `${safeCount} safe candidate(s). ${selectedCount} selected. Preview: ${formatBytes(previewReclaimableBytes)}`
         }
       >
         {selectedTarget ? (

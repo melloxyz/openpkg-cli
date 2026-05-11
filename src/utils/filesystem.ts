@@ -42,3 +42,8 @@ export const getDefaultProjectRoots = async (cwd: string): Promise<string[]> => 
     });
   });
 };
+
+export const getMachineScanRoots = async (): Promise<string[]> => {
+  const homeDir = os.homedir();
+  return (await pathExists(homeDir)) ? [homeDir] : [];
+};

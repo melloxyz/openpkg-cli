@@ -6,7 +6,7 @@ export type NavigationSection =
   | 'doctor'
   | 'settings';
 
-export type ScanScope = 'workspace' | 'developer-home' | 'custom';
+export type ScanScope = 'workspace' | 'developer-home' | 'machine' | 'custom';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -139,6 +139,7 @@ export type CleanupExecutionResult = {
 
 export type DashboardDataSnapshot = {
   roots: string[];
+  scope?: ScanScope;
   projects?: ProjectRecord[];
   cleanupTargets?: CleanupTargetRecord[];
   health?: EnvironmentHealthSnapshot;
@@ -146,6 +147,13 @@ export type DashboardDataSnapshot = {
   statusLine: string;
   helpLines?: string[];
   cleanupExecution?: CleanupExecutionResult;
+};
+
+export type OperationProgress = {
+  label: string;
+  current: number;
+  total: number;
+  detail?: string;
 };
 
 export type ThemePalette = {

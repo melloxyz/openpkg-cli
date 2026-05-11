@@ -8,12 +8,14 @@ type PanelProps = {
   footer?: string;
   width?: number | string;
   minHeight?: number;
+  flexGrow?: number;
 };
 
-export const Panel = ({ title, children, footer, width, minHeight }: PanelProps) => (
+export const Panel = ({ title, children, footer, width, minHeight, flexGrow }: PanelProps) => (
   <Box
     width={width}
     minHeight={minHeight}
+    flexGrow={flexGrow}
     flexDirection="column"
     borderStyle="round"
     borderColor={theme.panelBorder}

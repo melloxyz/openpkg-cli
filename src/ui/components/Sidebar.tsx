@@ -7,12 +7,14 @@ import type { NavigationSection } from '../../types/index.js';
 type SidebarProps = {
   activeSection: NavigationSection;
   hasFocus: boolean;
+  width: number;
+  compact: boolean;
 };
 
-export const Sidebar = ({ activeSection, hasFocus }: SidebarProps) => (
+export const Sidebar = ({ activeSection, hasFocus, width, compact }: SidebarProps) => (
   <Box
-    width={24}
-    minHeight={24}
+    width={width}
+    minHeight={compact ? 10 : 16}
     flexDirection="column"
     borderStyle="round"
     borderColor={hasFocus ? theme.primary : theme.panelBorder}
@@ -34,13 +36,13 @@ export const Sidebar = ({ activeSection, hasFocus }: SidebarProps) => (
         );
       })}
     </Box>
-    <Box marginTop={2} flexDirection="column">
+    <Box marginTop={compact ? 1 : 2} flexDirection="column">
       <Text color={theme.muted}>Hotkeys</Text>
       <Text color={theme.muted}>Tab switch focus</Text>
       <Text color={theme.muted}>j/k move</Text>
       <Text color={theme.muted}>/ command palette</Text>
-      <Text color={theme.muted}>r refresh section</Text>
-      <Text color={theme.muted}>x delete selected</Text>
+      {!compact ? <Text color={theme.muted}>r refresh section</Text> : null}
+      {!compact ? <Text color={theme.muted}>x delete selected</Text> : null}
     </Box>
   </Box>
 );
