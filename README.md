@@ -1,4 +1,24 @@
-# OpenPgk
+<div align="center">
+
+<pre>
+ ██████  ██████  ███████ ███    ██ ██████   ██████  ██   ██     ██████ ██      ██
+██    ██ ██   ██ ██      ████   ██ ██   ██ ██       ██  ██     ██      ██      ██
+██    ██ ██████  █████   ██ ██  ██ ██████  ██   ███ █████      ██      ██      ██
+██    ██ ██      ██      ██  ██ ██ ██      ██    ██ ██  ██     ██      ██      ██
+ ██████  ██      ███████ ██   ████ ██       ██████  ██   ██     ██████ ███████ ██
+<pre>
+
+![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Ink](https://img.shields.io/badge/Ink-7-000000?style=flat-square)
+![pnpm](https://img.shields.io/badge/pnpm-10-F69220?style=flat-square&logo=pnpm&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?style=flat-square&logo=vitest&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-10-4B32C3?style=flat-square&logo=eslint&logoColor=white)
+![MIT License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+</div>
+
+# OpenPgk CLI
 
 OpenPgk is a keyboard-first developer control center for the terminal.
 
