@@ -15,4 +15,36 @@ describe('parseCommandInput', () => {
       }
     });
   });
+
+  it('supports plain commands without slash and trims input', () => {
+    const result = parseCommandInput('   projects workspace --cached   ');
+
+    expect(result).toEqual({
+      name: 'projects',
+      raw: '   projects workspace --cached   ',
+      args: ['workspace'],
+      options: {
+        cached: true
+      }
+    });
+  });
+
+  it('coerces boolean and numeric option values', () => {
+    const result = parseCommandInput('/scan --enabled=true --retry=false --limit=42 --name=alpha');
+
+    expect(result.options).toEqual({
+      enabled: true,
+      retry: false,
+      limit: 42,
+      name: 'alpha'
+    });
+  });
+
+  it('ignores malformed options without a key', () => {
+    const result = parseCommandInput('/scan --=20 --force');
+
+    expect(result.options).toEqual({
+      force: true
+    });
+  });
 });

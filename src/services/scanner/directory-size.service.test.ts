@@ -8,9 +8,9 @@ const tempDirectories: string[] = [];
 
 afterEach(async () => {
   await Promise.all(
-    tempDirectories.splice(0, tempDirectories.length).map((directory) =>
-      rm(directory, { recursive: true, force: true })
-    )
+    tempDirectories
+      .splice(0, tempDirectories.length)
+      .map((directory) => rm(directory, { recursive: true, force: true }))
   );
 });
 
@@ -28,5 +28,15 @@ describe('DirectorySizeService', () => {
     const size = await service.getDirectorySize(root);
 
     expect(size).toBeGreaterThanOrEqual(15);
+  });
+
+  it('returns zero for an empty directory', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-size-'));
+    tempDirectories.push(root);
+
+    const service = new DirectorySizeService();
+    const size = await service.getDirectorySize(root);
+
+    expect(size).toBe(0);
   });
 });

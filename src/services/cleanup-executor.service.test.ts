@@ -26,9 +26,9 @@ const createCleanupTarget = async (directoryName: CleanupTargetRecord['kind']) =
 
 afterEach(async () => {
   await Promise.all(
-    tempDirectories.splice(0, tempDirectories.length).map((directory) =>
-      rm(directory, { recursive: true, force: true })
-    )
+    tempDirectories
+      .splice(0, tempDirectories.length)
+      .map((directory) => rm(directory, { recursive: true, force: true }))
   );
 });
 
@@ -61,5 +61,61 @@ describe('CleanupExecutorService', () => {
     expect(result.failed).toHaveLength(1);
     expect(result.failed[0]?.reason).toContain('unexpected directory');
     await expect(stat(target.path)).resolves.toBeDefined();
+  });
+
+  it('refuses deleting filesystem root', async () => {
+    const service = new CleanupExecutorService();
+    const rootPath = path.parse(process.cwd()).root;
+    const target: CleanupTargetRecord = {
+      id: `build:${rootPath}`,
+      kind: 'build',
+      path: rootPath,
+      sizeInBytes: 0,
+      recommendation: 'safe'
+    };
+
+    const result = await service.deleteTargets([target]);
+
+    expect(result.deleted).toHaveLength(0);
+    expect(result.failed).toHaveLength(1);
+    expect(result.failed[0]?.reason).toContain('filesystem root');
+  });
+
+  it('refuses target kind mismatch', async () => {
+    const service = new CleanupExecutorService();
+    const target = await createCleanupTarget('node_modules');
+    const mismatched: CleanupTargetRecord = {
+      ...target,
+      kind: 'build'
+    };
+
+    const result = await service.deleteTargets([mismatched]);
+
+    expect(result.deleted).toHaveLength(0);
+    expect(result.failed).toHaveLength(1);
+    expect(result.failed[0]?.reason).toContain('Target kind mismatch');
+    await expect(stat(target.path)).resolves.toBeDefined();
+  });
+
+  it('fails when target path is not a directory', async () => {
+    const service = new CleanupExecutorService();
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cleanup-'));
+    tempDirectories.push(tempRoot);
+    const fileTargetPath = path.join(tempRoot, 'build');
+    await writeFile(fileTargetPath, 'not a directory');
+
+    const target: CleanupTargetRecord = {
+      id: `build:${fileTargetPath}`,
+      kind: 'build',
+      path: fileTargetPath,
+      sizeInBytes: 1,
+      recommendation: 'review'
+    };
+
+    const result = await service.deleteTargets([target]);
+
+    expect(result.deleted).toHaveLength(0);
+    expect(result.failed).toHaveLength(1);
+    expect(result.failed[0]?.reason).toContain('not a directory');
   });
 });
