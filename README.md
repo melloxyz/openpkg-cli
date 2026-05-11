@@ -239,10 +239,10 @@ This structure is intended to support future additions such as plugin systems, l
 
 ## Roadmap
 
-See [ROADMAP.md](openpkg/README.md) for the current delivery status and planned work.
+See [ROADMAP.md](ROADMAP.md) for the current delivery status and planned work.
 
 ## License
 
 This project is licensed under the MIT License.
 
-See [LICENSE](openpkg/LICENSE) for details.
+See [LICENSE](LICENSE) for details.

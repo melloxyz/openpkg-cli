@@ -97,4 +97,4 @@ Good contributions usually include:
 
 ## Questions and Direction
 
-If a change affects architecture, safety, or scan performance, prefer aligning it with the roadmap first in [ROADMAP.md](openpkg/README.md).
+If a change affects architecture, safety, or scan performance, prefer aligning it with the roadmap first in [ROADMAP.md](ROADMAP.md).
