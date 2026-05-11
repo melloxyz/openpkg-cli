@@ -1,6 +1,8 @@
 <div align="center">
 <img src=".openpkg/assets/openpkg-logo.png" alt="OpenPgk logo" width="520" style="margin: 25px 0 25px;" />
 
+<div aria-hidden="true" style="height: 12px;"></div>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/TypeScript-6-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
