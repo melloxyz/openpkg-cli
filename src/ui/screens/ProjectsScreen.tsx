@@ -102,6 +102,9 @@ export const ProjectsScreen = ({
             <Text color={theme.text}>Package Manager: {selectedProject.packageManager}</Text>
             <Text color={theme.text}>Footprint: {formatBytes(selectedProject.sizeInBytes)}</Text>
             <Text color={theme.text}>Last Activity: {formatRelativeDate(selectedProject.lastActivityAt)}</Text>
+            {selectedProject.signals?.length ? (
+              <Text color={theme.text}>Signals: {selectedProject.signals.join(', ')}</Text>
+            ) : null}
             <Text color={theme.muted}>Path</Text>
             <Text color={theme.text}>{selectedProject.path}</Text>
           </Box>

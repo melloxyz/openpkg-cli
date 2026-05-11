@@ -38,4 +38,13 @@ export const DEFAULT_SCAN_EXCLUDES = [
   '**/node_modules/**'
 ];
 
-export const COMMON_PROJECT_FILENAMES = ['**/package.json'];
+export const COMMON_PROJECT_FILENAMES = [
+  '**/package.json',
+  '**/pyproject.toml',
+  '**/requirements.txt',
+  '**/Dockerfile',
+  '**/docker-compose.yml',
+  '**/docker-compose.yaml',
+  '**/compose.yml',
+  '**/compose.yaml'
+];

@@ -12,10 +12,13 @@ import { DirectorySizeService } from './directory-size.service.js';
 import type { ProjectFramework, ProjectRecord, ScanSummary } from '../../types/index.js';
 import { mapWithConcurrency } from '../../utils/async.js';
 
-const detectFramework = (content: ProjectManifest): ProjectFramework => {
+const detectFramework = (
+  manifest: ProjectManifest | undefined,
+  projectFiles: Set<string>
+): ProjectFramework => {
   const dependencies = {
-    ...content.dependencies,
-    ...content.devDependencies
+    ...manifest?.dependencies,
+    ...manifest?.devDependencies
   };
 
   if ('next' in dependencies) {
@@ -36,12 +39,18 @@ const detectFramework = (content: ProjectManifest): ProjectFramework => {
   if ('express' in dependencies || 'fastify' in dependencies || 'hono' in dependencies) {
     return 'node-api';
   }
+  if (
+    projectFiles.has('pyproject.toml') ||
+    projectFiles.has('requirements.txt')
+  ) {
+    return 'python';
+  }
 
   return 'unknown';
 };
 
-const getProjectName = (manifest: ProjectManifest, projectPath: string) =>
-  manifest.name?.trim() ? manifest.name : path.basename(projectPath);
+const getProjectName = (manifest: ProjectManifest | undefined, projectPath: string) =>
+  manifest?.name?.trim() ? manifest.name : path.basename(projectPath);
 
 const getProjectActivityStatus = (
   lastActivityAt?: string
@@ -60,6 +69,26 @@ const getProjectActivityStatus = (
   }
 
   return 'inactive';
+};
+
+const getProjectSignals = (projectFiles: Set<string>) => {
+  const signals: string[] = [];
+
+  if (
+    projectFiles.has('Dockerfile') ||
+    projectFiles.has('docker-compose.yml') ||
+    projectFiles.has('docker-compose.yaml') ||
+    projectFiles.has('compose.yml') ||
+    projectFiles.has('compose.yaml')
+  ) {
+    signals.push('docker');
+  }
+
+  if (projectFiles.has('pyproject.toml') || projectFiles.has('requirements.txt')) {
+    signals.push('python');
+  }
+
+  return signals;
 };
 
 export class ProjectScannerService {
@@ -82,32 +111,45 @@ export class ProjectScannerService {
       )
     ).flat();
 
+    const projectFileMap = new Map<string, Set<string>>();
+
+    for (const manifestPath of [...new Set(manifestPaths)]) {
+      const projectPath = path.dirname(manifestPath);
+      const projectFiles = projectFileMap.get(projectPath) ?? new Set<string>();
+      projectFiles.add(path.basename(manifestPath));
+      projectFileMap.set(projectPath, projectFiles);
+    }
+
     const records = await mapWithConcurrency(
-      [...new Set(manifestPaths)],
+      [...projectFileMap.entries()],
       Math.min(6, Math.max(2, os.cpus().length)),
-      async (manifestPath) => {
-        const projectPath = path.dirname(manifestPath);
-        const parsedManifest = JSON.parse(await fs.readFile(manifestPath, 'utf8')) as unknown;
-        const manifest = projectManifestSchema.parse(parsedManifest);
+      async ([projectPath, projectFiles]) => {
+        const packageJsonPath = path.join(projectPath, 'package.json');
+        const parsedManifest = await fs
+          .readFile(packageJsonPath, 'utf8')
+          .then(content => JSON.parse(content) as unknown)
+          .catch(() => undefined);
+        const manifest = parsedManifest ? projectManifestSchema.parse(parsedManifest) : undefined;
         const stats = await fs.stat(projectPath).catch(() => undefined);
-        const packageManager = await this.#packageManagerDetector.detect(projectPath);
+        const packageManager = await this.#packageManagerDetector.detect(projectPath, manifest);
         const sizeInBytes = await this.#sizeService.getDirectorySize(projectPath).catch(() => 0);
         const lastActivityAt = stats?.mtime.toISOString();
+        const signals = getProjectSignals(projectFiles);
 
         return {
           id: projectPath,
           name: getProjectName(manifest, projectPath),
           path: projectPath,
-          framework: detectFramework(manifest),
+          framework: detectFramework(manifest, projectFiles),
           packageManager,
           sizeInBytes,
           activityStatus: getProjectActivityStatus(lastActivityAt),
+          ...(signals.length > 0 ? { signals } : {}),
           ...(lastActivityAt ? { lastActivityAt } : {})
         } satisfies ProjectRecord;
       }
     );
 
-    const deduped = [...new Map(records.map((record) => [record.path, record])).values()];
     const completedAt = new Date().toISOString();
 
     return {
@@ -115,7 +157,7 @@ export class ProjectScannerService {
       startedAt,
       completedAt,
       durationMs: new Date(completedAt).getTime() - new Date(startedAt).getTime(),
-      records: deduped.sort((left, right) => {
+      records: records.sort((left, right) => {
         return (right.lastActivityAt ?? '').localeCompare(left.lastActivityAt ?? '');
       })
     };

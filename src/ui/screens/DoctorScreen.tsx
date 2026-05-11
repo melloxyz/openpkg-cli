@@ -10,11 +10,23 @@ type DoctorScreenProps = {
 
 export const DoctorScreen = ({ health }: DoctorScreenProps) => (
   <Box gap={1}>
-    <Panel title="Doctor" width="52%" footer="Runtime, package manager, and container checks are live.">
+    <Panel title="Doctor" width="52%" footer="Runtime, package manager, container, and Python checks are live.">
       {health ? (
         <Box flexDirection="column">
           <Text color={theme.text}>Platform: {health.platform}</Text>
           <Text color={theme.text}>Node: {health.nodeVersion}</Text>
+          <Text color={theme.text}>
+            Docker:{' '}
+            {health.toolAvailability.some((tool) => tool.name === 'docker' && tool.available)
+              ? 'available'
+              : 'missing'}
+          </Text>
+          <Text color={theme.text}>
+            Python:{' '}
+            {health.toolAvailability.some((tool) => tool.name === 'python' && tool.available)
+              ? 'available'
+              : 'missing'}
+          </Text>
           <Text color={theme.muted}>Detected Tools</Text>
           {health.toolAvailability.map((tool) => (
             <Text

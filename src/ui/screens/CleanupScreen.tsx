@@ -15,6 +15,7 @@ type CleanupScreenProps = {
   compact: boolean;
   visibleRows: number;
   previewReclaimableBytes: number;
+  totalSizeBytes: number;
 };
 
 const truncate = (value: string, length: number) =>
@@ -42,7 +43,8 @@ export const CleanupScreen = ({
   pendingDeletionCount,
   compact,
   visibleRows,
-  previewReclaimableBytes
+  previewReclaimableBytes,
+  totalSizeBytes
 }: CleanupScreenProps) => {
   const selectedTarget = cleanupTargets[selectedIndex];
   const rows = getWindowedRows(cleanupTargets, selectedIndex, visibleRows);
@@ -58,7 +60,7 @@ export const CleanupScreen = ({
         footer={
           isFocused
             ? 'Focused: j/k move, space toggle, s select all, a select safe, c clear, x delete.'
-            : 'Tab into content to manage cleanup targets.'
+            : `Tab into content to manage cleanup targets. Total: ${formatBytes(totalSizeBytes)}`
         }
       >
         {cleanupTargets.length === 0 ? (
@@ -109,7 +111,7 @@ export const CleanupScreen = ({
         footer={
           pendingDeletionCount > 0
             ? `Deletion armed for ${pendingDeletionCount} target(s). Preview: ${formatBytes(previewReclaimableBytes)}. Press y to confirm or Esc to cancel.`
-            : `${safeCount} safe candidate(s). ${selectedCount} selected. Preview: ${formatBytes(previewReclaimableBytes)}`
+            : `${safeCount} safe candidate(s). ${selectedCount} selected. Total: ${formatBytes(totalSizeBytes)}. Preview: ${formatBytes(previewReclaimableBytes)}`
         }
       >
         {selectedTarget ? (

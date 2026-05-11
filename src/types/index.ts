@@ -8,7 +8,15 @@ export type NavigationSection =
 
 export type ScanScope = 'workspace' | 'developer-home' | 'machine' | 'custom';
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
+export type PackageManager =
+  | 'npm'
+  | 'pnpm'
+  | 'yarn'
+  | 'bun'
+  | 'poetry'
+  | 'pip'
+  | 'uv'
+  | 'unknown';
 
 export type ProjectFramework =
   | 'react'
@@ -17,6 +25,7 @@ export type ProjectFramework =
   | 'angular'
   | 'electron'
   | 'node-api'
+  | 'python'
   | 'unknown';
 
 export type CleanupTargetKind =
@@ -88,6 +97,7 @@ export type ProjectRecord = {
   sizeInBytes?: number;
   lastActivityAt?: string;
   activityStatus: 'active' | 'stale' | 'inactive';
+  signals?: string[];
 };
 
 export type CleanupTargetRecord = {

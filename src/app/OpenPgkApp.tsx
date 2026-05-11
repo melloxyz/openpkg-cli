@@ -85,6 +85,11 @@ export const OpenPgkApp = () => {
         .reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
     [cleanupTargets, selectedCleanupIdSet]
   );
+  const visibleCleanupTotalBytes = useMemo(
+    () =>
+      visibleCleanupTargets.reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
+    [visibleCleanupTargets]
+  );
 
   const applySnapshot = (snapshot: DashboardDataSnapshot) => {
     setRoots(snapshot.roots);
@@ -479,6 +484,7 @@ export const OpenPgkApp = () => {
             compact={compactLayout}
             visibleRows={visibleRows}
             previewReclaimableBytes={previewReclaimableBytes}
+            totalSizeBytes={visibleCleanupTotalBytes}
           />
         );
       case 'cleanup':
@@ -492,6 +498,7 @@ export const OpenPgkApp = () => {
             compact={compactLayout}
             visibleRows={visibleRows}
             previewReclaimableBytes={previewReclaimableBytes}
+            totalSizeBytes={visibleCleanupTotalBytes}
           />
         );
       case 'doctor':

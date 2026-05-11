@@ -12,12 +12,14 @@ const resolveCachePolicy = (forceOption: unknown, cachedOption: unknown) => {
   return 'force' as const;
 };
 
-const resolveScope = (scopeOption: unknown) => {
-  if (scopeOption === 'workspace') {
+const resolveScope = (scopeOption: unknown, positionalScope?: string) => {
+  const scope = typeof positionalScope === 'string' ? positionalScope : scopeOption;
+
+  if (scope === 'workspace') {
     return 'workspace' as const;
   }
 
-  if (scopeOption === 'machine') {
+  if (scope === 'machine') {
     return 'machine' as const;
   }
 
@@ -38,7 +40,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       triggerCleanupScan: true,
       triggerDoctorScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
-      scope: resolveScope(parsed.options.scope)
+      scope: resolveScope(parsed.options.scope, parsed.args[0])
     })
   },
   {
@@ -63,7 +65,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       targetSection: 'projects',
       triggerProjectScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
-      scope: resolveScope(parsed.options.scope)
+      scope: resolveScope(parsed.options.scope, parsed.args[0])
     })
   },
   {
@@ -76,7 +78,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       targetSection: 'cache',
       triggerCleanupScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
-      scope: resolveScope(parsed.options.scope)
+      scope: resolveScope(parsed.options.scope, parsed.args[0])
     })
   },
   {
@@ -93,7 +95,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       targetSection: 'cleanup',
       triggerCleanupScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
-      scope: resolveScope(parsed.options.scope),
+      scope: resolveScope(parsed.options.scope, parsed.args[0]),
       ...(parsed.options['delete-safe'] === true ? { cleanupDeletionMode: 'safe' as const } : {})
     })
   },
