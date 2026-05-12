@@ -67,7 +67,7 @@ afterEach(async () => {
 
 describe('ScanCacheService', () => {
   it('stores and retrieves project summaries with normalized roots key', async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cache-'));
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cache-'));
     tempDirectories.push(home);
     vi.spyOn(os, 'homedir').mockReturnValue(home);
     const cache = new ScanCacheService();
@@ -81,7 +81,7 @@ describe('ScanCacheService', () => {
   });
 
   it('returns undefined for stale or root-mismatched project cache', async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cache-'));
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cache-'));
     tempDirectories.push(home);
     vi.spyOn(os, 'homedir').mockReturnValue(home);
     const cache = new ScanCacheService();
@@ -94,7 +94,7 @@ describe('ScanCacheService', () => {
   });
 
   it('stores cleanup and health snapshots', async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cache-'));
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cache-'));
     tempDirectories.push(home);
     vi.spyOn(os, 'homedir').mockReturnValue(home);
     const cache = new ScanCacheService();
@@ -109,10 +109,10 @@ describe('ScanCacheService', () => {
   });
 
   it('recovers from malformed cache file content', async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cache-'));
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cache-'));
     tempDirectories.push(home);
     vi.spyOn(os, 'homedir').mockReturnValue(home);
-    const cacheFile = path.join(home, '.openpgk', 'cache.json');
+    const cacheFile = path.join(home, '.openpkg', 'cache.json');
     await mkdir(path.dirname(cacheFile), { recursive: true });
     await writeFile(cacheFile, '{not-valid-json', 'utf8');
 

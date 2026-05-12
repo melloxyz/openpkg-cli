@@ -1,6 +1,6 @@
 import type { CleanupTargetKind, NavigationSection } from '../types/index.js';
 
-export const APP_NAME = 'OpenPgk';
+export const APP_NAME = 'OpenPkg';
 
 export const NAVIGATION_ITEMS: Array<{
   key: NavigationSection;

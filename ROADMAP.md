@@ -1,220 +1,128 @@
-# Roadmap (Roteiro)
+# Roadmap
 
-Este roteiro reflete o estado atual do OpenPgk e a direção planejada do projeto.
+Este roteiro reflete o estado atual do OpenPkg e o caminho objetivo até uma versão `1.0.0` estável.
 
-O OpenPgk está em desenvolvimento ativo, portanto, as prioridades podem mudar conforme o desempenho, a UX (experiência do usuário) e o suporte às plataformas evoluem.
+OpenPkg está em desenvolvimento ativo. A v1 prioriza estabilidade do núcleo, previsibilidade operacional, documentação, testes, CI e publicação pública. Módulos profundos de Docker, Python, plugins e indexação em background permanecem planejados para depois do hardening inicial.
 
 ## Visão
 
-Construir um centro de controle de terminal de nível de produção para ambientes de desenvolvedor que seja rápido, moderno e operacionalmente útil nos fluxos de trabalho do dia a dia.
+Construir um Developer Operating Center de terminal para ambientes locais de desenvolvimento: rápido, modular, bonito, seguro para operações destrutivas e útil em fluxos reais de manutenção.
 
-## Estágio Atual
+## Estado Atual
 
-O OpenPgk está atualmente no estágio de base mais operações iniciais.
+A primeira release pública planejada é `0.1.0`, formalizada em `2026-05-12`.
 
 O projeto já possui:
 
-- uma interface de usuário de terminal (TUI) funcional
-- um sistema de comandos funcional
-- varredura real do sistema de arquivos
-- execução real de limpeza
-- reconhecimento inicial de Docker e Python
-- layouts responsivos
-- snapshots (instantâneos) de varredura em cache
+- TUI funcional em Ink/React.
+- Execução headless por comando.
+- Sistema de comandos slash com aliases e sugestões.
+- Scans reais para projetos, caches e artefatos.
+- Escopos `workspace`, `developer-home` e `machine`.
+- Cache local de snapshots.
+- Cleanup real com validações de segurança.
+- Preview de espaço, dry-run e resumo pós-cleanup.
+- Doctor com package managers, runtimes e sinais iniciais de Docker/Python.
+- Testes unitários e fluxos de CI.
 
-## Entregues
+## `0.1.0` Entregue
 
-### Plataforma Base
+### Fundação
 
-- base de CLI/TUI em Node.js com TypeScript
-- configuração de projeto com pnpm
-- pipeline de build tsup
-- configurações do ESLint, Prettier e Vitest
-- estrutura de projeto modular alinhada com o crescimento futuro
+- [x] Base Node.js, TypeScript, Ink, React e tsup.
+- [x] Estrutura modular em `src/app`, `src/commands`, `src/modules`, `src/services`, `src/ui`, `src/shared` e `src/types`.
+- [x] ESLint, Prettier e Vitest configurados.
+- [x] CI, build-check e release workflow no GitHub Actions.
+- [x] README, ROADMAP, CHANGELOG, CONTRIBUTING e LICENSE.
 
-### Experiência de Terminal
+### Produto
 
-- shell do aplicativo TUI baseada em Ink
-- navegação por barra lateral
-- fluxos de trabalho priorizando o uso do teclado
-- paleta de comandos com suporte a barra (`/`)
-- modo de execução CLI "headless" (sem interface)
-- comportamento de layout responsivo para terminais menores
-- feedback de progresso para varreduras e fluxos de exclusão
+- [x] Dashboard TUI com sidebar, áreas de conteúdo e footer operacional.
+- [x] Paleta de comandos com suporte a `/`.
+- [x] Navegação por teclado e atalhos principais.
+- [x] Layout responsivo para terminais menores.
+- [x] Barras de progresso para scan e deleção.
+- [x] Execução headless para automação e smoke tests.
 
-### Sistema de Comandos
+### Núcleo Técnico
 
-- analisador (parser) e registro de comandos
-- sugestões de comandos com busca aproximada (fuzzy)
-- comandos embutidos para scan, projects, cache, cleanup, doctor, help e settings
-- suporte a comandos de escopo com opções (`--scope=...`) e parâmetros posicionais como `/scan machine`
+- [x] Parser e registry de comandos.
+- [x] Built-ins para `/scan`, `/projects`, `/cache`, `/cleanup`, `/doctor`, `/help` e `/settings`.
+- [x] Scanner de projetos com detecção de frameworks e package managers.
+- [x] Scanner de cleanup para diretórios pesados.
+- [x] Cache service para snapshots.
+- [x] Cleanup executor com whitelist de alvos e validação defensiva.
+- [x] Environment doctor com package managers, runtimes e ferramentas.
 
-### Varredura e Descoberta
+## Caminho Para `1.0.0`
 
-- descoberta recursiva de alvos de limpeza
-- descoberta de projetos em todo o escopo do workspace, pastas de desenvolvimento e máquina
-- cálculo de tamanho de diretórios com fallback (solução de contingência) em tempo de execução
-- detecção de frameworks para projetos:
-  - React
-  - Next.js
-  - Vue
-  - Angular
-  - Electron
-  - APIs Node
-  - projetos Python iniciais
-- detecção de gerenciadores de pacotes utilizando:
-  - lockfiles
-  - `packageManager` no arquivo `package.json`
-  - sinais iniciais de ferramentas em Python como Poetry, uv e pip
+### `0.2.x`: Hardening de Scan e Cleanup
 
-### Operações de Limpeza
+- [ ] Medir e otimizar performance de `/scan machine` em máquinas grandes.
+- [ ] Melhorar progresso incremental de scans longos.
+- [ ] Adicionar mais testes de integração para escopos `workspace`, `developer-home` e `machine`.
+- [ ] Cobrir edge cases de permissões, symlinks e diretórios inacessíveis.
+- [ ] Exportar resumo estruturado de cleanup em modo headless.
+- [ ] Refinar heurísticas de projeto inativo e recomendação segura.
 
-- inventário em tempo real de candidatos à limpeza
-- fluxo de limpeza com seleção múltipla
-- selecionar todos (select all)
-- selecionar candidatos seguros (safe candidates)
-- pré-visualização do espaço que será recuperado antes da exclusão
-- exclusão real com verificações de segurança
-- atualização automática após a exclusão
+### `0.3.x`: UX e Operação Pública
 
-### Diagnósticos
+- [ ] Melhorar paginação e drill-down em terminais pequenos.
+- [ ] Adicionar filtros e ordenações em projetos e cleanup.
+- [ ] Refinar command palette com autocomplete de argumentos.
+- [ ] Adicionar smoke tests documentados para build local e pacote instalado.
+- [ ] Validar release workflow com tag `v0.1.0` e notas extraídas do changelog.
+- [ ] Preparar templates de issue e PR para contribuições externas.
 
-- detecção de disponibilidade dos gerenciadores de pacotes
-- detecção de runtimes/ferramentas para:
-  - npm
-  - pnpm
-  - yarn
-  - bun
-  - python
-  - docker
-  - go
-  - rustc
-  - java
-- recomendação de saída (output) para ferramentas ausentes
+### `1.0.0`: Estável
 
-### Sinais de Ecossistemas Iniciais
+- [ ] Garantir `typecheck`, `lint`, `test` e `build` verdes no CI.
+- [ ] Documentar instalação via npm e uso dos bins `openpkg` e `opkg`.
+- [ ] Fechar matriz mínima de testes para Windows, macOS e Linux.
+- [ ] Revisar todo fluxo destrutivo de cleanup com testes e documentação.
+- [ ] Congelar contratos públicos principais de comandos e snapshots.
+- [ ] Publicar release estável com changelog versionado e tag GitHub.
 
-- sinais de projetos relacionados ao Docker
-- sinais de projetos relacionados ao Python
-- visibilidade de projetos que incluem configurações Docker ou compose
+## Pós-v1
 
-## Em Andamento / Próximas Prioridades Imediatas
+### Docker
 
-### Desempenho e Escala
+- Inspeção de engine, daemon, imagens, volumes, redes e contêineres.
+- Visualizações de uso de disco e cache Docker.
+- Fluxos seguros de limpeza para artefatos Docker.
 
-- agilizar varreduras em nível de máquina com indexação incremental
-- melhorar a granularidade da varredura para que o progresso reflita a movimentação real de arquivos e diretórios
-- reduzir a sobrecarga no cálculo repetido do tamanho de diretórios
-- adicionar invalidação de cache mais inteligente por raiz e diretório
+### Python
 
-### Profundidade de UX do TUI
+- Detecção profunda de ambientes virtuais.
+- Insights para Poetry, uv, pip e caches.
+- Saúde de interpretadores e ambientes.
 
-- melhor paginação para terminais muito pequenos
-- painéis de detalhes mais ricos e visualizações aprofundadas (drill-down views)
-- melhorias na interatividade da paleta de comandos
-- filtros e ordenações mais eficientes nas visualizações de projetos e de limpeza
+### Linguagens e Runtimes
 
-### Inteligência de Limpeza
+- Rust.
+- Go.
+- Java.
+- Bun em maior profundidade.
 
-- heurísticas de segurança mais detalhadas
-- melhor detecção de projetos inativos
-- relatórios de simulação de exclusão (dry-run)
-- exportação de resumos estruturados da limpeza
+### Plugins e Perfis
 
-## Planejado
+- Modelo de carregamento de plugins.
+- Comandos de terceiros.
+- Scanners externos.
+- Perfis de workspace.
 
-### Módulo Docker
+### Background Indexing e IA
 
-- saúde do mecanismo (engine) e do daemon Docker
-- inspeção de imagens, volumes, redes e contêineres
-- visualizações de cache e uso de disco
-- fluxos seguros de limpeza para artefatos Docker
+- Indexação em background.
+- Inventário contínuo da máquina.
+- Rescans delta-based.
+- Diagnósticos assistidos por IA.
+- Sugestões de correção e detecção de anomalias.
 
-### Módulo Python
+## Princípios de Produto
 
-- detecção de ambientes virtuais
-- insights sobre ambientes Poetry e uv
-- inspeção de cache do pip
-- avaliações de saúde de interpretadores e ambientes
-
-### Módulos de Outras Linguagens e Runtimes
-
-- Rust
-- Go
-- Java
-- ferramentas específicas do ecossistema Bun
-
-### Operações em Projetos
-
-- metadados de projetos mais completos
-- agrupamento por workspace
-- heurísticas de atividade recente
-- visualizações de projetos com base em perfis
-
-### Arquitetura de Plugins
-
-- modelo de carregamento de plugins
-- comandos de terceiros
-- scanners externos e módulos customizados
-
-### Serviços em Segundo Plano
-
-- indexação em background
-- inventário contínuo da máquina
-- varreduras baseadas em alterações (delta-based rescans)
-
-### IA e Diagnósticos
-
-- orientação assistida por IA para integridade do ambiente
-- sugestões de correção de problemas
-- detecção de anomalias para crescimento de cache e uso de disco
-
-## Direção a Longo Prazo
-
-### Preparação para Produção
-
-- cobertura mais sólida de plataforma cruzada (cross-platform)
-- expansão da cobertura de testes em cenários variados de varredura
-- tratamento defensivo de permissões
-- modelo persistente de estabilidade para preferências e estado
-
-### Experiência de Produto
-
-- refinamento de interface tipo dashboard terminal "premium"
-- atalhos de fluxo de trabalho para a manutenção diária
-- visibilidade operacional mais aprofundada para máquinas de desenvolvedores
-
-## Marcos de Lançamento (Milestones)
-
-### Versão 0.1.x
-
-Foco:
-
-- estabilizar a base existente
-- melhorar o desempenho das varreduras por toda a máquina
-- aprofundar fluxos de trabalho de limpeza e diagnóstico
-
-### Versão 0.2.x
-
-Foco:
-
-- disponibilizar módulos mais eficientes para Docker e Python
-- melhorar a inteligência do projeto
-- aprimorar a UX (experiência do usuário) no terminal e o sistema de filtros
-
-### Versão 0.3.x
-
-Foco:
-
-- introduzir arquitetura de plugins
-- iniciar indexação em background e suporte a perfis
-
-## Orientação para Contribuições
-
-O projeto deve continuar favorecendo:
-
-- limites de módulos bem definidos
-- comportamento multiplataforma
-- fluxos de trabalho que priorizem o teclado
-- operações destrutivas com segurança
-- responsividade ao processar sistemas de arquivos extensos de desenvolvedores
+- Segurança antes de automação destrutiva.
+- Performance perceptível em máquinas grandes.
+- UX premium sem sacrificar clareza.
+- Arquitetura modular e fácil de contribuir.
+- Comportamento previsível em TUI e headless.

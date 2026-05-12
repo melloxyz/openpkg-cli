@@ -10,7 +10,7 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
   const snapshot = await controller.runCommand(commandInput);
 
   const lines = [
-    renderBrandTitle('OpenPgk'),
+    renderBrandTitle('OpenPkg'),
     '',
     chalk.hex(theme.primary)(`Section: ${snapshot.activeSection ?? 'overview'}`),
     chalk.hex(theme.text)(snapshot.statusLine),
@@ -53,6 +53,26 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
       ...snapshot.cleanupTargets
         .slice(0, 5)
         .map((item) => `• ${item.kind}  ${item.recommendation}  ${formatBytes(item.sizeInBytes)}`)
+    );
+    lines.push('');
+  }
+
+  if (snapshot.cleanupExecution) {
+    const plannedCount = snapshot.cleanupExecution.planned?.length ?? 0;
+    const deletedCount = snapshot.cleanupExecution.deleted.length;
+    const failedCount = snapshot.cleanupExecution.failed.length;
+    lines.push(
+      chalk.hex(theme.accent)(
+        snapshot.cleanupExecution.dryRun ? 'Cleanup Dry Run' : 'Cleanup Summary'
+      ),
+      snapshot.cleanupExecution.dryRun
+        ? `Planned: ${plannedCount} target(s), ${formatBytes(
+            snapshot.cleanupExecution.reclaimedBytes
+          )} estimated reclaimable.`
+        : `Deleted: ${deletedCount} target(s), ${formatBytes(
+            snapshot.cleanupExecution.reclaimedBytes
+          )} reclaimed.`,
+      `Failures: ${failedCount}`
     );
     lines.push('');
   }

@@ -1,6 +1,6 @@
 # Contribuindo
 
-Obrigado por contribuir com o OpenPgk.
+Obrigado por contribuir com o OpenPkg.
 
 Este projeto ainda está em desenvolvimento ativo, por isso, as contribuições devem favorecer clareza, segurança, modularidade e comportamento multiplataforma em vez de adições rápidas e pontuais.
 
@@ -18,24 +18,25 @@ Este projeto ainda está em desenvolvimento ativo, por isso, as contribuições 
 Requisitos:
 
 - Node.js 20+
-- pnpm
+- Corepack habilitado ou pnpm instalado
 
 Instale as dependências:
 
 ```bash
-pnpm install
+corepack enable
+corepack pnpm install
 ```
 
 Execute em modo de desenvolvimento:
 
 ```bash
-pnpm dev
+corepack pnpm dev
 ```
 
 Crie o build:
 
 ```bash
-pnpm build
+corepack pnpm build
 ```
 
 ## Verificações de Qualidade
@@ -56,6 +57,7 @@ pnpm build
 - prefira serviços pequenos e combináveis no lugar de grandes módulos acoplados
 - evite introduzir premissas específicas de uma plataforma sem adotar verificações (guards)
 - mantenha a segurança como padrão para operações destrutivas
+- trate cleanup headless como destrutivo apenas quando houver confirmação explícita
 - preserve a clareza e seja descritivo em comportamentos de comando
 - atualize a documentação quando alterar funcionalidades com as quais o usuário interage
 

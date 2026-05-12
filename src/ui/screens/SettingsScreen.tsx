@@ -9,7 +9,7 @@ export const SettingsScreen = () => (
     footer="Profiles, plugins, and persisted preferences can anchor here next."
   >
     <Text color={theme.text}>
-      OpenPgk is wired for modular services, plugin commands, and future workspace profiles.
+      OpenPkg is wired for modular services, plugin commands, and future workspace profiles.
     </Text>
   </Panel>
 );

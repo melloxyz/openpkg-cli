@@ -32,7 +32,7 @@ afterEach(async () => {
 
 describe('CleanupScannerService', () => {
   it('discovers cleanup targets and assigns recommendations', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cleanup-scan-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cleanup-scan-'));
     tempDirectories.push(root);
 
     const nodeModulesPath = await createCleanupDirectory(root, 'workspace/node_modules', 120, 1);
@@ -58,7 +58,7 @@ describe('CleanupScannerService', () => {
   });
 
   it('sorts targets by size descending', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cleanup-scan-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cleanup-scan-'));
     tempDirectories.push(root);
 
     await createCleanupDirectory(root, 'a/dist', 10, 40);

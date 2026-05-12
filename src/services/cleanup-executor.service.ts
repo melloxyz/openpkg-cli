@@ -38,6 +38,35 @@ const validateCleanupTarget = async (target: CleanupTargetRecord): Promise<strin
 };
 
 export class CleanupExecutorService {
+  async previewTargets(targets: CleanupTargetRecord[]): Promise<CleanupExecutionResult> {
+    const planned: CleanupTargetRecord[] = [];
+    const failed: CleanupExecutionResult['failed'] = [];
+    let reclaimedBytes = 0;
+
+    for (const target of targets) {
+      const validationError = await validateCleanupTarget(target);
+
+      if (validationError) {
+        failed.push({
+          target,
+          reason: validationError
+        });
+        continue;
+      }
+
+      planned.push(target);
+      reclaimedBytes += target.sizeInBytes ?? 0;
+    }
+
+    return {
+      deleted: [],
+      planned,
+      failed,
+      reclaimedBytes,
+      dryRun: true
+    };
+  }
+
   async deleteTargets(targets: CleanupTargetRecord[]): Promise<CleanupExecutionResult> {
     const deleted: CleanupTargetRecord[] = [];
     const failed: CleanupExecutionResult['failed'] = [];

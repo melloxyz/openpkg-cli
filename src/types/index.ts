@@ -8,15 +8,7 @@ export type NavigationSection =
 
 export type ScanScope = 'workspace' | 'developer-home' | 'machine' | 'custom';
 
-export type PackageManager =
-  | 'npm'
-  | 'pnpm'
-  | 'yarn'
-  | 'bun'
-  | 'poetry'
-  | 'pip'
-  | 'uv'
-  | 'unknown';
+export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'poetry' | 'pip' | 'uv' | 'unknown';
 
 export type ProjectFramework =
   | 'react'
@@ -58,6 +50,7 @@ export type CommandResult = {
   triggerDoctorScan?: boolean;
   cachePolicy?: CommandCachePolicy;
   cleanupDeletionMode?: CleanupDeletionMode;
+  cleanupDryRun?: boolean;
   showHelp?: boolean;
   scope?: ScanScope;
 };
@@ -140,11 +133,13 @@ export type EnvironmentHealthSnapshot = {
 
 export type CleanupExecutionResult = {
   deleted: CleanupTargetRecord[];
+  planned?: CleanupTargetRecord[];
   failed: Array<{
     target: CleanupTargetRecord;
     reason: string;
   }>;
   reclaimedBytes: number;
+  dryRun?: boolean;
 };
 
 export type DashboardDataSnapshot = {

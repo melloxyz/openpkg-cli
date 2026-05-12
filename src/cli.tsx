@@ -2,7 +2,7 @@ import React from 'react';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import { render } from 'ink';
-import { OpenPgkApp } from './app/OpenPgkApp.js';
+import { OpenPkgApp } from './app/OpenPkgApp.js';
 import { runHeadlessCli } from './app/run-headless.js';
 import { renderBrandTitle, theme } from './shared/theme.js';
 
@@ -16,7 +16,7 @@ const bootstrap = async () => {
 
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     const message = [
-      renderBrandTitle('OpenPgk'),
+      renderBrandTitle('OpenPkg'),
       '',
       chalk.hex(theme.text)('Interactive mode requires a TTY-enabled terminal.'),
       chalk.hex(theme.muted)('Try `openpkg /doctor` or run `pnpm dev` in your terminal.')
@@ -32,7 +32,7 @@ const bootstrap = async () => {
     return;
   }
 
-  render(<OpenPgkApp />);
+  render(<OpenPkgApp />);
 };
 
 void bootstrap();

@@ -41,7 +41,7 @@ const nextSection = (current: NavigationSection, direction: 1 | -1) => {
   return sectionOrder[nextIndex] ?? 'overview';
 };
 
-export const OpenPgkApp = () => {
+export const OpenPkgApp = () => {
   const { exit } = useApp();
   const { stdout } = useStdout();
   const [activeSection, setActiveSection] = useState<NavigationSection>('overview');
@@ -66,7 +66,7 @@ export const OpenPgkApp = () => {
   const [terminalHeight, setTerminalHeight] = useState(stdout?.rows ?? 40);
 
   const suggestions = useCommandSuggestions(controller.commandRegistry, commandInput);
-  const activeTitle = renderBrandTitle(`OpenPgk\nDeveloper Operating Center`);
+  const activeTitle = renderBrandTitle(`OpenPkg\nDeveloper Operating Center`);
   const compactLayout = terminalWidth < 110;
   const sidebarWidth = compactLayout ? Math.max(24, terminalWidth - 4) : 24;
   const visibleRows = Math.max(5, Math.min(14, terminalHeight - (compactLayout ? 22 : 14)));
@@ -86,8 +86,7 @@ export const OpenPgkApp = () => {
     [cleanupTargets, selectedCleanupIdSet]
   );
   const visibleCleanupTotalBytes = useMemo(
-    () =>
-      visibleCleanupTargets.reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
+    () => visibleCleanupTargets.reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
     [visibleCleanupTargets]
   );
 
@@ -190,9 +189,7 @@ export const OpenPgkApp = () => {
     }
 
     if (activeSection === 'cleanup' || activeSection === 'cache') {
-      setCleanupCursor((current) =>
-        clampIndex(current + direction, visibleCleanupTargets.length)
-      );
+      setCleanupCursor((current) => clampIndex(current + direction, visibleCleanupTargets.length));
     }
   };
 
@@ -357,7 +354,9 @@ export const OpenPgkApp = () => {
       if (key.return) {
         const suggestion = suggestions[commandSuggestionIndex];
         const commandToRun =
-          commandInput.trim() === '/' && suggestion ? `/${suggestion.definition.name}` : commandInput;
+          commandInput.trim() === '/' && suggestion
+            ? `/${suggestion.definition.name}`
+            : commandInput;
         void executeCommand(commandToRun);
         return;
       }
@@ -533,10 +532,7 @@ export const OpenPgkApp = () => {
             <Box flexDirection="column">
               <Spinner label="Working..." />
               {operationProgress ? (
-                <ProgressBar
-                  progress={operationProgress}
-                  width={Math.max(20, terminalWidth - 4)}
-                />
+                <ProgressBar progress={operationProgress} width={Math.max(20, terminalWidth - 4)} />
               ) : null}
             </Box>
           ) : (

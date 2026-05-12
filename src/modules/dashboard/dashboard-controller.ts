@@ -173,6 +173,7 @@ export class DashboardController {
       Number(Boolean(result.triggerProjectScan)) +
       Number(Boolean(result.triggerCleanupScan)) +
       Number(Boolean(result.triggerDoctorScan)) +
+      Number(Boolean(result.cleanupDryRun)) +
       Number(Boolean(result.cleanupDeletionMode === 'safe'));
     let currentStage = 0;
 
@@ -198,6 +199,24 @@ export class DashboardController {
       const summary = await this.#scanCleanup(roots, cachePolicy);
       cleanupTargets = summary.records;
       statusLine = `Cleanup inventory ready with ${summary.records.length} target(s).`;
+    }
+
+    if (result.cleanupDryRun) {
+      pushStage('Previewing safe cleanup targets');
+      const previewCandidates =
+        cleanupTargets?.filter((target) => target.recommendation === 'safe') ??
+        (await this.#scanCleanup(roots, 'force')).records.filter(
+          (target) => target.recommendation === 'safe'
+        );
+      cleanupExecution = await this.#container.cleanupExecutor.previewTargets(previewCandidates);
+      const plannedCount = cleanupExecution.planned?.length ?? 0;
+      statusLine = `Dry-run preview: ${plannedCount} safe target(s), ${formatBytes(
+        cleanupExecution.reclaimedBytes
+      )} reclaimable. No files deleted.`;
+
+      if (cleanupExecution.failed.length > 0) {
+        statusLine = `${statusLine} ${cleanupExecution.failed.length} target(s) failed validation.`;
+      }
     }
 
     if (result.cleanupDeletionMode === 'safe') {

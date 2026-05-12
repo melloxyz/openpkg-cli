@@ -8,7 +8,7 @@ import type { CleanupTargetRecord } from '../types/index.js';
 const tempDirectories: string[] = [];
 
 const createCleanupTarget = async (directoryName: CleanupTargetRecord['kind']) => {
-  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cleanup-'));
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cleanup-'));
   tempDirectories.push(tempRoot);
 
   const targetPath = path.join(tempRoot, directoryName);
@@ -41,6 +41,20 @@ describe('CleanupExecutorService', () => {
 
     await expect(stat(target.path)).rejects.toThrow();
     expect(result.deleted).toHaveLength(1);
+    expect(result.failed).toHaveLength(0);
+    expect(result.reclaimedBytes).toBe(128);
+  });
+
+  it('previews supported cleanup directories without deleting them', async () => {
+    const service = new CleanupExecutorService();
+    const target = await createCleanupTarget('node_modules');
+
+    const result = await service.previewTargets([target]);
+
+    await expect(stat(target.path)).resolves.toBeDefined();
+    expect(result.dryRun).toBe(true);
+    expect(result.planned).toHaveLength(1);
+    expect(result.deleted).toHaveLength(0);
     expect(result.failed).toHaveLength(0);
     expect(result.reclaimedBytes).toBe(128);
   });
@@ -99,7 +113,7 @@ describe('CleanupExecutorService', () => {
 
   it('fails when target path is not a directory', async () => {
     const service = new CleanupExecutorService();
-    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'openpgk-cleanup-'));
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cleanup-'));
     tempDirectories.push(tempRoot);
     const fileTargetPath = path.join(tempRoot, 'build');
     await writeFile(fileTargetPath, 'not a directory');

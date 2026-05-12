@@ -23,7 +23,7 @@ afterEach(async () => {
 
 describe('ProjectScannerService', () => {
   it('scans projects and infers framework, package manager, signals and activity', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-project-scan-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-'));
     tempDirectories.push(root);
 
     const reactPath = path.join(root, 'react-app');
@@ -92,7 +92,7 @@ describe('ProjectScannerService', () => {
   });
 
   it('handles invalid package.json by falling back to directory name and unknown framework', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-project-scan-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-'));
     tempDirectories.push(root);
 
     const brokenProject = path.join(root, 'broken-project');

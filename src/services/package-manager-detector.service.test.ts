@@ -16,7 +16,7 @@ afterEach(async () => {
 
 describe('PackageManagerDetectorService', () => {
   it('prefers lockfile detection over packageManager in manifest', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-pm-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
     tempDirectories.push(root);
 
     await writeFile(
@@ -38,7 +38,7 @@ describe('PackageManagerDetectorService', () => {
   });
 
   it('detects package manager from package.json packageManager field without lockfile', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-pm-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
     tempDirectories.push(root);
 
     await writeFile(
@@ -59,9 +59,9 @@ describe('PackageManagerDetectorService', () => {
   });
 
   it('detects package manager from pyproject.toml and requirements fallback', async () => {
-    const poetryRoot = await mkdtemp(path.join(os.tmpdir(), 'openpgk-pm-'));
-    const uvRoot = await mkdtemp(path.join(os.tmpdir(), 'openpgk-pm-'));
-    const pipRoot = await mkdtemp(path.join(os.tmpdir(), 'openpgk-pm-'));
+    const poetryRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
+    const uvRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
+    const pipRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
     tempDirectories.push(poetryRoot, uvRoot, pipRoot);
 
     await writeFile(path.join(poetryRoot, 'pyproject.toml'), '[tool.poetry]\nname = "demo"');
@@ -76,7 +76,7 @@ describe('PackageManagerDetectorService', () => {
   });
 
   it('returns unknown when no package-manager signals exist', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-pm-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
     tempDirectories.push(root);
 
     const detector = new PackageManagerDetectorService();

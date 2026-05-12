@@ -23,6 +23,10 @@ const resolveScope = (scopeOption: unknown, positionalScope?: string) => {
     return 'machine' as const;
   }
 
+  if (scope === 'developer-home') {
+    return 'developer-home' as const;
+  }
+
   return 'developer-home' as const;
 };
 
@@ -31,7 +35,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'scan',
     description: 'Run project and cache discovery across your developer roots.',
     aliases: ['rescan', 'refresh'],
-    usage: '/scan [--scope=workspace|machine] [--cached] [--force]',
+    usage: '/scan [workspace|developer-home|machine] [--cached] [--force]',
     examples: ['/scan', '/scan --scope=machine'],
     execute: async (parsed) => ({
       message: 'Started a full environment scan.',
@@ -59,7 +63,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'projects',
     description: 'Open the project inventory and trigger project discovery.',
     aliases: ['repos', 'apps'],
-    usage: '/projects [--scope=workspace|machine] [--cached] [--force]',
+    usage: '/projects [workspace|developer-home|machine] [--cached] [--force]',
     execute: async (parsed) => ({
       message: 'Loading local projects.',
       targetSection: 'projects',
@@ -72,7 +76,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'cache',
     description: 'Inspect cache-heavy directories and build artifacts.',
     aliases: ['caches'],
-    usage: '/cache [--scope=workspace|machine] [--cached] [--force]',
+    usage: '/cache [workspace|developer-home|machine] [--cached] [--force]',
     execute: async (parsed) => ({
       message: 'Scanning cache and artifact directories.',
       targetSection: 'cache',
@@ -85,19 +89,33 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     name: 'cleanup',
     description: 'Review safe cleanup candidates across your machine.',
     aliases: ['clean'],
-    usage: '/cleanup [--scope=workspace|machine] [--cached] [--force] [--delete-safe]',
-    examples: ['/cleanup', '/cleanup --scope=machine --delete-safe'],
-    execute: async (parsed) => ({
-      message:
-        parsed.options['delete-safe'] === true
-          ? 'Deleting safe cleanup candidates.'
-          : 'Preparing cleanup candidates.',
-      targetSection: 'cleanup',
-      triggerCleanupScan: true,
-      cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
-      scope: resolveScope(parsed.options.scope, parsed.args[0]),
-      ...(parsed.options['delete-safe'] === true ? { cleanupDeletionMode: 'safe' as const } : {})
-    })
+    usage:
+      '/cleanup [workspace|developer-home|machine] [--cached] [--force] [--dry-run] [--delete-safe --confirm]',
+    examples: [
+      '/cleanup',
+      '/cleanup workspace --dry-run',
+      '/cleanup --scope=machine --delete-safe --confirm'
+    ],
+    execute: async (parsed) => {
+      const wantsDeletion = parsed.options['delete-safe'] === true;
+      const confirmed = parsed.options.confirm === true;
+      const dryRun = parsed.options['dry-run'] === true || (wantsDeletion && !confirmed);
+
+      return {
+        message:
+          wantsDeletion && confirmed
+            ? 'Deleting confirmed safe cleanup candidates.'
+            : dryRun
+              ? 'Previewing safe cleanup candidates. No files will be deleted.'
+              : 'Preparing cleanup candidates.',
+        targetSection: 'cleanup',
+        triggerCleanupScan: true,
+        cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
+        scope: resolveScope(parsed.options.scope, parsed.args[0]),
+        ...(dryRun ? { cleanupDryRun: true } : {}),
+        ...(wantsDeletion && confirmed ? { cleanupDeletionMode: 'safe' as const } : {})
+      };
+    }
   },
   {
     name: 'help',

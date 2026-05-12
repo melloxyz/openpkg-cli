@@ -16,7 +16,7 @@ afterEach(async () => {
 
 describe('DirectorySizeService', () => {
   it('calculates directory size with real file sizes', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-size-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-size-'));
     tempDirectories.push(root);
 
     const nested = path.join(root, 'nested');
@@ -31,7 +31,7 @@ describe('DirectorySizeService', () => {
   });
 
   it('returns zero for an empty directory', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-size-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-size-'));
     tempDirectories.push(root);
 
     const service = new DirectorySizeService();

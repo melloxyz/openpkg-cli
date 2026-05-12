@@ -7,6 +7,12 @@
     "openpkg": "./dist/cli.js",
     "opkg": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
@@ -29,6 +35,17 @@
   ],
   "author": "João Vitor de Mello <joaovdmello@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/melloxyz/openpkg-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/melloxyz/openpkg-cli/issues"
+  },
+  "homepage": "https://github.com/melloxyz/openpkg-cli#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
     "boxen": "^8.0.1",

@@ -72,13 +72,16 @@ export const OverviewScreen = ({
         footer="Keyboard: Tab switches focus, r refreshes, and cleanup uses space/x/y for live deletions."
       >
         <Box flexDirection="column">
-          {(helpLines && helpLines.length > 0 ? helpLines : [
-            '/scan  refresh projects, caches, and doctor',
-            '/projects  discover local repositories',
-            '/cleanup  inspect cleanup candidates',
-            '/cleanup --delete-safe  remove only safe items',
-            '/doctor  check tools and runtimes'
-          ]).map((line) => (
+          {(helpLines && helpLines.length > 0
+            ? helpLines
+            : [
+                '/scan  refresh projects, caches, and doctor',
+                '/projects  discover local repositories',
+                '/cleanup  inspect cleanup candidates',
+                '/cleanup --dry-run  preview safe cleanup',
+                '/doctor  check tools and runtimes'
+              ]
+          ).map((line) => (
             <Text key={line} color={theme.muted}>
               {line}
             </Text>

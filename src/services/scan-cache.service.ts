@@ -31,7 +31,7 @@ type PersistedCache = {
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export class ScanCacheService {
-  readonly #cachePath = path.join(os.homedir(), '.openpgk', 'cache.json');
+  readonly #cachePath = path.join(os.homedir(), '.openpkg', 'cache.json');
 
   async getProjectSummary(roots: string[], maxAgeMs = CACHE_TTL_MS) {
     const cache = await this.#readCache();
@@ -103,8 +103,12 @@ export class ScanCacheService {
   }
 
   async #writeCache(cache: PersistedCache) {
-    await fs.mkdir(path.dirname(this.#cachePath), { recursive: true });
-    await fs.writeFile(this.#cachePath, JSON.stringify(cache, null, 2), 'utf8');
+    try {
+      await fs.mkdir(path.dirname(this.#cachePath), { recursive: true });
+      await fs.writeFile(this.#cachePath, JSON.stringify(cache, null, 2), 'utf8');
+    } catch {
+      // Cache persistence must never make a scan or diagnostic command fail.
+    }
   }
 
   #getRootsKey(roots: string[]) {

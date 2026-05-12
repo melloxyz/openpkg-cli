@@ -79,7 +79,7 @@ describe('createBuiltInCommands', () => {
     expect(result.scope).toBe('developer-home');
   });
 
-  it('sets cleanupDeletionMode to safe when --delete-safe is provided', async () => {
+  it('previews safe cleanup targets when --delete-safe is not confirmed', async () => {
     const cleanup = getCommand('cleanup');
     const result = await cleanup.execute(
       baseParsed({
@@ -90,8 +90,44 @@ describe('createBuiltInCommands', () => {
       commandContext
     );
 
+    expect(result.cleanupDryRun).toBe(true);
+    expect(result.cleanupDeletionMode).toBeUndefined();
+    expect(result.message).toContain('Previewing safe cleanup candidates');
+  });
+
+  it('sets cleanupDeletionMode to safe only when --delete-safe is confirmed', async () => {
+    const cleanup = getCommand('cleanup');
+    const result = await cleanup.execute(
+      baseParsed({
+        name: 'cleanup',
+        raw: '/cleanup workspace --delete-safe --confirm',
+        args: ['workspace'],
+        options: { 'delete-safe': true, confirm: true }
+      }),
+      commandContext
+    );
+
     expect(result.cleanupDeletionMode).toBe('safe');
-    expect(result.message).toContain('Deleting safe cleanup candidates');
+    expect(result.cleanupDryRun).toBeUndefined();
+    expect(result.scope).toBe('workspace');
+    expect(result.message).toContain('Deleting confirmed safe cleanup candidates');
+  });
+
+  it('supports an explicit cleanup dry-run flag', async () => {
+    const cleanup = getCommand('cleanup');
+    const result = await cleanup.execute(
+      baseParsed({
+        name: 'cleanup',
+        raw: '/cleanup machine --dry-run',
+        args: ['machine'],
+        options: { 'dry-run': true }
+      }),
+      commandContext
+    );
+
+    expect(result.cleanupDryRun).toBe(true);
+    expect(result.cleanupDeletionMode).toBeUndefined();
+    expect(result.scope).toBe('machine');
   });
 
   it('returns help and settings command payloads', async () => {

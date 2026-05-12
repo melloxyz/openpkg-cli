@@ -17,7 +17,7 @@ afterEach(async () => {
 
 describe('filesystem utils', () => {
   it('pathExists returns true for existing path and false otherwise', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'openpgk-fs-'));
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-fs-'));
     tempDirectories.push(root);
     const filePath = path.join(root, 'file.txt');
     await writeFile(filePath, 'ok');
@@ -27,7 +27,7 @@ describe('filesystem utils', () => {
   });
 
   it('getMachineScanRoots returns mocked home when available', async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'openpgk-home-'));
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-home-'));
     tempDirectories.push(home);
     vi.spyOn(os, 'homedir').mockReturnValue(home);
 
@@ -35,14 +35,14 @@ describe('filesystem utils', () => {
   });
 
   it('getMachineScanRoots returns empty when home does not exist', async () => {
-    const missingHome = path.join(os.tmpdir(), 'openpgk-home-missing');
+    const missingHome = path.join(os.tmpdir(), 'openpkg-home-missing');
     vi.spyOn(os, 'homedir').mockReturnValue(missingHome);
 
     await expect(getMachineScanRoots()).resolves.toEqual([]);
   });
 
   it('getDefaultProjectRoots keeps cwd, filters parent roots and preserves existing candidates', async () => {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'openpgk-home-'));
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-home-'));
     tempDirectories.push(home);
     const desktop = path.join(home, 'Desktop');
     const projects = path.join(home, 'Projects');
