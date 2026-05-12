@@ -1,86 +1,86 @@
-# Roadmap
+# Roadmap (Roteiro)
 
-This roadmap reflects the current state of OpenPgk and the planned direction of the project.
+Este roteiro reflete o estado atual do OpenPgk e a direção planejada do projeto.
 
-OpenPgk is under active development, so priorities may shift as performance, UX, and platform support evolve.
+O OpenPgk está em desenvolvimento ativo, portanto, as prioridades podem mudar conforme o desempenho, a UX (experiência do usuário) e o suporte às plataformas evoluem.
 
-## Vision
+## Visão
 
-Build a production-grade terminal control center for developer environments that feels fast, modern, and operationally useful across day-to-day workflows.
+Construir um centro de controle de terminal de nível de produção para ambientes de desenvolvedor que seja rápido, moderno e operacionalmente útil nos fluxos de trabalho do dia a dia.
 
-## Current Stage
+## Estágio Atual
 
-OpenPgk is currently in the foundation-plus-initial-operations stage.
+O OpenPgk está atualmente no estágio de base mais operações iniciais.
 
-The project already has:
+O projeto já possui:
 
-- a working terminal UI
-- a working command system
-- real filesystem scanning
-- real cleanup execution
-- initial Docker and Python awareness
-- responsive layouts
-- cached scan snapshots
+- uma interface de usuário de terminal (TUI) funcional
+- um sistema de comandos funcional
+- varredura real do sistema de arquivos
+- execução real de limpeza
+- reconhecimento inicial de Docker e Python
+- layouts responsivos
+- snapshots (instantâneos) de varredura em cache
 
-## Delivered
+## Entregues
 
-### Core Platform
+### Plataforma Base
 
-- TypeScript-based Node.js CLI/TUI foundation
-- pnpm-based project setup
-- tsup build pipeline
-- ESLint, Prettier, and Vitest configuration
-- modular project structure aligned with future growth
+- base de CLI/TUI em Node.js com TypeScript
+- configuração de projeto com pnpm
+- pipeline de build tsup
+- configurações do ESLint, Prettier e Vitest
+- estrutura de projeto modular alinhada com o crescimento futuro
 
-### Terminal Experience
+### Experiência de Terminal
 
-- Ink-based TUI application shell
-- sidebar navigation
-- keyboard-first workflows
-- command palette with slash commands
-- headless CLI execution mode
-- responsive layout behavior for smaller terminals
-- progress feedback for scans and deletion workflows
+- shell do aplicativo TUI baseada em Ink
+- navegação por barra lateral
+- fluxos de trabalho priorizando o uso do teclado
+- paleta de comandos com suporte a barra (`/`)
+- modo de execução CLI "headless" (sem interface)
+- comportamento de layout responsivo para terminais menores
+- feedback de progresso para varreduras e fluxos de exclusão
 
-### Command System
+### Sistema de Comandos
 
-- command parser and registry
-- fuzzy command suggestions
-- built-in commands for scan, projects, cache, cleanup, doctor, help, and settings
-- support for both `--scope=...` and positional scope commands such as `/scan machine`
+- analisador (parser) e registro de comandos
+- sugestões de comandos com busca aproximada (fuzzy)
+- comandos embutidos para scan, projects, cache, cleanup, doctor, help e settings
+- suporte a comandos de escopo com opções (`--scope=...`) e parâmetros posicionais como `/scan machine`
 
-### Scanning and Discovery
+### Varredura e Descoberta
 
-- recursive cleanup target discovery
-- project discovery across workspace, developer roots, and machine scope
-- directory size calculation with runtime fallback support
-- project framework detection for:
+- descoberta recursiva de alvos de limpeza
+- descoberta de projetos em todo o escopo do workspace, pastas de desenvolvimento e máquina
+- cálculo de tamanho de diretórios com fallback (solução de contingência) em tempo de execução
+- detecção de frameworks para projetos:
   - React
   - Next.js
   - Vue
   - Angular
   - Electron
-  - Node APIs
-  - initial Python projects
-- package manager detection using:
+  - APIs Node
+  - projetos Python iniciais
+- detecção de gerenciadores de pacotes utilizando:
   - lockfiles
-  - `packageManager` in `package.json`
-  - initial Python signals such as Poetry, uv, and pip
+  - `packageManager` no arquivo `package.json`
+  - sinais iniciais de ferramentas em Python como Poetry, uv e pip
 
-### Cleanup Operations
+### Operações de Limpeza
 
-- live cleanup candidate inventory
-- multi-select cleanup flow
-- select all
-- select safe candidates
-- preview of reclaimable space before deletion
-- real deletion with safety checks
-- live refresh after deletion
+- inventário em tempo real de candidatos à limpeza
+- fluxo de limpeza com seleção múltipla
+- selecionar todos (select all)
+- selecionar candidatos seguros (safe candidates)
+- pré-visualização do espaço que será recuperado antes da exclusão
+- exclusão real com verificações de segurança
+- atualização automática após a exclusão
 
-### Diagnostics
+### Diagnósticos
 
-- package manager availability detection
-- runtime/tool detection for:
+- detecção de disponibilidade dos gerenciadores de pacotes
+- detecção de runtimes/ferramentas para:
   - npm
   - pnpm
   - yarn
@@ -90,131 +90,131 @@ The project already has:
   - go
   - rustc
   - java
-- recommendation output for missing tooling
+- recomendação de saída (output) para ferramentas ausentes
 
-### Initial Ecosystem Signals
+### Sinais de Ecossistemas Iniciais
 
-- Docker-related project signals
-- Python-related project signals
-- visibility into projects that include compose or Docker configuration
+- sinais de projetos relacionados ao Docker
+- sinais de projetos relacionados ao Python
+- visibilidade de projetos que incluem configurações Docker ou compose
 
-## In Progress / Immediate Next Priorities
+## Em Andamento / Próximas Prioridades Imediatas
 
-### Performance and Scale
+### Desempenho e Escala
 
-- make machine-wide scans faster with incremental indexing
-- improve scan granularity so progress reflects real file and directory movement
-- reduce repeated directory size computation overhead
-- add smarter cache invalidation per root and per directory
+- agilizar varreduras em nível de máquina com indexação incremental
+- melhorar a granularidade da varredura para que o progresso reflita a movimentação real de arquivos e diretórios
+- reduzir a sobrecarga no cálculo repetido do tamanho de diretórios
+- adicionar invalidação de cache mais inteligente por raiz e diretório
 
-### TUI UX Depth
+### Profundidade de UX do TUI
 
-- better pagination for very small terminals
-- richer detail panes and drill-down views
-- improved command palette affordances
-- stronger filtering and sorting inside project and cleanup views
+- melhor paginação para terminais muito pequenos
+- painéis de detalhes mais ricos e visualizações aprofundadas (drill-down views)
+- melhorias na interatividade da paleta de comandos
+- filtros e ordenações mais eficientes nas visualizações de projetos e de limpeza
 
-### Cleanup Intelligence
+### Inteligência de Limpeza
 
-- more nuanced safety heuristics
-- better inactive-project detection
-- dry-run deletion reports
-- structured cleanup summaries export
+- heurísticas de segurança mais detalhadas
+- melhor detecção de projetos inativos
+- relatórios de simulação de exclusão (dry-run)
+- exportação de resumos estruturados da limpeza
 
-## Planned
+## Planejado
 
-### Docker Module
+### Módulo Docker
 
-- Docker engine and daemon health
-- image, volume, network, and container inspection
-- cache and disk usage views
-- safe cleanup flows for Docker artifacts
+- saúde do mecanismo (engine) e do daemon Docker
+- inspeção de imagens, volumes, redes e contêineres
+- visualizações de cache e uso de disco
+- fluxos seguros de limpeza para artefatos Docker
 
-### Python Module
+### Módulo Python
 
-- virtual environment detection
-- Poetry and uv environment insights
-- pip cache inspection
-- interpreter and environment health checks
+- detecção de ambientes virtuais
+- insights sobre ambientes Poetry e uv
+- inspeção de cache do pip
+- avaliações de saúde de interpretadores e ambientes
 
-### Additional Language and Runtime Modules
+### Módulos de Outras Linguagens e Runtimes
 
 - Rust
 - Go
 - Java
-- Bun-specific environment tooling
+- ferramentas específicas do ecossistema Bun
 
-### Project Operations
+### Operações em Projetos
 
-- richer project metadata
-- workspace grouping
-- recent activity heuristics
-- profile-based project views
+- metadados de projetos mais completos
+- agrupamento por workspace
+- heurísticas de atividade recente
+- visualizações de projetos com base em perfis
 
-### Plugin Architecture
+### Arquitetura de Plugins
 
-- plugin loading model
-- third-party commands
-- external scanners and custom modules
+- modelo de carregamento de plugins
+- comandos de terceiros
+- scanners externos e módulos customizados
 
-### Background Services
+### Serviços em Segundo Plano
 
-- background indexing
-- persistent machine inventory
-- delta-based rescans
+- indexação em background
+- inventário contínuo da máquina
+- varreduras baseadas em alterações (delta-based rescans)
 
-### AI and Diagnostics
+### IA e Diagnósticos
 
-- AI-assisted environment health guidance
-- remediation suggestions
-- anomaly detection for cache growth and disk usage
+- orientação assistida por IA para integridade do ambiente
+- sugestões de correção de problemas
+- detecção de anomalias para crescimento de cache e uso de disco
 
-## Longer-Term Direction
+## Direção a Longo Prazo
 
-### Production Readiness
+### Preparação para Produção
 
-- stronger cross-platform coverage
-- broader test coverage for scanning edge cases
-- more defensive permission handling
-- stable persistence model for preferences and state
+- cobertura mais sólida de plataforma cruzada (cross-platform)
+- expansão da cobertura de testes em cenários variados de varredura
+- tratamento defensivo de permissões
+- modelo persistente de estabilidade para preferências e estado
 
-### Product Experience
+### Experiência de Produto
 
-- premium terminal dashboard polish
-- workflow shortcuts for daily maintenance
-- deeper operational visibility for developer machines
+- refinamento de interface tipo dashboard terminal "premium"
+- atalhos de fluxo de trabalho para a manutenção diária
+- visibilidade operacional mais aprofundada para máquinas de desenvolvedores
 
-## Release Milestones
+## Marcos de Lançamento (Milestones)
 
-### Milestone 0.1.x
+### Versão 0.1.x
 
-Focus:
+Foco:
 
-- stabilize the existing foundation
-- improve machine-scan performance
-- deepen cleanup and diagnostics workflows
+- estabilizar a base existente
+- melhorar o desempenho das varreduras por toda a máquina
+- aprofundar fluxos de trabalho de limpeza e diagnóstico
 
-### Milestone 0.2.x
+### Versão 0.2.x
 
-Focus:
+Foco:
 
-- ship stronger Docker and Python modules
-- improve project intelligence
-- strengthen terminal UX and filtering
+- disponibilizar módulos mais eficientes para Docker e Python
+- melhorar a inteligência do projeto
+- aprimorar a UX (experiência do usuário) no terminal e o sistema de filtros
 
-### Milestone 0.3.x
+### Versão 0.3.x
 
-Focus:
+Foco:
 
-- introduce plugin architecture
-- begin background indexing and profile support
+- introduzir arquitetura de plugins
+- iniciar indexação em background e suporte a perfis
 
-## Contribution Direction
+## Orientação para Contribuições
 
-The project should continue favoring:
+O projeto deve continuar favorecendo:
 
-- clear modular boundaries
-- cross-platform behavior
-- keyboard-driven workflows
-- safe destructive operations
-- responsiveness under large developer filesystems
+- limites de módulos bem definidos
+- comportamento multiplataforma
+- fluxos de trabalho que priorizem o teclado
+- operações destrutivas com segurança
+- responsividade ao processar sistemas de arquivos extensos de desenvolvedores

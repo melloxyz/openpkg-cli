@@ -6,60 +6,63 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/TypeScript-6-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/Ink-7-000000?style=flat-square" alt="Ink" />
+  <img src="https://img.shields.io/badge/Zod-4-3E67B1?style=flat-square&logo=zod&logoColor=white" alt="Zod" />
   <img src="https://img.shields.io/badge/pnpm-10-F69220?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm" />
   <img src="https://img.shields.io/badge/Vitest-4-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest" />
   <img src="https://img.shields.io/badge/ESLint-10-4B32C3?style=flat-square&logo=eslint&logoColor=white" alt="ESLint" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
+  <img src="https://img.shields.io/badge/Prettier-3-F7B93E?style=flat-square&logo=prettier&logoColor=black" alt="Prettier" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="Licença MIT" />
 </p>
 
 </div>
 
-OpenPgk is a keyboard-first developer control center for the terminal.
+O OpenPgk é um centro de controle de desenvolvedor para o terminal, focado no uso do teclado.
 
-It is designed to help developers inspect and manage local environments, package managers, runtimes, caches, projects, disk-heavy artifacts, diagnostics, and cleanup workflows from one fast TUI/CLI experience.
+Ele foi projetado para ajudar os desenvolvedores a inspecionar e gerenciar ambientes locais, gerenciadores de pacotes, runtimes, caches, projetos, artefatos pesados em disco, diagnósticos e fluxos de limpeza a partir de uma experiência TUI/CLI rápida e unificada.
 
 ## Status
 
-OpenPgk is currently in active development.
+O OpenPgk está atualmente em desenvolvimento ativo.
 
-The project already has a runnable foundation with real scanning, diagnostics, cleanup execution, and a responsive terminal UI, but the product is not yet considered stable. Expect rapid iteration, behavior changes, and unfinished modules while the architecture is still expanding.
+O projeto já possui uma base executável com varreduras reais, diagnósticos, execução de limpeza e uma interface de terminal (TUI) responsiva, mas o produto ainda não é considerado estável. Espere iterações rápidas, mudanças de comportamento e módulos inacabados enquanto a arquitetura ainda está em expansão.
 
-## Goals
+## Objetivos
 
-OpenPgk is not intended to be only a wrapper around package managers.
+O OpenPgk não tem a intenção de ser apenas um wrapper (encapsulador) em torno de gerenciadores de pacotes.
 
-The long-term goal is to provide a cross-platform developer operating center for:
+O objetivo a longo prazo é fornecer um centro de operações de desenvolvedor multiplataforma para:
 
-- package managers
+- gerenciadores de pacotes
 - runtimes
-- local projects
-- caches and build artifacts
-- cleanup workflows
-- diagnostics and environment health
-- Docker and container visibility
-- Python and other polyglot tooling
-- future plugins, profiles, indexing, and AI-assisted diagnostics
+- projetos locais
+- caches e artefatos de build
+- fluxos de limpeza
+- diagnósticos e saúde do ambiente
+- visibilidade de Docker e contêineres
+- Python e outras ferramentas poliglotas
+- futuros plugins, perfis, indexação e diagnósticos assistidos por IA
 
-## Current Capabilities
+## Funcionalidades Atuais
 
-The current implementation includes:
+A implementação atual inclui:
 
-- interactive TUI built with Ink and React
-- sidebar navigation with keyboard focus management
-- command palette with slash commands and fuzzy suggestions
-- headless CLI command execution for non-interactive environments
-- project discovery across workspace, developer roots, or machine scope
-- cleanup target discovery for `node_modules`, `.pnpm-store`, `.npm`, `.turbo`, `.next`, `dist`, and `build`
-- real cleanup execution with confirmation flow and live refresh
-- project framework detection for React, Next.js, Vue, Angular, Electron, Node APIs, and initial Python support
-- package manager detection via lockfiles and `packageManager` in `package.json`
-- Docker and Python signals surfaced in diagnostics and project metadata
-- cached scan snapshots for faster repeated use
-- responsive layout handling for different terminal sizes
-- progress feedback during scans and deletion flows
+- TUI interativa construída com Ink e React
+- navegação lateral com gerenciamento de foco por teclado
+- paleta de comandos com comandos "slash" (`/`) e sugestões aproximadas (fuzzy)
+- execução de comandos CLI "headless" (sem interface) para ambientes não interativos
+- descoberta de projetos no escopo do workspace, diretórios de desenvolvedor ou na máquina toda
+- descoberta de alvos de limpeza para `node_modules`, `.pnpm-store`, `.npm`, `.turbo`, `.next`, `dist` e `build`
+- execução real de limpeza com fluxo de confirmação e atualização em tempo real
+- detecção de frameworks de projeto para React, Next.js, Vue, Angular, Electron, APIs Node e suporte inicial a Python
+- detecção de gerenciador de pacotes via lockfiles e campo `packageManager` no `package.json`
+- sinais de Docker e Python exibidos em diagnósticos e metadados de projetos
+- snapshots (instantâneos) de varredura em cache para uso repetido mais rápido
+- manipulação de layout responsivo para diferentes tamanhos de terminal
+- feedback de progresso durante varreduras e fluxos de exclusão
 
-## Tech Stack
+## Tecnologias Utilizadas
 
 - Node.js
 - TypeScript
@@ -77,14 +80,14 @@ The current implementation includes:
 - Prettier
 - pnpm
 
-## Installation
+## Instalação
 
-### Requirements
+### Requisitos
 
-- Node.js 20 or newer
+- Node.js 20 ou superior
 - pnpm
 
-### Local Setup
+### Configuração Local
 
 ```bash
 pnpm install
@@ -97,7 +100,7 @@ pnpm dev
 pnpm build
 ```
 
-### Quality Checks
+### Verificações de Qualidade
 
 ```bash
 pnpm typecheck
@@ -105,23 +108,23 @@ pnpm lint
 pnpm test
 ```
 
-## Running OpenPgk
+## Executando o OpenPgk
 
-### Interactive TUI
+### TUI Interativa
 
 ```bash
 pnpm dev
 ```
 
-Or after building:
+Ou após o build:
 
 ```bash
 node dist/cli.js
 ```
 
-### Headless Commands
+### Comandos Sem Interface (Headless)
 
-Examples:
+Exemplos:
 
 ```bash
 node dist/cli.js /doctor
@@ -131,9 +134,9 @@ node dist/cli.js /cleanup workspace --delete-safe
 node dist/cli.js /scan machine
 ```
 
-## Command Reference
+## Referência de Comandos
 
-### Supported Commands
+### Comandos Suportados
 
 - `/scan`
 - `/projects`
@@ -143,11 +146,11 @@ node dist/cli.js /scan machine
 - `/help`
 - `/settings`
 
-### Scope Variants
+### Variantes de Escopo
 
-The scanner supports both option-based and positional scope syntax.
+O scanner suporta sintaxe de escopo tanto baseada em opções quanto posicional.
 
-Examples:
+Exemplos:
 
 ```bash
 /scan --scope=workspace
@@ -158,52 +161,52 @@ Examples:
 /cache machine
 ```
 
-### Supported Scopes
+### Escopos Suportados
 
-- `workspace`: scans only the current working directory
-- `developer-home`: scans common developer roots such as Desktop, Projects, Code, dev, and Developer
-- `machine`: scans the current user's home directory broadly to discover developer projects and artifacts
+- `workspace`: escaneia apenas o diretório de trabalho atual
+- `developer-home`: escaneia raízes comuns de desenvolvedores como Desktop, Projects, Code, dev e Developer
+- `machine`: escaneia amplamente o diretório home do usuário atual para descobrir projetos e artefatos de desenvolvedor
 
-## Keyboard Navigation
+## Navegação por Teclado
 
 ### Global
 
-- `Tab`: switch focus between sidebar and content
-- `h` / `Left`: move focus to sidebar
-- `l` / `Right`: move focus to content
-- `j` / `Down`: move selection
-- `k` / `Up`: move selection
-- `/`: open command palette
-- `r`: refresh current section
-- `Ctrl+C`: exit
+- `Tab`: alternar o foco entre a barra lateral e o conteúdo
+- `h` / `Seta para Esquerda`: mover o foco para a barra lateral
+- `l` / `Seta para Direita`: mover o foco para o conteúdo
+- `j` / `Seta para Baixo`: mover a seleção
+- `k` / `Seta para Cima`: mover a seleção
+- `/`: abrir a paleta de comandos
+- `r`: recarregar a seção atual
+- `Ctrl+C`: sair
 
-### Cleanup Views
+### Telas de Limpeza
 
-- `Space`: toggle selection
-- `s`: select all visible cleanup targets
-- `a`: select all safe cleanup targets
-- `c`: clear selection
-- `x`: arm deletion
-- `y`: confirm deletion
-- `Esc`: cancel deletion
+- `Espaço`: alternar seleção
+- `s`: selecionar todos os alvos de limpeza visíveis
+- `a`: selecionar todos os alvos de limpeza seguros
+- `c`: limpar seleção
+- `x`: preparar para exclusão
+- `y`: confirmar exclusão
+- `Esc`: cancelar exclusão
 
-## Cleanup Safety Model
+## Modelo de Segurança da Limpeza
 
-Cleanup is a real destructive operation.
+A limpeza é uma operação destrutiva real.
 
-OpenPgk currently protects the deletion flow by:
+Atualmente, o OpenPgk protege o fluxo de exclusão através de:
 
-- limiting deletion to known cleanup directory names
-- refusing filesystem root deletion
-- verifying the target still exists and is a directory
-- requiring a confirmation step in the interactive TUI
-- refreshing the cleanup inventory after deletion
+- limitação da exclusão a nomes conhecidos de diretórios de limpeza
+- recusa da exclusão da raiz do sistema de arquivos
+- verificação de que o alvo ainda existe e é um diretório
+- exigência de uma etapa de confirmação na TUI interativa
+- atualização do inventário de limpeza após a exclusão
 
-Even with these protections, review deletion candidates carefully before confirming them.
+Mesmo com essas proteções, analise os candidatos a exclusão cuidadosamente antes de confirmá-los.
 
-## Project Detection
+## Detecção de Projetos
 
-OpenPgk currently scans for project signals such as:
+O OpenPgk atualmente escaneia sinais de projetos como:
 
 - `package.json`
 - `pyproject.toml`
@@ -214,16 +217,16 @@ OpenPgk currently scans for project signals such as:
 - `compose.yml`
 - `compose.yaml`
 
-It uses these files to infer:
+Ele usa esses arquivos para inferir:
 
-- project name
+- nome do projeto
 - framework
-- package manager
-- activity status
-- size
-- Docker and Python signals
+- gerenciador de pacotes
+- status de atividade
+- tamanho
+- sinais de Docker e Python
 
-## Repository Structure
+## Estrutura do Repositório
 
 ```text
 src/
@@ -240,24 +243,24 @@ src/
 └── utils/
 ```
 
-## Architecture Notes
+## Notas de Arquitetura
 
-The current codebase is intentionally modular and organized around separable concerns:
+A base de código atual é intencionalmente modular e organizada em torno de preocupações separáveis:
 
-- `commands/`: parsing, registry, built-in command definitions
-- `modules/dashboard/`: orchestration and stateful command execution
-- `services/`: environment inspection, scanning, caching, cleanup execution
-- `ui/`: terminal layout, panels, lists, screens, and interaction surfaces
-- `shared/` and `types/`: reusable constants, schemas, and contracts
+- `commands/`: análise (parsing), registro e definições de comandos nativos
+- `modules/dashboard/`: orquestração e execução de comandos com manutenção de estado
+- `services/`: inspeção de ambiente, varredura, cache e execução de limpeza
+- `ui/`: layout do terminal, painéis, listas, telas e superfícies de interação
+- `shared/` e `types/`: constantes reutilizáveis, esquemas e contratos
 
-This structure is intended to support future additions such as plugin systems, language-specific modules, workspace profiles, and background indexing without tightly coupling features together.
+Essa estrutura tem a intenção de suportar adições futuras, como sistemas de plugins, módulos específicos para linguagens, perfis de workspace e indexação em segundo plano, sem um forte acoplamento entre os recursos.
 
-## Roadmap
+## Roadmap (Roteiro)
 
-See [ROADMAP.md](ROADMAP.md) for the current delivery status and planned work.
+Consulte o arquivo [ROADMAP.md](ROADMAP.md) para verificar o status de entrega atual e o trabalho planejado.
 
-## License
+## Licença
 
-This project is licensed under the MIT License.
+Este projeto é licenciado sob a Licença MIT.
 
-See [LICENSE](LICENSE) for details.
+Veja o arquivo [LICENSE](LICENSE) para obter detalhes.

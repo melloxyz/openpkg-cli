@@ -1,46 +1,46 @@
-# Contributing
+# Contribuindo
 
-Thank you for contributing to OpenPgk.
+Obrigado por contribuir com o OpenPgk.
 
-This project is still under active development, so contributions should favor clarity, safety, modularity, and cross-platform behavior over quick one-off additions.
+Este projeto ainda está em desenvolvimento ativo, por isso, as contribuições devem favorecer clareza, segurança, modularidade e comportamento multiplataforma em vez de adições rápidas e pontuais.
 
-## Principles
+## Princípios
 
-- keep the CLI/TUI keyboard-first
-- preserve modular boundaries between `commands`, `services`, `ui`, and `modules`
-- prefer cross-platform implementations
-- treat cleanup and deletion flows as high-risk features
-- optimize for performance on large developer machines
-- keep terminal layouts readable across different terminal sizes
+- mantenha a CLI/TUI sempre com o teclado em primeiro lugar (keyboard-first)
+- preserve as fronteiras modulares entre `commands`, `services`, `ui` e `modules`
+- prefira implementações multiplataforma (cross-platform)
+- trate os fluxos de limpeza e de exclusão como recursos de alto risco
+- otimize o desempenho para computadores com um grande volume de código
+- mantenha layouts de terminal legíveis independentemente do tamanho do terminal
 
-## Development Setup
+## Configuração do Ambiente de Desenvolvimento
 
-Requirements:
+Requisitos:
 
 - Node.js 20+
 - pnpm
 
-Install dependencies:
+Instale as dependências:
 
 ```bash
 pnpm install
 ```
 
-Run in development:
+Execute em modo de desenvolvimento:
 
 ```bash
 pnpm dev
 ```
 
-Build:
+Crie o build:
 
 ```bash
 pnpm build
 ```
 
-## Quality Checks
+## Verificações de Qualidade
 
-Before submitting changes, run:
+Antes de enviar alterações, execute:
 
 ```bash
 pnpm typecheck
@@ -49,52 +49,52 @@ pnpm test
 pnpm build
 ```
 
-## Code Guidelines
+## Diretrizes de Código
 
-- use TypeScript with strict typing
-- keep files focused on one responsibility
-- prefer small, composable services over large coupled modules
-- avoid introducing platform-specific assumptions without guards
-- preserve safe defaults for destructive operations
-- keep command behavior explicit and discoverable
-- update documentation when user-facing behavior changes
+- use TypeScript com tipagem estrita
+- mantenha arquivos focados em uma única responsabilidade
+- prefira serviços pequenos e combináveis no lugar de grandes módulos acoplados
+- evite introduzir premissas específicas de uma plataforma sem adotar verificações (guards)
+- mantenha a segurança como padrão para operações destrutivas
+- preserve a clareza e seja descritivo em comportamentos de comando
+- atualize a documentação quando alterar funcionalidades com as quais o usuário interage
 
-## UI Guidelines
+## Diretrizes de Interface (UI)
 
-- keep navigation fully keyboard-driven
-- maintain responsive behavior for narrow terminals
-- avoid cluttering screens with unnecessary decoration
-- prefer fast comprehension over visual noise
+- preserve a navegação totalmente baseada em teclado
+- garanta a responsividade para terminais estreitos
+- evite congestionar telas com decorações desnecessárias
+- prefira uma rápida compreensão da tela à poluição visual
 
-## Testing Expectations
+## Expectativas com Relação aos Testes
 
-Add or update tests when changing:
+Adicione ou atualize os testes quando fizer alterações em:
 
-- command parsing
-- cleanup behavior
-- filesystem scanning
-- package manager detection
-- safety checks
+- processamento (parsing) de comandos
+- comportamento de limpeza
+- varredura (scanning) no sistema de arquivos
+- detecção do gerenciador de pacotes
+- verificações de segurança
 
-Vitest is the current test runner.
+Vitest é o nosso executor de testes (test runner) atual.
 
-## Pull Request Scope
+## Escopo dos Pull Requests (PRs)
 
-Good contributions usually include:
+Boas contribuições geralmente incluem:
 
-- one focused feature or fix
-- updated docs when relevant
-- tests for behavior changes
-- no unrelated refactors mixed into the same change
+- um recurso ou correção bem focado
+- documentação atualizada quando apropriada
+- testes cobrindo as modificações de comportamento implementadas
+- ausência de refatorações misturadas na mesma alteração que não tenham a ver com o código principal modificado
 
-## Areas That Need Extra Care
+## Áreas que Requerem Cuidado Extra
 
-- cleanup execution
-- filesystem traversal
-- machine-wide scanning
-- progress and responsiveness in the TUI
-- Docker and Python detection logic
+- execução da limpeza
+- travessia no sistema de arquivos (filesystem traversal)
+- varredura em toda a máquina
+- exibições de progresso e responsividade na TUI
+- lógicas de detecção de Docker e Python
 
-## Questions and Direction
+## Dúvidas e Orientações
 
-If a change affects architecture, safety, or scan performance, prefer aligning it with the roadmap first in [ROADMAP.md](ROADMAP.md).
+Se uma alteração afetar arquitetura, segurança ou o desempenho de varreduras, prefira primeiro alinhá-la com as metas estipuladas no arquivo [ROADMAP.md](ROADMAP.md).

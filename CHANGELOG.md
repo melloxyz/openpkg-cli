@@ -1,37 +1,61 @@
 # Changelog
 
-All notable changes to this project should be documented in this file.
+Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
-The format is based on Keep a Changelog principles, adapted for the current early-development stage of OpenPgk.
+O formato baseia-se nos princípios de [Keep a Changelog](https://keepachangelog.com/), adaptado para o estágio inicial de desenvolvimento do OpenPgk.
 
-## [Unreleased]
+---
 
-### Added
+## Rumo à Versão 1.0.0 (Estável)
 
-- Initial OpenPgk CLI/TUI foundation with TypeScript, Ink, tsup, ESLint, Prettier, and Vitest
-- Interactive terminal dashboard with sidebar navigation, command palette, keyboard workflows, and responsive layout behavior
-- Headless command execution mode for non-interactive environments
-- Slash command system with built-in commands for scan, projects, cache, cleanup, doctor, help, and settings
-- Project scanning across workspace, developer-home, and machine scopes
-- Cleanup scanning for `node_modules`, `.pnpm-store`, `.npm`, `.turbo`, `.next`, `dist`, and `build`
-- Real cleanup execution with multi-select, select-all, safe-select, confirmation flow, and live refresh
-- Progress feedback for scans and cleanup execution
-- Scan snapshot caching
-- Initial Docker and Python awareness in diagnostics and project discovery
-- Project framework detection for React, Next.js, Vue, Angular, Electron, Node APIs, and initial Python projects
-- Package manager detection via lockfiles and `packageManager` in `package.json`
-- README, roadmap, MIT license, and contribution documentation
+Acompanhe o que já foi implementado e o que está planejado até o lançamento da versão `1.0.0`.
 
-### Changed
+### Fase 1: Fundação & Varredura (Concluído)
+- [x] CLI/TUI interativa com navegação lateral e suporte a teclado
+- [x] Execução de comandos nativos com paleta de comandos (`/scan`, `/cleanup`, etc.)
+- [x] Varredura de sistema de arquivos e cache de snapshots
 
-- Improved directory size calculation to avoid zero-size fallbacks during development runtime
-- Expanded command scope handling to support both `--scope=...` and positional forms like `/scan machine`
-- Improved project discovery to detect nested projects and additional project signal files
-- Improved cleanup and cache views to show aggregated size totals and deletion previews
-- Improved Doctor view to surface Docker and Python availability more clearly
+### Fase 2: Limpeza & Segurança (Em andamento)
+- [x] Descoberta e limpeza de alvos (`node_modules`, `dist`, `.next`, etc.)
+- [x] Proteção e avaliações de risco durante o fluxo de deleção
+- [ ] Relatórios e sumarização pós-limpeza (dry-run)
 
-### Fixed
+### Fase 3: Módulos Inteligentes & Plugins (Planejado)
+- [x] Reconhecimento inicial de ecossistema Docker e Python
+- [ ] Gestão detalhada de módulos Docker (volumes, imagens, etc.)
+- [ ] Implementação da arquitetura de plugins e comandos de terceiros
 
-- Fixed cleanup scanning so `node_modules` directories are discovered correctly
-- Fixed project scanning so nested `package.json` files are detected
-- Fixed runtime size estimation failures when worker-based sizing is unavailable
+### Fase 4: Estabilidade & Produção (Planejado)
+- [ ] Indexação e varredura assíncronas em segundo plano
+- [ ] Experiência "premium" e responsividade garantida sob estresse
+- [ ] Lançamento da versão 1.0.0
+
+---
+
+## [Unreleased] (Em Desenvolvimento)
+
+### Adicionado (Added)
+- Base CLI/TUI com TypeScript, Ink, tsup, ESLint, Prettier e Vitest.
+- Painel interativo com foco no uso do terminal (sidebar, paleta de comandos, atalhos de teclado).
+- Execução de comandos sem interface (headless) para ambientes automatizados.
+- Sistema nativo de comandos slash (`/scan`, `/projects`, `/cache`, `/cleanup`, `/doctor`, `/help`, `/settings`).
+- Descoberta e varredura de projetos em escopos como `workspace`, `developer-home` e `machine`.
+- Mapeamento avançado para limpeza de: `node_modules`, `.pnpm-store`, `.npm`, `.turbo`, `.next`, `dist` e `build`.
+- Fluxo de exclusão de artefatos contendo seleção múltipla, opções seguras e processo de confirmação de deleção para evitar acidentes.
+- Caching de snapshots para acelerar o processo repetitivo de escaneamento.
+- Identificação inicial de Python e Docker na busca e diagnósticos do sistema.
+- Reconhecimento automático de frameworks (React, Next.js, Vue, Angular, Electron, APIs nativas Node).
+- Detecção nativa do gerenciador de pacote utilizando o arquivo `package.json` ou identificando "lockfiles".
+- Adição das documentações oficiais (README, ROADMAP, CHANGELOG, CONTRIBUTING e LICENSE).
+
+### Modificado (Changed)
+- Aprimoramento no cálculo de espaço dos diretórios, evitando perdas métricas e resultados de fallback falsos no tempo de execução.
+- Suporte abrangente à entrada de opções `--scope=...` ou de forma posicional, ex.: `/scan machine`.
+- Processo de escaneamento modernizado para ser capaz de achar subprojetos agrupados ou pastas aninhadas.
+- Melhoria visual para visualização de espaços ocupados, agrupamento inteligente e uma prévia de espaço antes da exclusão.
+- Seção Doctor foi otimizada para evidenciar dependências essenciais de maneira direta.
+
+### Corrigido (Fixed)
+- Ajustado o erro onde as varreduras às vezes ignoravam diretórios `node_modules` válidos.
+- Ajustado o parser de projetos permitindo ler perfeitamente sub-arquivos `package.json` dentro do mesmo espaço.
+- Ajuste de contagem e renderização quando os medidores via processo worker não estão acessíveis.
