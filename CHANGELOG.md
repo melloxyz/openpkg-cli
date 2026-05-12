@@ -18,32 +18,74 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 - [x] Documentação inicial profissional.
 - [x] CI, build-check e release workflow.
 
-### Fase 2: Hardening `0.2.x` (Planejado)
+### Fase 2: Hardening `0.2.x` (Concluído)
 
-- [ ] Otimizar scans de máquina em ambientes grandes.
-- [ ] Ampliar testes de integração para escopos e cleanup destrutivo.
-- [ ] Melhorar tratamento de permissões e diretórios inacessíveis.
-- [ ] Exportar resumos estruturados de operações headless.
+- [x] Otimizar scans de máquina em ambientes grandes.
+- [x] Ampliar testes de integração para escopos e cleanup destrutivo.
+- [x] Melhorar tratamento de permissões e diretórios inacessíveis.
+- [x] Exportar resumos estruturados de operações headless.
+- [x] Adicionar check automático de updates do ambiente global.
+- [x] Entregar comando dedicado `/updates`.
 
-### Fase 3: Produto Público `0.3.x` (Planejado)
+### Fase 3: UX e Operação Pública `0.3.x` (Planejado)
 
 - [ ] Refinar filtros, ordenações e drill-downs no TUI.
 - [ ] Melhorar autocomplete de argumentos na command palette.
-- [ ] Adicionar templates de issue e pull request.
+- [ ] Tornar a seção "Settings" totalmente funcional e integrada.
+- [ ] Preparar templates de issue e PR para contribuições externas.
 - [ ] Validar fluxo completo de release com tag GitHub.
 
-### Fase 4: Estável `1.0.0` (Planejado)
+### Fase 4: Arquitetura UI, Revamp Visual e Navegação `0.4.x` (Planejado)
 
-- [ ] Congelar contratos públicos principais.
-- [ ] Validar matriz mínima Windows, macOS e Linux.
-- [ ] Documentar instalação via npm.
-- [ ] Publicar versão estável.
+- [ ] Melhoria geral de UI/UX no TUI para torná-lo mais organizado.
+- [ ] Melhorar sistema de navegação e fluxos entre telas.
+- [ ] Refatoração e separação profissional dos componentes React/Ink (cuidando rigorosamente para não remover lógicas importantes).
+- [ ] Polimento de design, responsividade estendida e feedback visual.
+
+### Fase 5: Estável `1.0.0` (Planejado)
+
+- [ ] Congelar contratos públicos principais de comandos e snapshots.
+- [ ] Fechar matriz mínima de testes para Windows, macOS e Linux.
+- [ ] Documentar instalação via npm e garantir qualidade no CI.
+- [ ] Revisar fluxos destrutivos e publicar release estável.
 
 ---
 
 ## [Unreleased] (Em Desenvolvimento)
 
-Nenhuma mudança não versionada no momento.
+### Adicionado (Added)
+
+- ...
+
+### Modificado (Changed)
+
+- ...
+
+### Corrigido (Fixed)
+
+- ...
+
+---
+
+## [0.2.0] - 2026-05-12
+
+### Adicionado (Added)
+
+- Serviço de checagem remota de updates para `npm`, `pnpm`, `yarn`, `bun` e `Node`.
+- Comando `/updates` para uso TUI e headless.
+- Cache dedicado para resultados remotos de updates com reaproveitamento no Doctor.
+- Progresso incremental para scans de projetos e cleanup.
+- Progresso por alvo para preview e exclusão de cleanup.
+- Resumo estruturado de execução de cleanup no snapshot e no modo headless.
+- Testes de integração do controller para `workspace`, `developer-home` e `machine`.
+
+### Modificado (Changed)
+
+- O Doctor passou a enriquecer o diagnóstico com status de atualização do ambiente global.
+- `--cached` em `Doctor` e `/updates` passou a usar apenas dados remotos já armazenados.
+- O scanner de projetos ficou mais tolerante a `package.json` inválido para o schema.
+- O cálculo de tamanho e os scanners ficaram mais resilientes a caminhos inacessíveis e symlinks.
+- O scanner passou a emitir progresso incremental por descoberta e processamento.
 
 ---
 

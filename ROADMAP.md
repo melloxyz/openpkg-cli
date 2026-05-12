@@ -56,23 +56,33 @@ O projeto já possui:
 
 ## Caminho Para `1.0.0`
 
-### `0.2.x`: Hardening de Scan e Cleanup
+### `0.2.x`: Hardening de Scan e Cleanup (Concluído)
 
-- [ ] Medir e otimizar performance de `/scan machine` em máquinas grandes.
-- [ ] Melhorar progresso incremental de scans longos.
-- [ ] Adicionar mais testes de integração para escopos `workspace`, `developer-home` e `machine`.
-- [ ] Cobrir edge cases de permissões, symlinks e diretórios inacessíveis.
-- [ ] Exportar resumo estruturado de cleanup em modo headless.
-- [ ] Refinar heurísticas de projeto inativo e recomendação segura.
+- [x] Medir e otimizar performance de `/scan machine` em máquinas grandes.
+- [x] Melhorar progresso incremental de scans longos.
+- [x] Adicionar mais testes de integração para escopos `workspace`, `developer-home` e `machine`.
+- [x] Cobrir edge cases de permissões, symlinks e diretórios inacessíveis.
+- [x] Exportar resumo estruturado de cleanup em modo headless.
+- [x] Refinar heurísticas de projeto inativo e recomendação segura.
+- [x] Adicionar checagem automática de updates no `Doctor` para `npm`, `pnpm`, `yarn`, `bun` e `Node`.
+- [x] Criar comando `/updates` para uso TUI e headless com cache remoto de versões.
 
 ### `0.3.x`: UX e Operação Pública
 
 - [ ] Melhorar paginação e drill-down em terminais pequenos.
 - [ ] Adicionar filtros e ordenações em projetos e cleanup.
 - [ ] Refinar command palette com autocomplete de argumentos.
+- [ ] Tornar a seção "Settings" totalmente funcional e integrada.
 - [ ] Adicionar smoke tests documentados para build local e pacote instalado.
 - [ ] Validar release workflow com tag `v0.1.0` e notas extraídas do changelog.
 - [ ] Preparar templates de issue e PR para contribuições externas.
+
+### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação
+
+- [ ] Melhoria geral de UI/UX no TUI para torná-lo mais organizado.
+- [ ] Melhorar sistema de navegação e fluxos entre telas.
+- [ ] Refatoração e separação profissional dos componentes React/Ink (cuidando rigorosamente para não remover lógicas importantes).
+- [ ] Polimento de design, responsividade estendida e feedback visual.
 
 ### `1.0.0`: Estável
 

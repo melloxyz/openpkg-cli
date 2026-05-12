@@ -1,6 +1,6 @@
 {
   "name": "openpkg",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Developer operating center for environment health, projects, caches, and tooling.",
   "type": "module",
   "bin": {
