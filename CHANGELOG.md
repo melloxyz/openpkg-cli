@@ -35,6 +35,7 @@ Acompanhe o que já foi implementado e o que está planejado até o lançamento 
 ## [Unreleased] (Em Desenvolvimento)
 
 ### Adicionado (Added)
+- Configuração de CI com GitHub Actions para validação automatizada de código (Typecheck, Lint, Testes) e garantia de build.
 - Base CLI/TUI com TypeScript, Ink, tsup, ESLint, Prettier e Vitest.
 - Painel interativo com foco no uso do terminal (sidebar, paleta de comandos, atalhos de teclado).
 - Execução de comandos sem interface (headless) para ambientes automatizados.
