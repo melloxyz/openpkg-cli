@@ -4,7 +4,6 @@ dist
 coverage
 .turbo
 *.log
-pnpm-lock.yaml
 .vscode
 .idea
 AGENTS.md
