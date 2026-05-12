@@ -79,7 +79,51 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 - Prettier
 - pnpm
 
-## Instalação Local
+## Instalação
+
+### Uso Via npm
+
+Instale globalmente para abrir o OpenPkg de qualquer terminal:
+
+```bash
+npm install -g openpkg
+openpkg
+```
+
+O pacote também instala o alias curto `opkg`:
+
+```bash
+opkg
+opkg /doctor
+```
+
+Se você não quiser instalar globalmente, use `npx`:
+
+```bash
+npx openpkg
+npx openpkg /doctor
+npx openpkg /scan machine
+```
+
+Para chamar o alias curto via `npx`, use:
+
+```bash
+npx -p openpkg opkg
+```
+
+Nota: existe outro pacote no npm chamado `openpkg-cli` que também registra o binário global `openpkg`. Se houver colisão em uma máquina que já tenha esse pacote instalado, use `opkg` como alias seguro para este projeto.
+
+### Desinstalação
+
+Se você instalou o OpenPkg globalmente e quiser remover:
+
+```bash
+npm uninstall -g openpkg
+```
+
+Após a desinstalação, os comandos `openpkg` e `opkg` deixam de apontar para este pacote.
+
+### Uso Local Para Desenvolvimento
 
 ### Requisitos
 
@@ -120,6 +164,8 @@ pnpm test
 ### TUI Interativa
 
 ```bash
+openpkg
+opkg
 pnpm dev
 ```
 
@@ -132,6 +178,9 @@ node dist/cli.js
 ### Headless
 
 ```bash
+openpkg /doctor
+opkg /projects workspace
+openpkg /cleanup workspace --dry-run
 node dist/cli.js /doctor
 node dist/cli.js /projects workspace
 node dist/cli.js /cache machine

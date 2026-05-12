@@ -4,6 +4,7 @@ dist
 coverage
 .turbo
 *.log
+.tmp
 .vscode
 .idea
 AGENTS.md

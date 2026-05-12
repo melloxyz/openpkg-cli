@@ -55,6 +55,7 @@ Nenhuma mudança não versionada no momento.
 - Workflow de release baseado em tags `v*` com extração de notas do changelog.
 - Base CLI/TUI com Node.js, TypeScript, Ink, React, tsup, ESLint, Prettier e Vitest.
 - Binários `openpkg` e `opkg` apontando para `dist/cli.js`.
+- Scripts de publicação com `prepack` e `prepublishOnly` para validar a CLI antes do empacotamento e do `npm publish`.
 - Painel interativo com sidebar, conteúdo principal, footer operacional e atalhos de teclado.
 - Paleta de comandos com suporte a comandos slash e sugestões fuzzy.
 - Execução headless para comandos em ambientes não interativos.
@@ -69,11 +70,13 @@ Nenhuma mudança não versionada no momento.
 - Dry-run explícito para cleanup headless.
 - Resumo pós-cleanup com itens deletados, falhas e espaço estimado recuperado.
 - Documentação inicial com README, ROADMAP, CONTRIBUTING, CHANGELOG e LICENSE MIT.
+- Documentação de instalação global, execução via `npx` e desinstalação da CLI.
 
 ### Modificado (Changed)
 
 - Padronizada a marca pública como OpenPkg.
 - O pacote npm permaneceu como `openpkg`, com bins `openpkg` e `opkg`.
+- O pacote publicado passou a incluir o asset do logo para renderização correta do README no npm.
 - O comando headless `/cleanup --delete-safe` passou a exigir `--confirm` para deletar de fato.
 - `/cleanup --delete-safe` sem confirmação passou a executar preview/dry-run.
 - O cálculo de espaço foi reforçado para evitar resultados falsos de tamanho zero quando possível.

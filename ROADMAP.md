@@ -77,11 +77,11 @@ O projeto já possui:
 ### `1.0.0`: Estável
 
 - [ ] Garantir `typecheck`, `lint`, `test` e `build` verdes no CI.
-- [ ] Documentar instalação via npm e uso dos bins `openpkg` e `opkg`.
+- [x] Documentar instalação via npm e uso dos bins `openpkg` e `opkg`.
 - [ ] Fechar matriz mínima de testes para Windows, macOS e Linux.
 - [ ] Revisar todo fluxo destrutivo de cleanup com testes e documentação.
 - [ ] Congelar contratos públicos principais de comandos e snapshots.
-- [ ] Publicar release estável com changelog versionado e tag GitHub.
+- [ ] Publicar release estável com changelog versionado, tag GitHub e pacote npm.
 
 ## Pós-v1
 
