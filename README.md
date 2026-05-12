@@ -25,7 +25,7 @@ Ele combina TUI interativa e comandos headless para gerenciar projetos, caches, 
 
 OpenPkg está em desenvolvimento ativo.
 
-A base atual já é executável e cobre o núcleo da primeira release pública `0.1.0`, incluindo scans reais, cache, diagnóstico, cleanup protegido, TUI responsiva e execução headless. O caminho até `1.0.0` foca hardening, previsibilidade, documentação e release pública profissional.
+A base atual já é executável e cobre o núcleo da primeira release pública `0.1.0`, incluindo scans reais, cache, diagnóstico, cleanup protegido, TUI responsiva e execução headless. O hardening planejado para a trilha `0.2.x` já está implementado no código atual, e o caminho até `1.0.0` agora segue para UX pública, documentação e release profissional.
 
 ## Objetivos
 
@@ -55,10 +55,12 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 - Cleanup real com confirmação forte e validação de alvos permitidos.
 - Detecção de React, Next.js, Vue, Angular, Electron, APIs Node e sinais iniciais de Python.
 - Detecção de package manager via lockfiles e campo `packageManager` no `package.json`.
+- Check automático de updates para `npm`, `pnpm`, `yarn`, `bun` e `Node` dentro do Doctor.
+- Cache remoto de updates com reaproveitamento em `Doctor` e `/updates`.
 - Sinais de Docker e Python em projetos e diagnósticos.
 - Cache de snapshots em `.openpkg/cache.json`.
 - Layout responsivo para diferentes tamanhos de terminal.
-- Feedback de progresso durante scan e exclusão.
+- Feedback de progresso incremental durante scan, preview e exclusão.
 
 ## Stack
 
@@ -102,6 +104,8 @@ Se você não quiser instalar globalmente, use `npx`:
 ```bash
 npx openpkg
 npx openpkg /doctor
+npx openpkg /updates
+npx openpkg /updates --cached
 npx openpkg /scan machine
 ```
 
@@ -179,9 +183,11 @@ node dist/cli.js
 
 ```bash
 openpkg /doctor
+openpkg /updates
 opkg /projects workspace
 openpkg /cleanup workspace --dry-run
 node dist/cli.js /doctor
+node dist/cli.js /updates
 node dist/cli.js /projects workspace
 node dist/cli.js /cache machine
 node dist/cli.js /cleanup workspace --dry-run
@@ -196,6 +202,7 @@ node dist/cli.js /scan machine
 - `/cache`: mostra diretórios de cache e artefatos.
 - `/cleanup`: prepara candidatos de limpeza.
 - `/doctor`: executa diagnósticos de ambiente.
+- `/updates`: checa updates disponíveis para as ferramentas globais do ambiente.
 - `/help`: lista comandos e aliases.
 - `/settings`: abre a área de configurações.
 
@@ -214,6 +221,12 @@ OpenPkg aceita escopo por argumento posicional ou flag.
 - `workspace`: escaneia apenas o diretório atual.
 - `developer-home`: escaneia raízes comuns de desenvolvimento dentro do home.
 - `machine`: escaneia amplamente o home do usuário para encontrar projetos e artefatos de dev.
+
+Para updates do ambiente:
+
+- `Doctor` consulta versões locais ao vivo e reaproveita o cache remoto de updates quando ele ainda está fresco.
+- `/updates --cached` usa apenas o cache remoto salvo anteriormente.
+- `/updates --force` ignora o cache remoto e consulta as fontes online novamente.
 
 ## Navegação
 

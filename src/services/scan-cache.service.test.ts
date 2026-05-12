@@ -6,6 +6,7 @@ import { ScanCacheService } from './scan-cache.service.js';
 import type {
   CleanupTargetRecord,
   EnvironmentHealthSnapshot,
+  EnvironmentUpdatesSnapshot,
   ProjectRecord,
   ScanSummary
 } from '../types/index.js';
@@ -51,9 +52,22 @@ const createHealthSnapshot = (): EnvironmentHealthSnapshot => ({
   packageManagers: { npm: true, pnpm: true, yarn: false, bun: false },
   toolVersions: { npm: '11.0.0' },
   toolAvailability: [
+    { name: 'node', category: 'runtime', available: true, version: 'v22.0.0' },
     { name: 'npm', category: 'package-manager', available: true, version: '11.0.0' }
   ],
   recommendations: []
+});
+
+const createUpdatesSnapshot = (): EnvironmentUpdatesSnapshot => ({
+  checkedAt: new Date('2026-01-01T00:00:02.000Z').toISOString(),
+  tools: [
+    {
+      name: 'npm',
+      latestVersion: '11.1.0',
+      source: 'npm',
+      fetchState: 'ok'
+    }
+  ]
 });
 
 afterEach(async () => {
@@ -93,19 +107,23 @@ describe('ScanCacheService', () => {
     await expect(cache.getProjectSummary(['C:\\workspace'], -1)).resolves.toBeUndefined();
   });
 
-  it('stores cleanup and health snapshots', async () => {
+  it('stores cleanup, health, and updates snapshots', async () => {
     const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-cache-'));
     tempDirectories.push(home);
     vi.spyOn(os, 'homedir').mockReturnValue(home);
     const cache = new ScanCacheService();
     const cleanup = createCleanupSummary(['C:\\workspace']);
     const health = createHealthSnapshot();
+    const updates = createUpdatesSnapshot();
 
     await cache.setCleanupSummary(cleanup);
     await cache.setHealthSnapshot(health);
+    await cache.setEnvironmentUpdatesSnapshot(updates);
 
     await expect(cache.getCleanupSummary(['C:\\workspace'])).resolves.toEqual(cleanup);
     await expect(cache.getHealthSnapshot()).resolves.toEqual(health);
+    await expect(cache.getEnvironmentUpdatesSnapshot()).resolves.toEqual(updates);
+    await expect(cache.getEnvironmentUpdatesSnapshot(-1)).resolves.toBeUndefined();
   });
 
   it('recovers from malformed cache file content', async () => {

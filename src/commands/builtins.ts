@@ -12,6 +12,22 @@ const resolveCachePolicy = (forceOption: unknown, cachedOption: unknown) => {
   return 'force' as const;
 };
 
+const resolveUpdateFetchPolicy = (
+  forceOption: unknown,
+  cachedOption: unknown,
+  defaultPolicy: 'auto' | 'cache-only' = 'auto'
+) => {
+  if (forceOption === true) {
+    return 'force' as const;
+  }
+
+  if (cachedOption === true) {
+    return 'cache-only' as const;
+  }
+
+  return defaultPolicy;
+};
+
 const resolveScope = (scopeOption: unknown, positionalScope?: string) => {
   const scope = typeof positionalScope === 'string' ? positionalScope : scopeOption;
 
@@ -44,6 +60,11 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       triggerCleanupScan: true,
       triggerDoctorScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
+      updateFetchPolicy: resolveUpdateFetchPolicy(
+        parsed.options.force,
+        parsed.options.cached,
+        'cache-only'
+      ),
       scope: resolveScope(parsed.options.scope, parsed.args[0])
     })
   },
@@ -56,7 +77,22 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       message: 'Running environment diagnostics.',
       targetSection: 'doctor',
       triggerDoctorScan: true,
-      cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached)
+      cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
+      updateFetchPolicy: resolveUpdateFetchPolicy(parsed.options.force, parsed.options.cached)
+    })
+  },
+  {
+    name: 'updates',
+    description: 'Check available updates for global environment tools.',
+    aliases: ['upgrade', 'versions'],
+    usage: '/updates [--cached] [--force]',
+    execute: async (parsed) => ({
+      message: 'Checking environment updates.',
+      targetSection: 'doctor',
+      triggerDoctorScan: true,
+      updatesOnly: true,
+      cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
+      updateFetchPolicy: resolveUpdateFetchPolicy(parsed.options.force, parsed.options.cached)
     })
   },
   {

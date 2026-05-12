@@ -1,6 +1,6 @@
 import os from 'node:os';
 import { execa } from 'execa';
-import type { EnvironmentHealthSnapshot, PackageManager } from '../types/index.js';
+import type { EnvironmentHealthSnapshot, EnvironmentToolName, PackageManager } from '../types/index.js';
 
 const isPackageManagerAvailable = async (command: Exclude<PackageManager, 'unknown'>) => {
   try {
@@ -12,7 +12,7 @@ const isPackageManagerAvailable = async (command: Exclude<PackageManager, 'unkno
 };
 
 const getCommandVersion = async (
-  command: string,
+  command: Exclude<EnvironmentToolName, 'node'>,
   args: string[],
   category: 'package-manager' | 'runtime' | 'container'
 ) => {
@@ -21,7 +21,8 @@ const getCommandVersion = async (
       reject: false,
       all: true
     });
-    const version = result.all?.split(/\r?\n/).find(Boolean)?.trim();
+    const version =
+      result.exitCode === 0 ? result.all?.split(/\r?\n/).find(Boolean)?.trim() : undefined;
 
     return {
       name: command,
@@ -47,17 +48,25 @@ export class EnvironmentService {
       isPackageManagerAvailable('bun')
     ]);
 
-    const toolAvailability = await Promise.all([
-      getCommandVersion('npm', ['--version'], 'package-manager'),
-      getCommandVersion('pnpm', ['--version'], 'package-manager'),
-      getCommandVersion('yarn', ['--version'], 'package-manager'),
-      getCommandVersion('bun', ['--version'], 'package-manager'),
-      getCommandVersion('python', ['--version'], 'runtime'),
-      getCommandVersion('docker', ['--version'], 'container'),
-      getCommandVersion('go', ['version'], 'runtime'),
-      getCommandVersion('rustc', ['--version'], 'runtime'),
-      getCommandVersion('java', ['-version'], 'runtime')
-    ]);
+    const toolAvailability = [
+      {
+        name: 'node' as const,
+        category: 'runtime' as const,
+        available: true,
+        version: process.version
+      },
+      ...(await Promise.all([
+        getCommandVersion('npm', ['--version'], 'package-manager'),
+        getCommandVersion('pnpm', ['--version'], 'package-manager'),
+        getCommandVersion('yarn', ['--version'], 'package-manager'),
+        getCommandVersion('bun', ['--version'], 'package-manager'),
+        getCommandVersion('python', ['--version'], 'runtime'),
+        getCommandVersion('docker', ['--version'], 'container'),
+        getCommandVersion('go', ['version'], 'runtime'),
+        getCommandVersion('rustc', ['--version'], 'runtime'),
+        getCommandVersion('java', ['-version'], 'runtime')
+      ]))
+    ];
 
     const toolVersions = Object.fromEntries(
       toolAvailability

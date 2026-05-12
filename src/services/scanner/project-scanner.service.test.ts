@@ -53,7 +53,13 @@ describe('ProjectScannerService', () => {
     await Promise.all([
       utimes(reactPath, reactTime, reactTime),
       utimes(apiPath, apiTime, apiTime),
-      utimes(pythonPath, pythonTime, pythonTime)
+      utimes(pythonPath, pythonTime, pythonTime),
+      utimes(path.join(reactPath, 'package.json'), reactTime, reactTime),
+      utimes(path.join(reactPath, 'pnpm-lock.yaml'), reactTime, reactTime),
+      utimes(path.join(reactPath, 'Dockerfile'), reactTime, reactTime),
+      utimes(path.join(apiPath, 'package.json'), apiTime, apiTime),
+      utimes(path.join(apiPath, 'package-lock.json'), apiTime, apiTime),
+      utimes(path.join(pythonPath, 'pyproject.toml'), pythonTime, pythonTime)
     ]);
 
     const scanner = new ProjectScannerService();
@@ -110,5 +116,36 @@ describe('ProjectScannerService', () => {
       packageManager: 'unknown'
     });
     expect(summary.records[0]?.signals).toContain('docker');
+  });
+
+  it('tolerates schema-invalid package.json content without failing the scan', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-'));
+    tempDirectories.push(root);
+
+    const malformedProject = path.join(root, 'malformed-project');
+    await mkdir(malformedProject, { recursive: true });
+    await writeFile(
+      path.join(malformedProject, 'package.json'),
+      JSON.stringify({ name: ['unexpected-array'], dependencies: 'invalid-shape' }),
+      'utf8'
+    );
+
+    const scanner = new ProjectScannerService();
+    const summary = await scanner.scan([root]);
+
+    expect(summary.records).toHaveLength(1);
+    expect(summary.records[0]).toMatchObject({
+      name: 'malformed-project',
+      framework: 'unknown'
+    });
+  });
+
+  it('returns an empty summary for missing roots without throwing', async () => {
+    const missingRoot = path.join(os.tmpdir(), `openpkg-project-missing-${Date.now()}`);
+    const scanner = new ProjectScannerService();
+    const summary = await scanner.scan([missingRoot]);
+
+    expect(summary.roots).toEqual([missingRoot]);
+    expect(summary.records).toEqual([]);
   });
 });

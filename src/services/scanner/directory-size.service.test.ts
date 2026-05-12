@@ -39,4 +39,25 @@ describe('DirectorySizeService', () => {
 
     expect(size).toBe(0);
   });
+
+  it('returns zero for a missing directory path', async () => {
+    const missingDirectory = path.join(os.tmpdir(), `openpkg-size-missing-${Date.now()}`);
+
+    const service = new DirectorySizeService();
+    const size = await service.getDirectorySize(missingDirectory);
+
+    expect(size).toBe(0);
+  });
+
+  it('returns zero when the target path is a file instead of a directory', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-size-'));
+    tempDirectories.push(root);
+    const targetFile = path.join(root, 'single-file.txt');
+    await writeFile(targetFile, '123456');
+
+    const service = new DirectorySizeService();
+    const size = await service.getDirectorySize(targetFile);
+
+    expect(size).toBe(0);
+  });
 });

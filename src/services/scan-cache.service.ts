@@ -4,6 +4,7 @@ import path from 'node:path';
 import type {
   CleanupTargetRecord,
   EnvironmentHealthSnapshot,
+  EnvironmentUpdatesSnapshot,
   ProjectRecord,
   ScanSummary
 } from '../types/index.js';
@@ -25,10 +26,15 @@ type PersistedCache = {
       updatedAt: string;
       snapshot: EnvironmentHealthSnapshot;
     };
+    updates?: {
+      updatedAt: string;
+      snapshot: EnvironmentUpdatesSnapshot;
+    };
   };
 };
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const UPDATE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 export class ScanCacheService {
   readonly #cachePath = path.join(os.homedir(), '.openpkg', 'cache.json');
@@ -84,6 +90,21 @@ export class ScanCacheService {
   async setHealthSnapshot(snapshot: EnvironmentHealthSnapshot) {
     const cache = await this.#readCache();
     cache.scans.health = {
+      updatedAt: new Date().toISOString(),
+      snapshot
+    };
+    await this.#writeCache(cache);
+  }
+
+  async getEnvironmentUpdatesSnapshot(maxAgeMs = UPDATE_CACHE_TTL_MS) {
+    const cache = await this.#readCache();
+    const cached = cache.scans.updates;
+    return cached && this.#isFresh(cached.updatedAt, maxAgeMs) ? cached.snapshot : undefined;
+  }
+
+  async setEnvironmentUpdatesSnapshot(snapshot: EnvironmentUpdatesSnapshot) {
+    const cache = await this.#readCache();
+    cache.scans.updates = {
       updatedAt: new Date().toISOString(),
       snapshot
     };

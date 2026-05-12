@@ -23,7 +23,16 @@ const commandContext = {
 describe('createBuiltInCommands', () => {
   it('returns the expected built-in command set', () => {
     const names = createBuiltInCommands().map((command) => command.name);
-    expect(names).toEqual(['scan', 'doctor', 'projects', 'cache', 'cleanup', 'help', 'settings']);
+    expect(names).toEqual([
+      'scan',
+      'doctor',
+      'updates',
+      'projects',
+      'cache',
+      'cleanup',
+      'help',
+      'settings'
+    ]);
   });
 
   it('resolves scan command scope and cache policy', async () => {
@@ -41,6 +50,7 @@ describe('createBuiltInCommands', () => {
       triggerCleanupScan: true,
       triggerDoctorScan: true,
       cachePolicy: 'force',
+      updateFetchPolicy: 'force',
       scope: 'machine'
     });
   });
@@ -133,10 +143,19 @@ describe('createBuiltInCommands', () => {
   it('returns help and settings command payloads', async () => {
     const help = getCommand('help');
     const settings = getCommand('settings');
+    const updates = getCommand('updates');
 
-    const [helpResult, settingsResult] = await Promise.all([
+    const [helpResult, settingsResult, updatesResult] = await Promise.all([
       help.execute(baseParsed({ name: 'help', raw: '/help' }), commandContext),
-      settings.execute(baseParsed({ name: 'settings', raw: '/settings' }), commandContext)
+      settings.execute(baseParsed({ name: 'settings', raw: '/settings' }), commandContext),
+      updates.execute(
+        baseParsed({
+          name: 'updates',
+          raw: '/updates --force',
+          options: { force: true }
+        }),
+        commandContext
+      )
     ]);
 
     expect(helpResult).toMatchObject({
@@ -145,6 +164,45 @@ describe('createBuiltInCommands', () => {
     });
     expect(settingsResult).toMatchObject({
       targetSection: 'settings'
+    });
+    expect(updatesResult).toMatchObject({
+      targetSection: 'doctor',
+      triggerDoctorScan: true,
+      updatesOnly: true,
+      updateFetchPolicy: 'force'
+    });
+  });
+
+  it('uses cache-only update policy when --cached is provided to doctor or updates', async () => {
+    const doctor = getCommand('doctor');
+    const updates = getCommand('updates');
+
+    const [doctorResult, updatesResult] = await Promise.all([
+      doctor.execute(
+        baseParsed({
+          name: 'doctor',
+          raw: '/doctor --cached',
+          options: { cached: true }
+        }),
+        commandContext
+      ),
+      updates.execute(
+        baseParsed({
+          name: 'updates',
+          raw: '/updates --cached',
+          options: { cached: true }
+        }),
+        commandContext
+      )
+    ]);
+
+    expect(doctorResult).toMatchObject({
+      cachePolicy: 'prefer-cache',
+      updateFetchPolicy: 'cache-only'
+    });
+    expect(updatesResult).toMatchObject({
+      cachePolicy: 'prefer-cache',
+      updateFetchPolicy: 'cache-only'
     });
   });
 });

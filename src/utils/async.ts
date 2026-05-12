@@ -1,7 +1,10 @@
 export const mapWithConcurrency = async <TValue, TResult>(
   values: TValue[],
   concurrency: number,
-  mapper: (value: TValue, index: number) => Promise<TResult>
+  mapper: (value: TValue, index: number) => Promise<TResult>,
+  options: {
+    onResolved?: (result: TResult, index: number) => void | Promise<void>;
+  } = {}
 ): Promise<TResult[]> => {
   const results = new Array<TResult>(values.length);
   let currentIndex = 0;
@@ -11,6 +14,7 @@ export const mapWithConcurrency = async <TValue, TResult>(
       const index = currentIndex;
       currentIndex += 1;
       results[index] = await mapper(values[index]!, index);
+      await options.onResolved?.(results[index], index);
     }
   };
 

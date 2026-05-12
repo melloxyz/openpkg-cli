@@ -37,6 +37,24 @@ export type CommandCachePolicy = 'prefer-cache' | 'force';
 
 export type CleanupDeletionMode = 'safe' | 'selected';
 
+export type UpdateFetchPolicy = 'auto' | 'cache-only' | 'force';
+
+export type EnvironmentToolName =
+  | 'npm'
+  | 'pnpm'
+  | 'yarn'
+  | 'bun'
+  | 'node'
+  | 'python'
+  | 'docker'
+  | 'go'
+  | 'rustc'
+  | 'java';
+
+export type EnvironmentToolUpdateStatus = 'current' | 'outdated' | 'unknown' | 'offline';
+
+export type EnvironmentToolUpdateSource = 'npm' | 'nodejs' | 'github';
+
 export type CommandExecutionContext = {
   cwd: string;
   homeDir: string;
@@ -49,8 +67,10 @@ export type CommandResult = {
   triggerCleanupScan?: boolean;
   triggerDoctorScan?: boolean;
   cachePolicy?: CommandCachePolicy;
+  updateFetchPolicy?: UpdateFetchPolicy;
   cleanupDeletionMode?: CleanupDeletionMode;
   cleanupDryRun?: boolean;
+  updatesOnly?: boolean;
   showHelp?: boolean;
   scope?: ScanScope;
 };
@@ -106,7 +126,32 @@ export type ScanProgress = {
   currentPath?: string;
   visited: number;
   matched: number;
+  total: number;
   phase: 'discovering' | 'sizing' | 'done';
+};
+
+export type ScanOptions = {
+  onProgress?: (progress: ScanProgress) => void;
+};
+
+export type CleanupExecutionProgress = {
+  currentPath?: string;
+  current: number;
+  total: number;
+  phase: 'validating' | 'deleting' | 'done';
+};
+
+export type CleanupExecutionOptions = {
+  onProgress?: (progress: CleanupExecutionProgress) => void;
+};
+
+export type CleanupExecutionSummary = {
+  requestedCount: number;
+  plannedCount: number;
+  deletedCount: number;
+  failedCount: number;
+  reclaimedBytes: number;
+  dryRun: boolean;
 };
 
 export type ScanSummary<TRecord> = {
@@ -122,13 +167,27 @@ export type EnvironmentHealthSnapshot = {
   platform: NodeJS.Platform;
   packageManagers: Partial<Record<Exclude<PackageManager, 'unknown'>, boolean>>;
   toolVersions: Record<string, string>;
+  updatesCheckedAt?: string;
   toolAvailability: Array<{
-    name: string;
+    name: EnvironmentToolName;
     available: boolean;
     version?: string;
+    latestVersion?: string;
+    updateStatus?: EnvironmentToolUpdateStatus;
+    updateSource?: EnvironmentToolUpdateSource;
     category: 'package-manager' | 'runtime' | 'container';
   }>;
   recommendations: string[];
+};
+
+export type EnvironmentUpdatesSnapshot = {
+  checkedAt: string;
+  tools: Array<{
+    name: Extract<EnvironmentToolName, 'npm' | 'pnpm' | 'yarn' | 'bun' | 'node'>;
+    latestVersion?: string;
+    source: EnvironmentToolUpdateSource;
+    fetchState: 'ok' | 'offline' | 'unknown';
+  }>;
 };
 
 export type CleanupExecutionResult = {
@@ -140,6 +199,7 @@ export type CleanupExecutionResult = {
   }>;
   reclaimedBytes: number;
   dryRun?: boolean;
+  summary: CleanupExecutionSummary;
 };
 
 export type DashboardDataSnapshot = {
@@ -152,6 +212,7 @@ export type DashboardDataSnapshot = {
   statusLine: string;
   helpLines?: string[];
   cleanupExecution?: CleanupExecutionResult;
+  updatesOnly?: boolean;
 };
 
 export type OperationProgress = {

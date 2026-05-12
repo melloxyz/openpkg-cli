@@ -72,4 +72,13 @@ describe('CleanupScannerService', () => {
       true
     );
   });
+
+  it('returns an empty summary for missing roots without throwing', async () => {
+    const missingRoot = path.join(os.tmpdir(), `openpkg-cleanup-missing-${Date.now()}`);
+    const scanner = new CleanupScannerService();
+    const summary = await scanner.scan([missingRoot]);
+
+    expect(summary.roots).toEqual([missingRoot]);
+    expect(summary.records).toEqual([]);
+  });
 });

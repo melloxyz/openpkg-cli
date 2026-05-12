@@ -43,6 +43,14 @@ describe('CleanupExecutorService', () => {
     expect(result.deleted).toHaveLength(1);
     expect(result.failed).toHaveLength(0);
     expect(result.reclaimedBytes).toBe(128);
+    expect(result.summary).toMatchObject({
+      requestedCount: 1,
+      plannedCount: 1,
+      deletedCount: 1,
+      failedCount: 0,
+      reclaimedBytes: 128,
+      dryRun: false
+    });
   });
 
   it('previews supported cleanup directories without deleting them', async () => {
@@ -57,6 +65,14 @@ describe('CleanupExecutorService', () => {
     expect(result.deleted).toHaveLength(0);
     expect(result.failed).toHaveLength(0);
     expect(result.reclaimedBytes).toBe(128);
+    expect(result.summary).toMatchObject({
+      requestedCount: 1,
+      plannedCount: 1,
+      deletedCount: 0,
+      failedCount: 0,
+      reclaimedBytes: 128,
+      dryRun: true
+    });
   });
 
   it('refuses to delete unexpected directories', async () => {
@@ -131,5 +147,28 @@ describe('CleanupExecutorService', () => {
     expect(result.deleted).toHaveLength(0);
     expect(result.failed).toHaveLength(1);
     expect(result.failed[0]?.reason).toContain('not a directory');
+  });
+
+  it('reports per-target progress for previews and deletions', async () => {
+    const service = new CleanupExecutorService();
+    const previewTarget = await createCleanupTarget('dist');
+    const deleteTarget = await createCleanupTarget('build');
+    const previewPhases: string[] = [];
+    const deletePhases: string[] = [];
+
+    await service.previewTargets([previewTarget], {
+      onProgress: (progress) => {
+        previewPhases.push(progress.phase);
+      }
+    });
+
+    await service.deleteTargets([deleteTarget], {
+      onProgress: (progress) => {
+        deletePhases.push(progress.phase);
+      }
+    });
+
+    expect(previewPhases).toEqual(['validating', 'done']);
+    expect(deletePhases).toEqual(['deleting', 'done']);
   });
 });

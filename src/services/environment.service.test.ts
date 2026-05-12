@@ -47,6 +47,7 @@ describe('EnvironmentService', () => {
       bun: false
     });
     expect(snapshot.toolAvailability.some((tool) => tool.name === 'npm' && tool.available)).toBe(true);
+    expect(snapshot.toolAvailability.some((tool) => tool.name === 'node' && tool.available)).toBe(true);
     expect(snapshot.toolAvailability.some((tool) => tool.name === 'docker' && !tool.available)).toBe(
       true
     );
@@ -66,8 +67,10 @@ describe('EnvironmentService', () => {
     const service = new EnvironmentService();
     const snapshot = await service.getHealthSnapshot();
     const npm = snapshot.toolAvailability.find((tool) => tool.name === 'npm');
+    const node = snapshot.toolAvailability.find((tool) => tool.name === 'node');
 
     expect(npm?.available).toBe(false);
-    expect(snapshot.toolVersions.npm).toBe('unknown-version');
+    expect(node?.available).toBe(true);
+    expect(snapshot.toolVersions.npm).toBeUndefined();
   });
 });

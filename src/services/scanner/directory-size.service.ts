@@ -3,7 +3,7 @@ import path from 'node:path';
 import { Worker } from 'node:worker_threads';
 
 const getDirectorySizeInline = async (targetPath: string): Promise<number> => {
-  const entries = await fs.readdir(targetPath, { withFileTypes: true });
+  const entries = await fs.readdir(targetPath, { withFileTypes: true }).catch(() => []);
   let total = 0;
 
   for (const entry of entries) {
@@ -19,8 +19,8 @@ const getDirectorySizeInline = async (targetPath: string): Promise<number> => {
     }
 
     if (entry.isFile()) {
-      const stats = await fs.stat(entryPath);
-      total += stats.size;
+      const stats = await fs.stat(entryPath).catch(() => undefined);
+      total += stats?.size ?? 0;
     }
   }
 

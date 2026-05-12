@@ -17,7 +17,7 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
     ''
   ];
 
-  if (snapshot.health) {
+  if (snapshot.health && !snapshot.updatesOnly) {
     lines.push(
       chalk.hex(theme.text)(`Node: ${snapshot.health.nodeVersion}`),
       chalk.hex(theme.text)(
@@ -27,6 +27,22 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
       ),
       ''
     );
+  }
+
+  if (snapshot.health) {
+    const updateTools = snapshot.health.toolAvailability.filter((tool) => tool.updateStatus);
+
+    if (updateTools.length > 0) {
+      lines.push(
+        chalk.hex(theme.accent)('Updates'),
+        ...updateTools.map((tool) => {
+          const current = tool.version ?? 'n/a';
+          const latest = tool.latestVersion ?? 'n/a';
+          return `• ${tool.name}  ${current} -> ${latest}  ${tool.updateStatus}`;
+        }),
+        ''
+      );
+    }
   }
 
   if (snapshot.projects?.length) {
@@ -58,22 +74,25 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
   }
 
   if (snapshot.cleanupExecution) {
-    const plannedCount = snapshot.cleanupExecution.planned?.length ?? 0;
-    const deletedCount = snapshot.cleanupExecution.deleted.length;
-    const failedCount = snapshot.cleanupExecution.failed.length;
+    const { summary } = snapshot.cleanupExecution;
     lines.push(
       chalk.hex(theme.accent)(
         snapshot.cleanupExecution.dryRun ? 'Cleanup Dry Run' : 'Cleanup Summary'
       ),
+      `Requested: ${summary.requestedCount}  Planned: ${summary.plannedCount}  Deleted: ${summary.deletedCount}  Failures: ${summary.failedCount}`,
       snapshot.cleanupExecution.dryRun
-        ? `Planned: ${plannedCount} target(s), ${formatBytes(
-            snapshot.cleanupExecution.reclaimedBytes
-          )} estimated reclaimable.`
-        : `Deleted: ${deletedCount} target(s), ${formatBytes(
-            snapshot.cleanupExecution.reclaimedBytes
-          )} reclaimed.`,
-      `Failures: ${failedCount}`
+        ? `Estimated reclaimable: ${formatBytes(summary.reclaimedBytes)}`
+        : `Reclaimed: ${formatBytes(summary.reclaimedBytes)}`
     );
+
+    if (summary.failedCount > 0) {
+      lines.push(
+        ...snapshot.cleanupExecution.failed
+          .slice(0, 5)
+          .map((failure) => `• ${failure.target.kind}  ${failure.reason}`)
+      );
+    }
+
     lines.push('');
   }
 

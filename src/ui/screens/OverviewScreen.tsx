@@ -79,9 +79,10 @@ export const OverviewScreen = ({
                 '/projects  discover local repositories',
                 '/cleanup  inspect cleanup candidates',
                 '/cleanup --dry-run  preview safe cleanup',
-                '/doctor  check tools and runtimes'
+                '/doctor  check tools and runtimes',
+                '/updates  inspect available tool updates'
               ]
-          ).map((line) => (
+            ).map((line) => (
             <Text key={line} color={theme.muted}>
               {line}
             </Text>

@@ -1,6 +1,10 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import type { CleanupExecutionResult, CleanupTargetRecord } from '../types/index.js';
+import type {
+  CleanupExecutionOptions,
+  CleanupExecutionResult,
+  CleanupTargetRecord
+} from '../types/index.js';
 
 const ALLOWED_DIRECTORY_NAMES = new Set([
   'node_modules',
@@ -38,12 +42,21 @@ const validateCleanupTarget = async (target: CleanupTargetRecord): Promise<strin
 };
 
 export class CleanupExecutorService {
-  async previewTargets(targets: CleanupTargetRecord[]): Promise<CleanupExecutionResult> {
+  async previewTargets(
+    targets: CleanupTargetRecord[],
+    options: CleanupExecutionOptions = {}
+  ): Promise<CleanupExecutionResult> {
     const planned: CleanupTargetRecord[] = [];
     const failed: CleanupExecutionResult['failed'] = [];
     let reclaimedBytes = 0;
 
-    for (const target of targets) {
+    for (const [index, target] of targets.entries()) {
+      options.onProgress?.({
+        currentPath: target.path,
+        current: index + 1,
+        total: Math.max(1, targets.length),
+        phase: 'validating'
+      });
       const validationError = await validateCleanupTarget(target);
 
       if (validationError) {
@@ -58,21 +71,44 @@ export class CleanupExecutorService {
       reclaimedBytes += target.sizeInBytes ?? 0;
     }
 
+    options.onProgress?.({
+      current: targets.length,
+      total: Math.max(1, targets.length),
+      phase: 'done'
+    });
+
     return {
       deleted: [],
       planned,
       failed,
       reclaimedBytes,
-      dryRun: true
+      dryRun: true,
+      summary: {
+        requestedCount: targets.length,
+        plannedCount: planned.length,
+        deletedCount: 0,
+        failedCount: failed.length,
+        reclaimedBytes,
+        dryRun: true
+      }
     };
   }
 
-  async deleteTargets(targets: CleanupTargetRecord[]): Promise<CleanupExecutionResult> {
+  async deleteTargets(
+    targets: CleanupTargetRecord[],
+    options: CleanupExecutionOptions = {}
+  ): Promise<CleanupExecutionResult> {
     const deleted: CleanupTargetRecord[] = [];
     const failed: CleanupExecutionResult['failed'] = [];
     let reclaimedBytes = 0;
 
-    for (const target of targets) {
+    for (const [index, target] of targets.entries()) {
+      options.onProgress?.({
+        currentPath: target.path,
+        current: index + 1,
+        total: Math.max(1, targets.length),
+        phase: 'deleting'
+      });
       const validationError = await validateCleanupTarget(target);
 
       if (validationError) {
@@ -100,10 +136,24 @@ export class CleanupExecutorService {
       }
     }
 
+    options.onProgress?.({
+      current: targets.length,
+      total: Math.max(1, targets.length),
+      phase: 'done'
+    });
+
     return {
       deleted,
       failed,
-      reclaimedBytes
+      reclaimedBytes,
+      summary: {
+        requestedCount: targets.length,
+        plannedCount: deleted.length,
+        deletedCount: deleted.length,
+        failedCount: failed.length,
+        reclaimedBytes,
+        dryRun: false
+      }
     };
   }
 }

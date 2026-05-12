@@ -9,7 +9,7 @@ import {
 } from '../../shared/schemas/project-manifest.schema.js';
 import { PackageManagerDetectorService } from '../package-manager-detector.service.js';
 import { DirectorySizeService } from './directory-size.service.js';
-import type { ProjectFramework, ProjectRecord, ScanSummary } from '../../types/index.js';
+import type { ProjectFramework, ProjectRecord, ScanOptions, ScanSummary } from '../../types/index.js';
 import { mapWithConcurrency } from '../../utils/async.js';
 
 const detectFramework = (
@@ -71,6 +71,29 @@ const getProjectActivityStatus = (
   return 'inactive';
 };
 
+const getLatestProjectActivity = async (projectPath: string, projectFiles: Set<string>) => {
+  const candidatePaths = [
+    ...projectFiles,
+    'package.json',
+    'package-lock.json',
+    'pnpm-lock.yaml',
+    'yarn.lock',
+    'bun.lock',
+    'bun.lockb'
+  ].map((relativePath) => path.join(projectPath, relativePath));
+
+  const timestamps = await Promise.all(
+    [...new Set(candidatePaths)].map(async (candidatePath) => {
+      const stats = await fs.stat(candidatePath).catch(() => undefined);
+      return stats?.mtime.toISOString();
+    })
+  );
+
+  return timestamps
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => right.localeCompare(left))[0];
+};
+
 const getProjectSignals = (projectFiles: Set<string>) => {
   const signals: string[] = [];
 
@@ -95,21 +118,30 @@ export class ProjectScannerService {
   readonly #packageManagerDetector = new PackageManagerDetectorService();
   readonly #sizeService = new DirectorySizeService();
 
-  async scan(roots: string[]): Promise<ScanSummary<ProjectRecord>> {
+  async scan(roots: string[], options: ScanOptions = {}): Promise<ScanSummary<ProjectRecord>> {
     const startedAt = new Date().toISOString();
-    const manifestPaths = (
-      await Promise.all(
-        roots.map(async (root) =>
-          fastGlob(COMMON_PROJECT_FILENAMES, {
-            cwd: root,
-            absolute: true,
-            suppressErrors: true,
-            ignore: DEFAULT_SCAN_EXCLUDES,
-            deep: 5
-          })
-        )
-      )
-    ).flat();
+    const manifestPaths: string[] = [];
+
+    for (const [index, root] of roots.entries()) {
+      const discoveredPaths = await fastGlob(COMMON_PROJECT_FILENAMES, {
+        cwd: root,
+        absolute: true,
+        suppressErrors: true,
+        ignore: DEFAULT_SCAN_EXCLUDES,
+        deep: 5,
+        followSymbolicLinks: false,
+        throwErrorOnBrokenSymbolicLink: false
+      });
+
+      manifestPaths.push(...discoveredPaths);
+      options.onProgress?.({
+        currentPath: root,
+        visited: index + 1,
+        matched: manifestPaths.length,
+        total: Math.max(1, roots.length),
+        phase: 'discovering'
+      });
+    }
 
     const projectFileMap = new Map<string, Set<string>>();
 
@@ -120,6 +152,7 @@ export class ProjectScannerService {
       projectFileMap.set(projectPath, projectFiles);
     }
 
+    let processedProjects = 0;
     const records = await mapWithConcurrency(
       [...projectFileMap.entries()],
       Math.min(6, Math.max(2, os.cpus().length)),
@@ -129,11 +162,15 @@ export class ProjectScannerService {
           .readFile(packageJsonPath, 'utf8')
           .then(content => JSON.parse(content) as unknown)
           .catch(() => undefined);
-        const manifest = parsedManifest ? projectManifestSchema.parse(parsedManifest) : undefined;
-        const stats = await fs.stat(projectPath).catch(() => undefined);
+        const manifestResult = parsedManifest
+          ? projectManifestSchema.safeParse(parsedManifest)
+          : undefined;
+        const manifest = manifestResult?.success ? manifestResult.data : undefined;
         const packageManager = await this.#packageManagerDetector.detect(projectPath, manifest);
         const sizeInBytes = await this.#sizeService.getDirectorySize(projectPath).catch(() => 0);
-        const lastActivityAt = stats?.mtime.toISOString();
+        const stats = await fs.stat(projectPath).catch(() => undefined);
+        const lastActivityAt =
+          (await getLatestProjectActivity(projectPath, projectFiles)) ?? stats?.mtime.toISOString();
         const signals = getProjectSignals(projectFiles);
 
         return {
@@ -147,10 +184,28 @@ export class ProjectScannerService {
           ...(signals.length > 0 ? { signals } : {}),
           ...(lastActivityAt ? { lastActivityAt } : {})
         } satisfies ProjectRecord;
+      },
+      {
+        onResolved: async (record) => {
+          processedProjects += 1;
+          options.onProgress?.({
+            currentPath: record.path,
+            visited: processedProjects,
+            matched: processedProjects,
+            total: Math.max(1, projectFileMap.size),
+            phase: 'sizing'
+          });
+        }
       }
     );
 
     const completedAt = new Date().toISOString();
+    options.onProgress?.({
+      visited: records.length,
+      matched: records.length,
+      total: Math.max(1, records.length),
+      phase: 'done'
+    });
 
     return {
       roots,

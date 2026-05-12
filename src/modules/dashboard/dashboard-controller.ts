@@ -5,6 +5,7 @@ import type {
   CommandResult,
   DashboardDataSnapshot,
   OperationProgress,
+  ScanProgress,
   ScanScope
 } from '../../types/index.js';
 import { createAppContainer } from '../../core/container.js';
@@ -16,6 +17,15 @@ type ProgressListener = (progress: OperationProgress | undefined) => void;
 type RunOptions = {
   onProgress?: ProgressListener;
   scopeOverride?: ScanScope;
+};
+
+const formatScanProgressDetail = (progress: ScanProgress) => {
+  const progressLine =
+    progress.phase === 'discovering'
+      ? `${progress.visited}/${progress.total} root(s), ${progress.matched} match(es)`
+      : `${progress.visited}/${progress.total} item(s) processed`;
+
+  return progress.currentPath ? `${progressLine} • ${progress.currentPath}` : progressLine;
 };
 
 export class DashboardController {
@@ -84,7 +94,19 @@ export class DashboardController {
       detail: `Preparing ${targets.length} target(s)`
     });
 
-    const cleanupExecution = await this.#container.cleanupExecutor.deleteTargets(targets);
+    const cleanupExecution = await this.#container.cleanupExecutor.deleteTargets(targets, {
+      onProgress: (progress) => {
+        onProgress?.({
+          label:
+            progress.phase === 'deleting'
+              ? 'Deleting selected targets'
+              : 'Finalizing cleanup execution',
+          current: progress.current,
+          total: Math.max(1, progress.total),
+          detail: progress.currentPath ?? `${progress.current}/${progress.total} target(s)`
+        });
+      }
+    });
 
     onProgress?.({
       label: 'Refreshing cleanup inventory',
@@ -176,39 +198,97 @@ export class DashboardController {
       Number(Boolean(result.cleanupDryRun)) +
       Number(Boolean(result.cleanupDeletionMode === 'safe'));
     let currentStage = 0;
+    const takeStage = () => {
+      currentStage += 1;
+      return currentStage;
+    };
 
     const pushStage = (label: string, detail?: string) => {
-      currentStage += 1;
+      const stageSlot = takeStage();
       options.onProgress?.({
         label,
-        current: currentStage,
+        current: stageSlot,
         total: Math.max(1, totalStages),
         ...(detail ? { detail } : {})
       });
     };
 
+    const forwardScanProgress = (stageSlot: number, label: string, progress: ScanProgress) => {
+      const ratio =
+        progress.total <= 0 ? 1 : Math.max(0, Math.min(progress.visited / progress.total, 1));
+      const phaseLabel =
+        progress.phase === 'discovering'
+          ? `${label}: discovering`
+          : progress.phase === 'sizing'
+            ? `${label}: sizing`
+            : label;
+
+      options.onProgress?.({
+        label: phaseLabel,
+        current: stageSlot - 1 + ratio,
+        total: Math.max(1, totalStages),
+        detail: formatScanProgressDetail(progress)
+      });
+    };
+
     if (result.triggerProjectScan) {
-      pushStage('Scanning projects', `${roots.length} root(s)`);
-      const summary = await this.#scanProjects(roots, cachePolicy);
+      const stageSlot = takeStage();
+      options.onProgress?.({
+        label: 'Scanning projects',
+        current: stageSlot - 1,
+        total: Math.max(1, totalStages),
+        detail: `${roots.length} root(s)`
+      });
+      const summary = await this.#scanProjects(roots, cachePolicy, (progress) =>
+        forwardScanProgress(stageSlot, 'Scanning projects', progress)
+      );
       projects = summary.records;
       statusLine = `${statusLine} Found ${summary.records.length} project(s).`;
     }
 
     if (result.triggerCleanupScan) {
-      pushStage('Scanning cleanup targets', `${roots.length} root(s)`);
-      const summary = await this.#scanCleanup(roots, cachePolicy);
+      const stageSlot = takeStage();
+      options.onProgress?.({
+        label: 'Scanning cleanup targets',
+        current: stageSlot - 1,
+        total: Math.max(1, totalStages),
+        detail: `${roots.length} root(s)`
+      });
+      const summary = await this.#scanCleanup(roots, cachePolicy, (progress) =>
+        forwardScanProgress(stageSlot, 'Scanning cleanup targets', progress)
+      );
       cleanupTargets = summary.records;
       statusLine = `Cleanup inventory ready with ${summary.records.length} target(s).`;
     }
 
     if (result.cleanupDryRun) {
-      pushStage('Previewing safe cleanup targets');
+      const stageSlot = takeStage();
+      options.onProgress?.({
+        label: 'Previewing safe cleanup targets',
+        current: stageSlot - 1,
+        total: Math.max(1, totalStages)
+      });
       const previewCandidates =
         cleanupTargets?.filter((target) => target.recommendation === 'safe') ??
         (await this.#scanCleanup(roots, 'force')).records.filter(
           (target) => target.recommendation === 'safe'
         );
-      cleanupExecution = await this.#container.cleanupExecutor.previewTargets(previewCandidates);
+      cleanupExecution = await this.#container.cleanupExecutor.previewTargets(previewCandidates, {
+        onProgress: (progress) => {
+          const ratio =
+            progress.total <= 0 ? 1 : Math.max(0, Math.min(progress.current / progress.total, 1));
+          options.onProgress?.({
+            label:
+              progress.phase === 'validating'
+                ? 'Previewing safe cleanup targets'
+                : 'Finalizing cleanup preview',
+            current: stageSlot - 1 + ratio,
+            total: Math.max(1, totalStages),
+            detail:
+              progress.currentPath ?? `${progress.current}/${Math.max(1, progress.total)} target(s)`
+          });
+        }
+      });
       const plannedCount = cleanupExecution.planned?.length ?? 0;
       statusLine = `Dry-run preview: ${plannedCount} safe target(s), ${formatBytes(
         cleanupExecution.reclaimedBytes
@@ -220,13 +300,33 @@ export class DashboardController {
     }
 
     if (result.cleanupDeletionMode === 'safe') {
-      pushStage('Deleting safe cleanup targets');
+      const stageSlot = takeStage();
+      options.onProgress?.({
+        label: 'Deleting safe cleanup targets',
+        current: stageSlot - 1,
+        total: Math.max(1, totalStages)
+      });
       const deletionCandidates =
         cleanupTargets?.filter((target) => target.recommendation === 'safe') ??
         (await this.#scanCleanup(roots, 'force')).records.filter(
           (target) => target.recommendation === 'safe'
         );
-      cleanupExecution = await this.#container.cleanupExecutor.deleteTargets(deletionCandidates);
+      cleanupExecution = await this.#container.cleanupExecutor.deleteTargets(deletionCandidates, {
+        onProgress: (progress) => {
+          const ratio =
+            progress.total <= 0 ? 1 : Math.max(0, Math.min(progress.current / progress.total, 1));
+          options.onProgress?.({
+            label:
+              progress.phase === 'deleting'
+                ? 'Deleting safe cleanup targets'
+                : 'Finalizing cleanup deletion',
+            current: stageSlot - 1 + ratio,
+            total: Math.max(1, totalStages),
+            detail:
+              progress.currentPath ?? `${progress.current}/${Math.max(1, progress.total)} target(s)`
+          });
+        }
+      });
       const refreshedCleanup = await this.#scanCleanup(roots, 'force');
       cleanupTargets = refreshedCleanup.records;
       statusLine = `Deleted ${cleanupExecution.deleted.length} safe target(s), reclaimed ${formatBytes(
@@ -240,10 +340,14 @@ export class DashboardController {
 
     if (result.triggerDoctorScan) {
       pushStage('Collecting diagnostics');
-      health = await this.#scanHealth(cachePolicy);
-      statusLine = `${result.message} ${
-        Object.values(health.packageManagers).filter(Boolean).length
-      } package managers detected.`;
+      health = await this.#scanHealth(cachePolicy, result.updateFetchPolicy);
+      statusLine = result.updatesOnly
+        ? `${result.message} ${
+            health.toolAvailability.filter((tool) => tool.updateStatus).length
+          } tool(s) inspected for updates.`
+        : `${result.message} ${
+            Object.values(health.packageManagers).filter(Boolean).length
+          } package managers detected.`;
     }
 
     options.onProgress?.(undefined);
@@ -256,12 +360,17 @@ export class DashboardController {
       ...(health ? { health } : {}),
       ...(result.targetSection ? { activeSection: result.targetSection } : {}),
       ...(cleanupExecution ? { cleanupExecution } : {}),
+      ...(result.updatesOnly ? { updatesOnly: true } : {}),
       ...(result.showHelp ? { helpLines: this.getHelpLines() } : {}),
       statusLine
     };
   }
 
-  async #scanProjects(roots: string[], cachePolicy: CommandResult['cachePolicy']) {
+  async #scanProjects(
+    roots: string[],
+    cachePolicy: CommandResult['cachePolicy'],
+    onProgress?: (progress: ScanProgress) => void
+  ) {
     if (cachePolicy === 'prefer-cache') {
       const cached = await this.#container.scanCache.getProjectSummary(roots);
       if (cached) {
@@ -269,12 +378,19 @@ export class DashboardController {
       }
     }
 
-    const summary = await this.#container.projectScanner.scan(roots);
+    const summary = await this.#container.projectScanner.scan(
+      roots,
+      onProgress ? { onProgress } : {}
+    );
     await this.#container.scanCache.setProjectSummary(summary);
     return summary;
   }
 
-  async #scanCleanup(roots: string[], cachePolicy: CommandResult['cachePolicy']) {
+  async #scanCleanup(
+    roots: string[],
+    cachePolicy: CommandResult['cachePolicy'],
+    onProgress?: (progress: ScanProgress) => void
+  ) {
     if (cachePolicy === 'prefer-cache') {
       const cached = await this.#container.scanCache.getCleanupSummary(roots);
       if (cached) {
@@ -282,12 +398,18 @@ export class DashboardController {
       }
     }
 
-    const summary = await this.#container.cleanupScanner.scan(roots);
+    const summary = await this.#container.cleanupScanner.scan(
+      roots,
+      onProgress ? { onProgress } : {}
+    );
     await this.#container.scanCache.setCleanupSummary(summary);
     return summary;
   }
 
-  async #scanHealth(cachePolicy: CommandResult['cachePolicy']) {
+  async #scanHealth(
+    cachePolicy: CommandResult['cachePolicy'],
+    updateFetchPolicy: CommandResult['updateFetchPolicy'] = 'auto'
+  ) {
     if (cachePolicy === 'prefer-cache') {
       const cached = await this.#container.scanCache.getHealthSnapshot();
       if (cached) {
@@ -296,8 +418,25 @@ export class DashboardController {
     }
 
     const snapshot = await this.#container.environmentService.getHealthSnapshot();
-    await this.#container.scanCache.setHealthSnapshot(snapshot);
-    return snapshot;
+    const cachedUpdates = await this.#container.scanCache.getEnvironmentUpdatesSnapshot();
+    const updates =
+      updateFetchPolicy === 'force'
+        ? await this.#container.environmentUpdatesService.getSnapshot()
+        : updateFetchPolicy === 'auto'
+          ? cachedUpdates ?? (await this.#container.environmentUpdatesService.getSnapshot())
+          : cachedUpdates;
+
+    const mergedSnapshot = this.#container.environmentUpdatesService.mergeHealthSnapshot(
+      snapshot,
+      updates
+    );
+
+    if (updates?.tools.some((tool) => tool.fetchState === 'ok')) {
+      await this.#container.scanCache.setEnvironmentUpdatesSnapshot(updates);
+    }
+
+    await this.#container.scanCache.setHealthSnapshot(mergedSnapshot);
+    return mergedSnapshot;
   }
 
   async #getRoots(scope: ScanScope = 'developer-home') {

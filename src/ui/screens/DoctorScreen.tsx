@@ -16,6 +16,10 @@ export const DoctorScreen = ({ health }: DoctorScreenProps) => (
           <Text color={theme.text}>Platform: {health.platform}</Text>
           <Text color={theme.text}>Node: {health.nodeVersion}</Text>
           <Text color={theme.text}>
+            Updates:{' '}
+            {health.updatesCheckedAt ? `checked ${new Date(health.updatesCheckedAt).toLocaleString()}` : 'not checked'}
+          </Text>
+          <Text color={theme.text}>
             Docker:{' '}
             {health.toolAvailability.some((tool) => tool.name === 'docker' && tool.available)
               ? 'available'
@@ -31,10 +35,20 @@ export const DoctorScreen = ({ health }: DoctorScreenProps) => (
           {health.toolAvailability.map((tool) => (
             <Text
               key={`${tool.category}:${tool.name}`}
-              color={tool.available ? theme.success : theme.warning}
+              color={
+                tool.updateStatus === 'outdated'
+                  ? theme.warning
+                  : tool.updateStatus === 'offline'
+                    ? theme.muted
+                    : tool.available
+                      ? theme.success
+                      : theme.warning
+              }
             >
               {tool.name.padEnd(8)} {tool.available ? 'ok' : 'missing'}{' '}
               {tool.version ?? ''}
+              {tool.latestVersion ? ` -> ${tool.latestVersion}` : ''}
+              {tool.updateStatus ? `  [${tool.updateStatus}]` : ''}
             </Text>
           ))}
         </Box>
