@@ -1,15 +1,5 @@
 <div align="center">
 
-```text
-   ____                  ____  __
-  / __ \____  ___  ____ / __ \/ /______ _
- / / / / __ \/ _ \/ __ `/ /_/ / //_/ __ `/
-/ /_/ / /_/ /  __/ /_/ / ____/ ,< / /_/ /
-\____/ .___/\___/\__, /_/   /_/|_|\__, /
-    /_/         /____/            /____/
-                 CLI
-```
-
 <img src=".openpkg/assets/openpkg-logo.png" alt="OpenPkg logo" width="520" style="margin: 25px 0 25px;" />
 
 <p align="center">
