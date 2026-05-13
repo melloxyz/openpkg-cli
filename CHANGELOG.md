@@ -32,7 +32,7 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 - [ ] Refinar filtros, ordenações e drill-downs no TUI.
 - [ ] Melhorar autocomplete de argumentos na command palette.
 - [ ] Tornar a seção "Settings" totalmente funcional e integrada.
-- [ ] Preparar templates de issue e PR para contribuições externas.
+- [x] Preparar templates de issue e PR para contribuições externas.
 - [ ] Validar fluxo completo de release com tag GitHub.
 
 ### Fase 4: Arquitetura UI, Revamp Visual e Navegação `0.4.x` (Planejado)
@@ -55,7 +55,8 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Adicionado (Added)
 
-- ...
+- Scripts de smoke para validar o binário local e a instalação do pacote com `pnpm smoke:local`, `pnpm smoke:package` e `pnpm smoke`.
+- Templates de issue e PR para padronizar contribuições externas.
 
 ### Modificado (Changed)
 

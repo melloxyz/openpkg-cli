@@ -73,9 +73,9 @@ O projeto já possui:
 - [ ] Adicionar filtros e ordenações em projetos e cleanup.
 - [ ] Refinar command palette com autocomplete de argumentos.
 - [ ] Tornar a seção "Settings" totalmente funcional e integrada.
-- [ ] Adicionar smoke tests documentados para build local e pacote instalado.
-- [ ] Validar release workflow com tag `v0.1.0` e notas extraídas do changelog.
-- [ ] Preparar templates de issue e PR para contribuições externas.
+- [x] Adicionar smoke tests documentados para build local e pacote instalado.
+- [ ] Validar release workflow com tag `vX.X.X` e notas extraídas do changelog.
+- [x] Preparar templates de issue e PR para contribuições externas.
 
 ### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação
 
