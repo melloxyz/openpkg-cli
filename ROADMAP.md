@@ -71,8 +71,8 @@ O projeto já possui:
 
 - [ ] Melhorar paginação e drill-down em terminais pequenos.
 - [ ] Adicionar filtros e ordenações em projetos e cleanup.
-- [ ] Refinar command palette com autocomplete de argumentos.
-- [ ] Tornar a seção "Settings" totalmente funcional e integrada.
+- [x] Refinar command palette com autocomplete de argumentos.
+- [x] Tornar a seção "Settings" totalmente funcional e integrada.
 - [x] Adicionar smoke tests documentados para build local e pacote instalado.
 - [ ] Validar release workflow com tag `vX.X.X` e notas extraídas do changelog.
 - [x] Preparar templates de issue e PR para contribuições externas.

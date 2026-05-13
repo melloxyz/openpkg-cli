@@ -11,6 +11,7 @@ import type {
   NavigationSection,
   OperationProgress,
   ProjectRecord,
+  SettingsSnapshot,
   ScanScope
 } from '../types/index.js';
 import { useCommandSuggestions } from '../hooks/useCommandInput.js';
@@ -24,6 +25,7 @@ import { ProjectsScreen } from '../ui/screens/ProjectsScreen.js';
 import { SettingsScreen } from '../ui/screens/SettingsScreen.js';
 
 const sectionOrder = NAVIGATION_ITEMS.map((item) => item.key);
+const scanScopes: ScanScope[] = ['workspace', 'developer-home', 'machine'];
 const cacheKinds = new Set(['.pnpm-store', '.npm', '.turbo', '.next', 'dist', 'build']);
 const controller = new DashboardController();
 
@@ -57,6 +59,7 @@ export const OpenPkgApp = () => {
   const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [cleanupTargets, setCleanupTargets] = useState<CleanupTargetRecord[]>([]);
   const [health, setHealth] = useState<EnvironmentHealthSnapshot>();
+  const [settingsSnapshot, setSettingsSnapshot] = useState<SettingsSnapshot>();
   const [helpLines, setHelpLines] = useState<string[]>(controller.getHelpLines());
   const [projectCursor, setProjectCursor] = useState(0);
   const [cleanupCursor, setCleanupCursor] = useState(0);
@@ -117,6 +120,10 @@ export const OpenPkgApp = () => {
     if (snapshot.helpLines) {
       setHelpLines(snapshot.helpLines);
     }
+
+    if (snapshot.settings) {
+      setSettingsSnapshot(snapshot.settings);
+    }
   };
 
   const executeCommand = async (value: string) => {
@@ -124,7 +131,8 @@ export const OpenPkgApp = () => {
 
     try {
       const snapshot = await controller.runCommand(value, {
-        onProgress: setOperationProgress
+        onProgress: setOperationProgress,
+        scopeOverride: scope
       });
       applySnapshot(snapshot);
     } catch (error) {
@@ -219,6 +227,29 @@ export const OpenPkgApp = () => {
   const selectAllCleanupTargets = () => {
     setSelectedCleanupIds(visibleCleanupTargets.map((target) => target.id));
     setStatusLine(`Selected ${visibleCleanupTargets.length} cleanup target(s).`);
+  };
+
+  const changeSettingsScope = async (direction: 1 | -1) => {
+    const currentIndex = scanScopes.indexOf(scope);
+    const nextIndex =
+      (Math.max(0, currentIndex) + direction + scanScopes.length) % scanScopes.length;
+    const nextScope = scanScopes[nextIndex] ?? 'developer-home';
+
+    setScope(nextScope);
+    setStatusLine(`Default command scope set to ${nextScope}.`);
+    setIsBusy(true);
+
+    try {
+      const snapshot = await controller.refreshSection('settings', nextScope);
+      applySnapshot({
+        ...snapshot,
+        statusLine: `Default command scope set to ${nextScope}.`
+      });
+    } catch (error) {
+      setStatusLine(error instanceof Error ? error.message : 'Settings refresh failed unexpectedly.');
+    } finally {
+      setIsBusy(false);
+    }
   };
 
   const armDeletion = () => {
@@ -345,7 +376,11 @@ export const OpenPkgApp = () => {
       if (key.tab) {
         const suggestion = suggestions[commandSuggestionIndex];
         if (suggestion) {
-          setCommandInput(`/${suggestion.definition.name}`);
+          setCommandInput((current) => {
+            const prefix = current.slice(0, suggestion.rangeStart);
+            const suffix = current.slice(suggestion.rangeEnd);
+            return `${prefix}${suggestion.insertText}${suffix}`;
+          });
           setCommandSuggestionIndex(0);
         }
         return;
@@ -354,8 +389,8 @@ export const OpenPkgApp = () => {
       if (key.return) {
         const suggestion = suggestions[commandSuggestionIndex];
         const commandToRun =
-          commandInput.trim() === '/' && suggestion
-            ? `/${suggestion.definition.name}`
+          commandInput.trim() === '/' && suggestion?.kind === 'command'
+            ? suggestion.insertText
             : commandInput;
         void executeCommand(commandToRun);
         return;
@@ -432,6 +467,16 @@ export const OpenPkgApp = () => {
         return;
       }
 
+      if (activeSection === 'settings' && input === '[') {
+        void changeSettingsScope(-1);
+        return;
+      }
+
+      if (activeSection === 'settings' && input === ']') {
+        void changeSettingsScope(1);
+        return;
+      }
+
       if ((activeSection === 'cleanup' || activeSection === 'cache') && input === ' ') {
         toggleCleanupSelection();
         return;
@@ -503,7 +548,18 @@ export const OpenPkgApp = () => {
       case 'doctor':
         return <DoctorScreen health={health} />;
       case 'settings':
-        return <SettingsScreen />;
+        return (
+          <SettingsScreen
+            snapshot={settingsSnapshot}
+            statusLine={statusLine}
+            currentScope={scope}
+            roots={roots}
+            helpLines={helpLines}
+            projectCount={projects.length}
+            cleanupCount={cleanupTargets.length}
+            healthLoaded={Boolean(health)}
+          />
+        );
       case 'overview':
       default:
         return (

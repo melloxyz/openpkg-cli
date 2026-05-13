@@ -60,6 +60,17 @@ export type CommandExecutionContext = {
   homeDir: string;
 };
 
+export type CommandCompletionEntry = {
+  kind: 'argument' | 'flag';
+  value: string;
+  description: string;
+  values?: string[];
+};
+
+export type CommandCompletion = {
+  entries: CommandCompletionEntry[];
+};
+
 export type CommandResult = {
   message: string;
   targetSection?: NavigationSection;
@@ -81,6 +92,7 @@ export type CommandDefinition = {
   aliases?: string[];
   usage?: string;
   examples?: string[];
+  completion?: CommandCompletion;
   execute: (
     args: ParsedCommand,
     context: CommandExecutionContext
@@ -99,6 +111,18 @@ export type CommandMatch = {
   score: number;
   definition: CommandDefinition;
   matchedBy: 'name' | 'alias' | 'fuzzy';
+};
+
+export type CommandPaletteSuggestion = {
+  kind: 'command' | 'argument' | 'flag';
+  label: string;
+  detail?: string;
+  insertText: string;
+  rangeStart: number;
+  rangeEnd: number;
+  commandName?: string;
+  usage?: string;
+  example?: string;
 };
 
 export type ProjectRecord = {
@@ -213,6 +237,23 @@ export type DashboardDataSnapshot = {
   helpLines?: string[];
   cleanupExecution?: CleanupExecutionResult;
   updatesOnly?: boolean;
+  settings?: SettingsSnapshot;
+};
+
+export type SettingsSnapshot = {
+  scope: ScanScope;
+  roots: string[];
+  availableCommands: Array<{
+    name: string;
+    description: string;
+    aliases: string[];
+    usage?: string;
+  }>;
+  cacheState: {
+    projectsLoaded: number;
+    cleanupLoaded: number;
+    healthLoaded: boolean;
+  };
 };
 
 export type OperationProgress = {

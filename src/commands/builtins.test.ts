@@ -35,6 +35,26 @@ describe('createBuiltInCommands', () => {
     ]);
   });
 
+  it('publishes completion hints for scope and flags', () => {
+    const scan = getCommand('scan');
+    const cleanup = getCommand('cleanup');
+
+    expect(scan.completion?.entries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'argument', value: 'workspace' }),
+        expect.objectContaining({ kind: 'flag', value: '--scope' }),
+        expect.objectContaining({ kind: 'flag', value: '--cached' })
+      ])
+    );
+    expect(cleanup.completion?.entries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'flag', value: '--dry-run' }),
+        expect.objectContaining({ kind: 'flag', value: '--delete-safe' }),
+        expect.objectContaining({ kind: 'flag', value: '--confirm' })
+      ])
+    );
+  });
+
   it('resolves scan command scope and cache policy', async () => {
     const scan = getCommand('scan');
     const result = await scan.execute(

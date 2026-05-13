@@ -53,6 +53,41 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     aliases: ['rescan', 'refresh'],
     usage: '/scan [workspace|developer-home|machine] [--cached] [--force]',
     examples: ['/scan', '/scan --scope=machine'],
+    completion: {
+      entries: [
+        {
+          kind: 'argument',
+          value: 'workspace',
+          description: 'Scan the current workspace.'
+        },
+        {
+          kind: 'argument',
+          value: 'developer-home',
+          description: 'Scan the default developer roots.'
+        },
+        {
+          kind: 'argument',
+          value: 'machine',
+          description: 'Scan every configured machine root.'
+        },
+        {
+          kind: 'flag',
+          value: '--scope',
+          description: 'Set the scan scope.',
+          values: ['workspace', 'developer-home', 'machine']
+        },
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Prefer cached scan results.'
+        },
+        {
+          kind: 'flag',
+          value: '--force',
+          description: 'Bypass caches and refresh data.'
+        }
+      ]
+    },
     execute: async (parsed) => ({
       message: 'Started a full environment scan.',
       targetSection: 'overview',
@@ -73,6 +108,20 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     description: 'Check runtime availability and environment health.',
     aliases: ['diag', 'health'],
     usage: '/doctor [--cached] [--force]',
+    completion: {
+      entries: [
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Use cached health data when available.'
+        },
+        {
+          kind: 'flag',
+          value: '--force',
+          description: 'Refresh diagnostics from live tools.'
+        }
+      ]
+    },
     execute: async (parsed) => ({
       message: 'Running environment diagnostics.',
       targetSection: 'doctor',
@@ -86,6 +135,20 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     description: 'Check available updates for global environment tools.',
     aliases: ['upgrade', 'versions'],
     usage: '/updates [--cached] [--force]',
+    completion: {
+      entries: [
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Use cached update data when available.'
+        },
+        {
+          kind: 'flag',
+          value: '--force',
+          description: 'Refresh update data from live sources.'
+        }
+      ]
+    },
     execute: async (parsed) => ({
       message: 'Checking environment updates.',
       targetSection: 'doctor',
@@ -100,6 +163,41 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     description: 'Open the project inventory and trigger project discovery.',
     aliases: ['repos', 'apps'],
     usage: '/projects [workspace|developer-home|machine] [--cached] [--force]',
+    completion: {
+      entries: [
+        {
+          kind: 'argument',
+          value: 'workspace',
+          description: 'Open the current workspace inventory.'
+        },
+        {
+          kind: 'argument',
+          value: 'developer-home',
+          description: 'Open the developer-home inventory.'
+        },
+        {
+          kind: 'argument',
+          value: 'machine',
+          description: 'Open the machine-wide inventory.'
+        },
+        {
+          kind: 'flag',
+          value: '--scope',
+          description: 'Set the project scan scope.',
+          values: ['workspace', 'developer-home', 'machine']
+        },
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Prefer cached project data.'
+        },
+        {
+          kind: 'flag',
+          value: '--force',
+          description: 'Refresh the project scan.'
+        }
+      ]
+    },
     execute: async (parsed) => ({
       message: 'Loading local projects.',
       targetSection: 'projects',
@@ -113,6 +211,41 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     description: 'Inspect cache-heavy directories and build artifacts.',
     aliases: ['caches'],
     usage: '/cache [workspace|developer-home|machine] [--cached] [--force]',
+    completion: {
+      entries: [
+        {
+          kind: 'argument',
+          value: 'workspace',
+          description: 'Inspect the current workspace cache.'
+        },
+        {
+          kind: 'argument',
+          value: 'developer-home',
+          description: 'Inspect developer-home caches.'
+        },
+        {
+          kind: 'argument',
+          value: 'machine',
+          description: 'Inspect machine-wide caches.'
+        },
+        {
+          kind: 'flag',
+          value: '--scope',
+          description: 'Set the cache inspection scope.',
+          values: ['workspace', 'developer-home', 'machine']
+        },
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Prefer cached cache data.'
+        },
+        {
+          kind: 'flag',
+          value: '--force',
+          description: 'Refresh cache inspection results.'
+        }
+      ]
+    },
     execute: async (parsed) => ({
       message: 'Scanning cache and artifact directories.',
       targetSection: 'cache',
@@ -132,6 +265,56 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       '/cleanup workspace --dry-run',
       '/cleanup --scope=machine --delete-safe --confirm'
     ],
+    completion: {
+      entries: [
+        {
+          kind: 'argument',
+          value: 'workspace',
+          description: 'Inspect cleanup candidates in the current workspace.'
+        },
+        {
+          kind: 'argument',
+          value: 'developer-home',
+          description: 'Inspect cleanup candidates in developer roots.'
+        },
+        {
+          kind: 'argument',
+          value: 'machine',
+          description: 'Inspect cleanup candidates across the machine.'
+        },
+        {
+          kind: 'flag',
+          value: '--scope',
+          description: 'Set the cleanup scope.',
+          values: ['workspace', 'developer-home', 'machine']
+        },
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Prefer cached cleanup data.'
+        },
+        {
+          kind: 'flag',
+          value: '--force',
+          description: 'Refresh cleanup candidates.'
+        },
+        {
+          kind: 'flag',
+          value: '--dry-run',
+          description: 'Preview safe cleanup targets without deleting.'
+        },
+        {
+          kind: 'flag',
+          value: '--delete-safe',
+          description: 'Delete safe cleanup targets when confirmed.'
+        },
+        {
+          kind: 'flag',
+          value: '--confirm',
+          description: 'Confirm safe cleanup deletion.'
+        }
+      ]
+    },
     execute: async (parsed) => {
       const wantsDeletion = parsed.options['delete-safe'] === true;
       const confirmed = parsed.options.confirm === true;

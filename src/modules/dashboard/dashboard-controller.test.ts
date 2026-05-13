@@ -88,6 +88,27 @@ describe('DashboardController', () => {
     expect(snapshot.activeSection).toBe('settings');
     expect(snapshot.scope).toBe('workspace');
     expect(snapshot.statusLine).toBe('Settings panel refreshed.');
+    expect(snapshot.settings?.scope).toBe('workspace');
+    expect(snapshot.settings?.availableCommands.length).toBeGreaterThan(0);
+    expect(snapshot.settings?.cacheState).toMatchObject({
+      projectsLoaded: 0,
+      cleanupLoaded: 0,
+      healthLoaded: false
+    });
+  });
+
+  it('keeps explicit command scope ahead of the UI default scope', async () => {
+    const workspaceRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-dashboard-explicit-'));
+    tempDirectories.push(workspaceRoot);
+    process.chdir(workspaceRoot);
+
+    const controller = new DashboardController();
+    const snapshot = await controller.runCommand('/projects workspace --force', {
+      scopeOverride: 'machine'
+    });
+
+    expect(snapshot.scope).toBe('workspace');
+    expect(snapshot.roots).toEqual([workspaceRoot]);
   });
 
   it('exposes formatted help lines', () => {

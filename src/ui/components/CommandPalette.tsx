@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { theme } from '../../shared/theme.js';
-import type { CommandMatch } from '../../types/index.js';
+import type { CommandPaletteSuggestion } from '../../types/index.js';
 
 type CommandPaletteProps = {
   input: string;
-  suggestions: CommandMatch[];
+  suggestions: CommandPaletteSuggestion[];
   visible: boolean;
   selectedIndex: number;
 };
@@ -35,21 +35,32 @@ export const CommandPalette = ({
       <Box marginTop={1} flexDirection="column">
         {suggestions.map((suggestion, index) => (
           <Text
-            key={suggestion.definition.name}
+            key={`${suggestion.kind}:${suggestion.commandName ?? ''}:${suggestion.label}:${suggestion.insertText}`}
             color={index === selectedIndex ? theme.accent : theme.text}
           >
-            {index === selectedIndex ? '›' : ' '} /{suggestion.definition.name}{' '}
-            <Text color={theme.muted}>{suggestion.definition.description}</Text>
+            {index === selectedIndex ? '›' : ' '} {suggestion.label}{' '}
+            <Text color={theme.muted}>{suggestion.detail}</Text>
           </Text>
         ))}
         {suggestions.length === 0 ? <Text color={theme.muted}>No matching commands.</Text> : null}
       </Box>
       {activeSuggestion ? (
         <Box marginTop={1} flexDirection="column">
-          <Text color={theme.primary}>Usage: {activeSuggestion.definition.usage ?? '/'}</Text>
-          {activeSuggestion.definition.examples?.[0] ? (
-            <Text color={theme.muted}>Example: {activeSuggestion.definition.examples[0]}</Text>
-          ) : null}
+          {activeSuggestion.kind === 'command' ? (
+            <>
+              <Text color={theme.primary}>Usage: {activeSuggestion.usage ?? '/'}</Text>
+              {activeSuggestion.example ? (
+                <Text color={theme.muted}>Example: {activeSuggestion.example}</Text>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <Text color={theme.primary}>Insert: {activeSuggestion.insertText}</Text>
+              {activeSuggestion.commandName ? (
+                <Text color={theme.muted}>Command: /{activeSuggestion.commandName}</Text>
+              ) : null}
+            </>
+          )}
         </Box>
       ) : null}
     </Box>

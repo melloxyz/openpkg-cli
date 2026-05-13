@@ -5,6 +5,7 @@ import type {
   CommandResult,
   DashboardDataSnapshot,
   OperationProgress,
+  SettingsSnapshot,
   ScanProgress,
   ScanScope
 } from '../../types/index.js';
@@ -45,6 +46,11 @@ export class DashboardController {
       ...(projects ? { projects: projects.records } : {}),
       ...(cleanupTargets ? { cleanupTargets: cleanupTargets.records } : {}),
       ...(health ? { health } : {}),
+      settings: await this.#buildSettingsSnapshot('developer-home', roots, {
+        projectsLoaded: projects?.records.length ?? 0,
+        cleanupLoaded: cleanupTargets?.records.length ?? 0,
+        healthLoaded: Boolean(health)
+      }),
       statusLine:
         projects || cleanupTargets || health
           ? 'Loaded cached snapshot. Run /scan for a live refresh.'
@@ -160,10 +166,12 @@ export class DashboardController {
     };
 
     if (section === 'settings') {
+      const roots = await this.#getRoots(scope);
       return {
-        roots: await this.#getRoots(scope),
+        roots,
         scope,
         activeSection: 'settings',
+        settings: await this.#buildSettingsSnapshot(scope, roots),
         statusLine: 'Settings panel refreshed.'
       } satisfies DashboardDataSnapshot;
     }
@@ -182,7 +190,7 @@ export class DashboardController {
     result: CommandResult,
     options: RunOptions = {}
   ): Promise<DashboardDataSnapshot> {
-    const scope = options.scopeOverride ?? result.scope ?? 'developer-home';
+    const scope = result.scope ?? options.scopeOverride ?? 'developer-home';
     const roots = await this.#getRoots(scope);
     const cachePolicy = result.cachePolicy ?? 'force';
     let statusLine = result.message;
@@ -362,6 +370,9 @@ export class DashboardController {
       ...(cleanupExecution ? { cleanupExecution } : {}),
       ...(result.updatesOnly ? { updatesOnly: true } : {}),
       ...(result.showHelp ? { helpLines: this.getHelpLines() } : {}),
+      ...(result.targetSection === 'settings'
+        ? { settings: await this.#buildSettingsSnapshot(scope, roots) }
+        : {}),
       statusLine
     };
   }
@@ -449,5 +460,35 @@ export class DashboardController {
     }
 
     return getDefaultProjectRoots(process.cwd());
+  }
+
+  async #buildSettingsSnapshot(
+    scope: ScanScope,
+    roots: string[],
+    cacheState?: SettingsSnapshot['cacheState']
+  ): Promise<SettingsSnapshot> {
+    const [projectSummary, cleanupSummary, healthSnapshot] = cacheState
+      ? [undefined, undefined, undefined]
+      : await Promise.all([
+          this.#container.scanCache.getProjectSummary(roots),
+          this.#container.scanCache.getCleanupSummary(roots),
+          this.#container.scanCache.getHealthSnapshot()
+        ]);
+
+    return {
+      scope,
+      roots,
+      availableCommands: this.#container.commandRegistry.getAll().map((command) => ({
+        name: command.name,
+        description: command.description,
+        aliases: command.aliases ?? [],
+        ...(command.usage ? { usage: command.usage } : {})
+      })),
+      cacheState: cacheState ?? {
+        projectsLoaded: projectSummary?.records.length ?? 0,
+        cleanupLoaded: cleanupSummary?.records.length ?? 0,
+        healthLoaded: Boolean(healthSnapshot)
+      }
+    };
   }
 }

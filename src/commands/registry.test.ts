@@ -81,4 +81,69 @@ describe('CommandRegistry', () => {
       }
     });
   });
+
+  it('builds palette suggestions for command names, flags, and scoped values', () => {
+    const registry = new CommandRegistry();
+    registry.register(createCommand('scan', ['rescan']));
+    registry.register(createCommand('cleanup', ['clean']));
+
+    const scanCommand = registry.getPaletteSuggestions('/sc');
+    expect(scanCommand[0]).toMatchObject({
+      kind: 'command',
+      label: '/scan',
+      insertText: '/scan'
+    });
+
+    const scanFlags = createCommand('scan', ['rescan']);
+    scanFlags.completion = {
+      entries: [
+        {
+          kind: 'flag',
+          value: '--scope',
+          description: 'Set the scan scope.',
+          values: ['workspace', 'developer-home', 'machine']
+        },
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Use cached scan data.'
+        }
+      ]
+    };
+
+    const completionRegistry = new CommandRegistry();
+    completionRegistry.register(scanFlags);
+
+    const flagSuggestions = completionRegistry.getPaletteSuggestions('/scan --sc');
+    expect(flagSuggestions[0]).toMatchObject({
+      kind: 'flag',
+      label: '--scope=',
+      insertText: '--scope='
+    });
+
+    const valueSuggestions = completionRegistry.getPaletteSuggestions('/scan --scope=de');
+    expect(valueSuggestions[0]).toMatchObject({
+      kind: 'flag',
+      label: 'developer-home',
+      insertText: '--scope=developer-home'
+    });
+  });
+
+  it('does not replace unknown argument tokens with command suggestions', () => {
+    const scanCommand = createCommand('scan');
+    scanCommand.completion = {
+      entries: [
+        {
+          kind: 'flag',
+          value: '--cached',
+          description: 'Use cached scan data.'
+        }
+      ]
+    };
+
+    const registry = new CommandRegistry();
+    registry.register(scanCommand);
+
+    expect(registry.getPaletteSuggestions('/scan --bogus')).toEqual([]);
+  });
 });
