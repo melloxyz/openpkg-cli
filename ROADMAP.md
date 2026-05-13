@@ -79,10 +79,11 @@ O projeto já possui:
 
 ### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação
 
-- [ ] Melhoria geral de UI/UX no TUI para torná-lo mais organizado.
+- [ ] Melhoria geral de UI/UX no TUI para torná-lo mais bonito e organizado.
 - [ ] Melhorar sistema de navegação e fluxos entre telas.
 - [ ] Refatoração e separação profissional dos componentes React/Ink (cuidando rigorosamente para não remover lógicas importantes).
 - [ ] Polimento de design, responsividade estendida e feedback visual.
+- [ ] Tela de informações da ferramenta, versão, ultima release, infos importantes, creditos ao autor e colaboradores.
 
 ### `1.0.0`: Estável
 
