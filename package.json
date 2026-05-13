@@ -25,6 +25,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "smoke": "tsx src/smoke/cli-smoke.ts",
+    "smoke:local": "tsx src/smoke/cli-smoke.ts local",
+    "smoke:package": "tsx src/smoke/cli-smoke.ts package",
     "prepack": "npm run build",
     "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
   },

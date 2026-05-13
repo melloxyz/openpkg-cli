@@ -163,6 +163,16 @@ pnpm lint
 pnpm test
 ```
 
+### Smoke
+
+```bash
+pnpm smoke:local
+pnpm smoke:package
+pnpm smoke
+```
+
+`pnpm smoke:local` valida o binário em `dist/cli.js`. `pnpm smoke:package` gera um tarball local, instala o pacote em um projeto temporário e verifica os bins `openpkg` e `opkg` com `/help`.
+
 ## Executando o OpenPkg
 
 ### TUI Interativa
