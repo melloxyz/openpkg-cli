@@ -1,0 +1,69 @@
+name: Feature request
+description: Suggest an improvement for OpenPkg
+title: '[feature]: '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an improvement for OpenPkg.
+        Focus on the user problem, the intended outcome, and any operational risk.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which OpenPkg area does this request affect?
+      options:
+        - TUI
+        - Headless CLI
+        - Scan
+        - Cleanup
+        - Doctor
+        - Updates
+        - Docs
+        - Release workflow
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What workflow pain or gap does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the change you want in concrete terms.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: User impact
+      description: Who benefits and how does this improve OpenPkg?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Note any simpler or safer alternatives.
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Operational risk
+      description: Does this touch risky flows like cleanup or filesystem scanning?
+      options:
+        - Low
+        - Medium
+        - High
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Extra context
+      description: Link related issues, mockups, commands, or implementation ideas.

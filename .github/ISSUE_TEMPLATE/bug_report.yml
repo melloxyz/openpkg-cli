@@ -1,0 +1,79 @@
+name: Bug report
+description: Report a problem in OpenPkg
+title: '[bug]: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug in OpenPkg.
+        Include the command you ran, what you expected, and what happened instead.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area affected
+      description: Which part of OpenPkg is involved?
+      options:
+        - TUI
+        - Headless CLI
+        - Scan
+        - Cleanup
+        - Doctor
+        - Updates
+        - Docs
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Where did this happen?
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command run
+      description: 'Example: pnpm dev /cleanup --delete-safe --confirm'
+      placeholder: pnpm dev /scan --cached
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should OpenPkg have done?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the smallest reliable reproduction steps.
+      placeholder: |
+        1. Run ...
+        2. Observe ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste relevant output, stack traces, or images.
+      render: shell
+  - type: textarea
+    id: notes
+    attributes:
+      label: Extra context
+      description: Mention version, terminal, shell, or anything else useful.
