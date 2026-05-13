@@ -1,6 +1,6 @@
 {
   "name": "openpkg",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Developer operating center for environment health, projects, caches, and tooling.",
   "type": "module",
   "bin": {
@@ -28,6 +28,7 @@
     "smoke": "tsx src/smoke/cli-smoke.ts",
     "smoke:local": "tsx src/smoke/cli-smoke.ts local",
     "smoke:package": "tsx src/smoke/cli-smoke.ts package",
+    "release:notes": "tsx src/scripts/release-notes.ts",
     "prepack": "npm run build",
     "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
   },

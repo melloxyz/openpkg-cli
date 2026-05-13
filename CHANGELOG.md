@@ -27,13 +27,13 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 - [x] Adicionar check automático de updates do ambiente global.
 - [x] Entregar comando dedicado `/updates`.
 
-### Fase 3: UX e Operação Pública `0.3.x` (Planejado)
+### Fase 3: UX e Operação Pública `0.3.x` (Concluído)
 
-- [ ] Refinar filtros, ordenações e drill-downs no TUI.
-- [ ] Melhorar autocomplete de argumentos na command palette.
-- [ ] Tornar a seção "Settings" totalmente funcional e integrada.
+- [x] Refinar paginação, filtros, ordenações e drill-downs no TUI.
+- [x] Melhorar autocomplete de argumentos na command palette.
+- [x] Tornar a seção "Settings" totalmente funcional e integrada.
 - [x] Preparar templates de issue e PR para contribuições externas.
-- [ ] Validar fluxo completo de release com tag GitHub.
+- [x] Validar fluxo completo de release com tag GitHub.
 
 ### Fase 4: Arquitetura UI, Revamp Visual e Navegação `0.4.x` (Planejado)
 
@@ -55,16 +55,25 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Adicionado (Added)
 
-- Scripts de smoke para validar o binário local e a instalação do pacote com `pnpm smoke:local`, `pnpm smoke:package` e `pnpm smoke`.
-- Templates de issue e PR para padronizar contribuições externas.
-
 ### Modificado (Changed)
-
-- ...
 
 ### Corrigido (Fixed)
 
-- ...
+---
+
+## [0.3.0] - 2026-05-13
+
+### Adicionado (Added)
+
+- Scripts de smoke para validar o binário local e a instalação do pacote com `pnpm smoke:local`, `pnpm smoke:package` e `pnpm smoke`.
+- Templates de issue e PR para padronizar contribuições externas.
+- Extração local de release notes baseada no `CHANGELOG.md` para validar tags `vX.X.X` antes da publicação.
+- Drill-down compacto para projetos e cleanup em terminais pequenos, com paginação por página e preservação da seleção atual.
+
+### Modificado (Changed)
+
+- As listas de projetos e cleanup passaram a suportar filtros locais com `f`, ordenações com `o` e navegação com `PgUp`, `PgDn`, `Home` e `End`.
+- O workflow de release passou a extrair notas usando o script local `src/scripts/release-notes.ts`, validando tag, `package.json` e `CHANGELOG.md` no mesmo fluxo.
 
 ---
 
