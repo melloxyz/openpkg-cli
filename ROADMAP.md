@@ -69,12 +69,12 @@ O projeto já possui:
 
 ### `0.3.x`: UX e Operação Pública
 
-- [ ] Melhorar paginação e drill-down em terminais pequenos.
-- [ ] Adicionar filtros e ordenações em projetos e cleanup.
+- [x] Melhorar paginação e drill-down em terminais pequenos.
+- [x] Adicionar filtros e ordenações em projetos e cleanup.
 - [x] Refinar command palette com autocomplete de argumentos.
 - [x] Tornar a seção "Settings" totalmente funcional e integrada.
 - [x] Adicionar smoke tests documentados para build local e pacote instalado.
-- [ ] Validar release workflow com tag `vX.X.X` e notas extraídas do changelog.
+- [x] Validar release workflow com tag `vX.X.X` e notas extraídas do changelog.
 - [x] Preparar templates de issue e PR para contribuições externas.
 
 ### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação

@@ -61,6 +61,8 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 - Cache de snapshots em `.openpkg/cache.json`.
 - Layout responsivo para diferentes tamanhos de terminal.
 - Feedback de progresso incremental durante scan, preview e exclusão.
+- Filtros e ordenações locais para listas de projetos e cleanup.
+- Drill-down compacto com paginação por página em terminais pequenos.
 
 ## Stack
 
@@ -173,6 +175,14 @@ pnpm smoke
 
 `pnpm smoke:local` valida o binário em `dist/cli.js`. `pnpm smoke:package` gera um tarball local, instala o pacote em um projeto temporário e verifica os bins `openpkg` e `opkg` com `/help`.
 
+### Release Notes
+
+```bash
+pnpm release:notes -- --tag v0.2.0
+```
+
+Esse comando valida se a tag segue o padrão `vX.X.X`, confere se ela bate com a versão atual do `package.json` e extrai a seção correspondente do `CHANGELOG.md` para o workflow de release.
+
 ## Executando o OpenPkg
 
 ### TUI Interativa
@@ -245,6 +255,12 @@ Para updates do ambiente:
 - `l` ou seta direita: focar conteúdo.
 - `j` ou seta baixo: mover seleção para baixo.
 - `k` ou seta cima: mover seleção para cima.
+- `PgUp` e `PgDn`: navegar uma página por vez em listas longas.
+- `Home` e `End`: ir para o primeiro ou último item da lista atual.
+- `f`: alternar o filtro ativo em Projects e Cleanup.
+- `o`: alternar a ordenação ativa em Projects e Cleanup.
+- `Enter`: abrir ou fechar o drill-down compacto de detalhes em Projects e Cleanup quando o layout compacto estiver ativo.
+- `Esc`: voltar para a lista quando o drill-down compacto estiver aberto.
 - `/`: abrir paleta de comandos.
 - `r`: recarregar seção atual.
 - `Ctrl+C`: sair.

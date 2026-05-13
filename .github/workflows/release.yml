@@ -18,10 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract release notes
-        id: extract_release_notes
-        uses: ffurrer2/extract-release-notes@v2
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -35,6 +31,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Extract release notes
+        id: extract_release_notes
+        run: |
+          release_notes="$(pnpm exec tsx src/scripts/release-notes.ts --tag "${GITHUB_REF_NAME}")"
+          {
+            echo 'release_notes<<EOF'
+            printf '%s\n' "$release_notes"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Typecheck
         run: pnpm run typecheck
