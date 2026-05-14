@@ -59,6 +59,7 @@ const createCleanupDirectory = async (
 };
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   process.chdir(originalCwd);
   mockScanRoots.defaultRoots = [];
   mockScanRoots.machineRoots = [];
@@ -82,6 +83,9 @@ describe('DashboardController', () => {
   });
 
   it('refreshes settings section without scan side-effects', async () => {
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-dashboard-cache-'));
+    tempDirectories.push(home);
+    vi.spyOn(os, 'homedir').mockReturnValue(home);
     const controller = new DashboardController();
     const snapshot = await controller.refreshSection('settings', 'workspace');
 

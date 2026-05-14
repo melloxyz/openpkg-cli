@@ -158,25 +158,33 @@ export class DashboardController {
     onProgress?: ProgressListener
   ) {
     const commandMap: Record<string, string> = {
-      overview: `/scan --scope=${scope}`,
-      projects: `/projects --scope=${scope}`,
-      cache: `/cache --scope=${scope}`,
+      dashboard: `/scan --scope=${scope}`,
+      packages: `/projects --scope=${scope}`,
       cleanup: `/cleanup --scope=${scope}`,
-      doctor: '/doctor'
+      scripts: '/doctor',
+      search: '/help'
     };
 
-    if (section === 'settings') {
+    if (section === 'settings' || section === 'registry' || section === 'scripts' || section === 'search') {
       const roots = await this.#getRoots(scope);
       return {
         roots,
         scope,
-        activeSection: 'settings',
+        activeSection: section,
         settings: await this.#buildSettingsSnapshot(scope, roots),
-        statusLine: 'Settings panel refreshed.'
+        ...(section === 'search' ? { helpLines: this.getHelpLines() } : {}),
+        statusLine:
+          section === 'settings'
+            ? 'Settings panel refreshed.'
+            : section === 'registry'
+              ? 'Registry panel refreshed.'
+            : section === 'scripts'
+              ? 'Scripts panel refreshed.'
+              : 'Search panel refreshed.'
       } satisfies DashboardDataSnapshot;
     }
 
-    return this.runCommand(commandMap[section ?? 'overview'] ?? `/scan --scope=${scope}`, {
+    return this.runCommand(commandMap[section ?? 'dashboard'] ?? `/scan --scope=${scope}`, {
       scopeOverride: scope,
       ...(onProgress ? { onProgress } : {})
     });

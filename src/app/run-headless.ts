@@ -12,7 +12,7 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
   const lines = [
     renderBrandTitle('OpenPkg'),
     '',
-    chalk.hex(theme.primary)(`Section: ${snapshot.activeSection ?? 'overview'}`),
+    chalk.hex(theme.primary)(`Section: ${snapshot.activeSection ?? 'dashboard'}`),
     chalk.hex(theme.text)(snapshot.statusLine),
     ''
   ];
@@ -46,7 +46,7 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
   }
 
   if (snapshot.projects?.length) {
-    lines.push(chalk.hex(theme.accent)(`Projects (${snapshot.projects.length})`));
+    lines.push(chalk.hex(theme.accent)(`Packages (${snapshot.projects.length})`));
     lines.push(
       ...snapshot.projects
         .slice(0, 5)
@@ -63,7 +63,7 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
       (total, item) => total + (item.sizeInBytes ?? 0),
       0
     );
-    lines.push(chalk.hex(theme.accent)(`Cleanup Targets (${snapshot.cleanupTargets.length})`));
+    lines.push(chalk.hex(theme.accent)(`Cleanup (${snapshot.cleanupTargets.length})`));
     lines.push(`Potential reclaimable space: ${formatBytes(reclaimable)}`);
     lines.push(
       ...snapshot.cleanupTargets

@@ -90,7 +90,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     },
     execute: async (parsed) => ({
       message: 'Started a full environment scan.',
-      targetSection: 'overview',
+      targetSection: 'dashboard',
       triggerProjectScan: true,
       triggerCleanupScan: true,
       triggerDoctorScan: true,
@@ -124,7 +124,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     },
     execute: async (parsed) => ({
       message: 'Running environment diagnostics.',
-      targetSection: 'doctor',
+      targetSection: 'scripts',
       triggerDoctorScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
       updateFetchPolicy: resolveUpdateFetchPolicy(parsed.options.force, parsed.options.cached)
@@ -151,7 +151,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     },
     execute: async (parsed) => ({
       message: 'Checking environment updates.',
-      targetSection: 'doctor',
+      targetSection: 'scripts',
       triggerDoctorScan: true,
       updatesOnly: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
@@ -200,7 +200,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     },
     execute: async (parsed) => ({
       message: 'Loading local projects.',
-      targetSection: 'projects',
+      targetSection: 'packages',
       triggerProjectScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
       scope: resolveScope(parsed.options.scope, parsed.args[0])
@@ -248,7 +248,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     },
     execute: async (parsed) => ({
       message: 'Scanning cache and artifact directories.',
-      targetSection: 'cache',
+      targetSection: 'cleanup',
       triggerCleanupScan: true,
       cachePolicy: resolveCachePolicy(parsed.options.force, parsed.options.cached),
       scope: resolveScope(parsed.options.scope, parsed.args[0])
@@ -343,7 +343,7 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
     usage: '/help',
     execute: async () => ({
       message: 'Command reference loaded.',
-      targetSection: 'overview',
+      targetSection: 'search',
       showHelp: true
     })
   },

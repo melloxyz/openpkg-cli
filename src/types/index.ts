@@ -1,9 +1,10 @@
 export type NavigationSection =
-  | 'overview'
-  | 'projects'
-  | 'cache'
+  | 'dashboard'
+  | 'packages'
   | 'cleanup'
-  | 'doctor'
+  | 'scripts'
+  | 'registry'
+  | 'search'
   | 'settings';
 
 export type ScanScope = 'workspace' | 'developer-home' | 'machine' | 'custom';

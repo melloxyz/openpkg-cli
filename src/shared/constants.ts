@@ -2,17 +2,65 @@ import type { CleanupTargetKind, NavigationSection } from '../types/index.js';
 
 export const APP_NAME = 'OpenPkg';
 
+export const OPENPKG_BOX_MARK = ['◇'] as const;
+export const OPENPKG_BOX_EASTER_EGG = ['╭─╮', '╰─╯'] as const;
+
 export const NAVIGATION_ITEMS: Array<{
   key: NavigationSection;
   label: string;
   shortcut: string;
+  icon: string;
+  description: string;
 }> = [
-  { key: 'overview', label: 'Overview', shortcut: '1' },
-  { key: 'projects', label: 'Projects', shortcut: '2' },
-  { key: 'cache', label: 'Caches', shortcut: '3' },
-  { key: 'cleanup', label: 'Cleanup', shortcut: '4' },
-  { key: 'doctor', label: 'Doctor', shortcut: '5' },
-  { key: 'settings', label: 'Settings', shortcut: '6' }
+  {
+    key: 'dashboard',
+    label: 'Dashboard',
+    shortcut: '1',
+    icon: '◇',
+    description: 'Workspace health and package signals.'
+  },
+  {
+    key: 'packages',
+    label: 'Packages',
+    shortcut: '2',
+    icon: '□',
+    description: 'Package inventory and project metadata.'
+  },
+  {
+    key: 'cleanup',
+    label: 'Cleanup',
+    shortcut: '3',
+    icon: '⌧',
+    description: 'Safe cleanup candidates and recoverable space.'
+  },
+  {
+    key: 'scripts',
+    label: 'Scripts',
+    shortcut: '4',
+    icon: '›',
+    description: 'Command shortcuts and workflow actions.'
+  },
+  {
+    key: 'registry',
+    label: 'Registry',
+    shortcut: '5',
+    icon: '◎',
+    description: 'Command registry, cache state, and tool health.'
+  },
+  {
+    key: 'search',
+    label: 'Search',
+    shortcut: '6',
+    icon: '?',
+    description: 'Command palette, fuzzy actions, and filters.'
+  },
+  {
+    key: 'settings',
+    label: 'Settings',
+    shortcut: '7',
+    icon: '=',
+    description: 'Workspace defaults, scope, and preferences.'
+  }
 ];
 
 export const CLEANUP_TARGET_PATTERNS: Record<CleanupTargetKind, string[]> = {

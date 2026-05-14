@@ -65,7 +65,7 @@ describe('createBuiltInCommands', () => {
     );
 
     expect(result).toMatchObject({
-      targetSection: 'overview',
+      targetSection: 'dashboard',
       triggerProjectScan: true,
       triggerCleanupScan: true,
       triggerDoctorScan: true,
@@ -88,7 +88,7 @@ describe('createBuiltInCommands', () => {
     );
 
     expect(result).toMatchObject({
-      targetSection: 'projects',
+      targetSection: 'packages',
       triggerProjectScan: true,
       cachePolicy: 'prefer-cache',
       scope: 'workspace'
@@ -180,13 +180,13 @@ describe('createBuiltInCommands', () => {
 
     expect(helpResult).toMatchObject({
       showHelp: true,
-      targetSection: 'overview'
+      targetSection: 'search'
     });
     expect(settingsResult).toMatchObject({
       targetSection: 'settings'
     });
     expect(updatesResult).toMatchObject({
-      targetSection: 'doctor',
+      targetSection: 'scripts',
       triggerDoctorScan: true,
       updatesOnly: true,
       updateFetchPolicy: 'force'
