@@ -25,7 +25,27 @@ Ele combina TUI interativa e comandos headless para gerenciar projetos, caches, 
 
 OpenPkg está em desenvolvimento ativo.
 
-A base atual já é executável e cobre o núcleo da primeira release pública `0.1.0`, incluindo scans reais, cache, diagnóstico, cleanup protegido, TUI responsiva e execução headless. O hardening planejado para a trilha `0.2.x` já está implementado no código atual, e o caminho até `1.0.0` agora segue para UX pública, documentação e release profissional.
+A base atual já cobre o núcleo operacional do produto: scans reais, cache, diagnóstico, cleanup protegido, TUI responsiva, navegação por teclado e execução headless. As trilhas `0.2.x` e `0.3.x` já estão consolidadas no código atual, a `0.4.x` está focada em UX/TUI, e a nova `0.5.x` foi reservada para expansão de ecossistemas e package managers antes da `1.0.0`.
+
+## Visão Rápida
+
+OpenPkg foi pensado para ser um Developer Operating Center de terminal, não apenas um launcher de comandos.
+
+Hoje ele ajuda a:
+
+- descobrir projetos locais e classificar atividade recente
+- inspecionar caches, artefatos pesados e oportunidades seguras de cleanup
+- diagnosticar runtimes, package managers e ferramentas do ambiente
+- consultar updates relevantes do ambiente global
+- operar via TUI moderna ou via comandos headless reproduzíveis
+
+## Por Que OpenPkg
+
+- UX guiada por teclado, com TUI limpa e foco em fluidez
+- mesma base arquitetural para TUI interativa e automação headless
+- operações destrutivas protegidas por defaults conservadores
+- arquitetura modular preparada para ampliar ecossistemas sem jogar lógica na UI
+- roadmap explícito até uma `1.0.0` estável
 
 ## Objetivos
 
@@ -45,8 +65,10 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 ## Funcionalidades Atuais
 
 - TUI interativa construída com Ink e React.
-- Navegação lateral com foco por teclado.
-- Paleta de comandos com comandos slash (`/`) e sugestões fuzzy.
+- Navegação lateral com foco por teclado, footer operacional e transições mais consistentes entre seções.
+- Paleta de comandos com comandos slash (`/`), aliases e sugestões fuzzy.
+- Tela de informações da ferramenta com versão, links do projeto e contexto da release atual.
+- Sistema de tips leve no dashboard para onboarding e discoverability.
 - Execução headless para ambientes não interativos.
 - Descoberta de projetos em `workspace`, `developer-home` e `machine`.
 - Detecção de `node_modules`, `.pnpm-store`, `.npm`, `.turbo`, `.next`, `dist` e `build`.
@@ -54,7 +76,7 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 - Dry-run explícito para fluxos headless de cleanup.
 - Cleanup real com confirmação forte e validação de alvos permitidos.
 - Detecção de React, Next.js, Vue, Angular, Electron, APIs Node e sinais iniciais de Python.
-- Detecção de package manager via lockfiles e campo `packageManager` no `package.json`.
+- Detecção de package manager via lockfiles, `packageManager` no `package.json`, `pyproject.toml` e `requirements.txt`.
 - Check automático de updates para `npm`, `pnpm`, `yarn`, `bun` e `Node` dentro do Doctor.
 - Cache remoto de updates com reaproveitamento em `Doctor` e `/updates`.
 - Sinais de Docker e Python em projetos e diagnósticos.
@@ -62,7 +84,50 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 - Layout responsivo para diferentes tamanhos de terminal.
 - Feedback de progresso incremental durante scan, preview e exclusão.
 - Filtros e ordenações locais para listas de projetos e cleanup.
-- Drill-down compacto com paginação por página em terminais pequenos.
+- Drill-down compacto e viewport interno para seções mais densas em terminais pequenos.
+
+## Ecossistemas
+
+Esta seção resume o que o OpenPkg já consegue operar hoje e o que ainda está planejado para a fase `0.5.x`.
+
+### Já Cobertos No Código Atual
+
+| Ecossistema | Status | O que já funciona |
+| --- | --- | --- |
+| Node.js | forte | base principal do produto, doctor, updates, scans e execução headless |
+| npm | forte | detecção no ambiente, versão, update check e sinais em projetos |
+| pnpm | forte | detecção no ambiente, versão, update check e sinais em projetos |
+| yarn | forte | detecção no ambiente, versão, update check e sinais em projetos |
+| Bun | bom | detecção em projetos, disponibilidade local e update check |
+| Python | parcial | sinais em projetos, `python --version` no doctor e detecção de `pyproject.toml`/`requirements.txt` |
+| pip | parcial | inferência em projetos por `requirements.txt` |
+| Poetry | parcial | inferência em projetos por `pyproject.toml` |
+| uv | parcial | inferência em projetos por `pyproject.toml` |
+| Docker | parcial | sinais em projetos e disponibilidade no doctor |
+
+### Planejados Para A Fase `0.5.x`
+
+| Ecossistema | Status planejado | Escopo esperado |
+| --- | --- | --- |
+| Python | expansão | aprofundar inventário, saúde básica e melhorar a leitura do ecossistema |
+| pip | expansão | enriquecer diagnóstico e visibilidade no ambiente |
+| Poetry | expansão | enriquecer diagnóstico e visibilidade no ambiente |
+| uv | expansão | enriquecer diagnóstico e visibilidade no ambiente |
+| Docker | expansão | ampliar inventário e diagnóstico antes de qualquer limpeza profunda |
+| Deno | planejado | detecção, versão instalada e sinais de projeto |
+| Cargo / Rust | planejado | detecção, versão instalada e sinais de projeto |
+| RubyGems | planejado | sinais de ambiente e projeto quando fizer sentido |
+| NuGet / .NET | planejado | sinais de ambiente e projeto quando fizer sentido |
+| Homebrew | planejado | visibilidade de disponibilidade no ambiente, respeitando plataforma |
+| Chocolatey | planejado | visibilidade de disponibilidade no ambiente, respeitando plataforma |
+
+### Ainda Não É Objetivo Desta Fase
+
+- automação destrutiva específica por ecossistema
+- gerenciamento profundo de containers, volumes e imagens Docker
+- workflows completos de ambientes virtuais Python
+- sistema completo de plugins
+- indexação contínua em background
 
 ## Stack
 
@@ -185,6 +250,11 @@ Esse comando valida se a tag segue o padrão `vX.X.X`, confere se ela bate com a
 
 ## Executando o OpenPkg
 
+OpenPkg roda em dois modos complementares:
+
+- `TUI`: quando aberto sem argumentos em um terminal interativo
+- `Headless`: quando executado com slash commands, útil para automação, smoke e inspeção rápida
+
 ### TUI Interativa
 
 ```bash
@@ -225,6 +295,17 @@ node dist/cli.js /scan machine
 - `/updates`: checa updates disponíveis para as ferramentas globais do ambiente.
 - `/help`: lista comandos e aliases.
 - `/settings`: abre a área de configurações.
+- `/info`: abre a tela de informações da ferramenta e créditos.
+
+Exemplos úteis:
+
+```bash
+openpkg /scan machine
+openpkg /doctor
+openpkg /updates --force
+openpkg /cleanup workspace --dry-run
+openpkg /info
+```
 
 ## Escopos
 
@@ -262,6 +343,7 @@ Para updates do ambiente:
 - `Enter`: abrir ou fechar o drill-down compacto de detalhes em Projects e Cleanup quando o layout compacto estiver ativo.
 - `Esc`: voltar para a lista quando o drill-down compacto estiver aberto.
 - `/`: abrir paleta de comandos.
+- `i`: abrir a tela `Info`.
 - `r`: recarregar seção atual.
 - `Ctrl+C`: sair.
 
@@ -298,6 +380,8 @@ OpenPkg detecta projetos usando sinais como:
 
 A partir desses sinais, o scanner infere nome, framework, package manager, tamanho, atividade recente e metadados de ecossistema.
 
+Hoje a cobertura de projeto é mais madura para o ecossistema JS/Node. Python e Docker ainda aparecem como sinais e detecção inicial; a expansão dedicada desses ecossistemas está planejada para a `0.5.x`.
+
 ## Estrutura
 
 ```text
@@ -326,11 +410,13 @@ A base é modular por design.
 - `shared/`: tema, constantes e schemas compartilhados.
 - `types/`: contratos públicos entre módulos.
 
-Essa organização prepara o projeto para Docker, Python, Rust, Java, Go, perfis de workspace, plugins, indexação em background e diagnósticos assistidos por IA sem acoplamento rígido ao núcleo atual.
+O fluxo principal preserva a cadeia `CommandDefinition -> CommandRegistry -> DashboardController -> services -> DashboardDataSnapshot`, mantendo a UI consumindo dados prontos em vez de acessar serviços diretamente.
+
+Essa organização prepara o projeto para ampliar suporte de ecossistemas, plugins, perfis de workspace, indexação em background e diagnósticos assistidos por IA sem acoplamento rígido ao núcleo atual.
 
 ## Roadmap
 
-Consulte [ROADMAP.md](ROADMAP.md) para o plano rumo à versão `1.0.0`.
+Consulte [ROADMAP.md](ROADMAP.md) para o plano rumo à versão `1.0.0` e para a nova fase `0.5.x` de expansão de ecossistemas e package managers.
 
 ## Contribuição
 
