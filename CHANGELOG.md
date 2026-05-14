@@ -35,10 +35,10 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 - [x] Preparar templates de issue e PR para contribuições externas.
 - [x] Validar fluxo completo de release com tag GitHub.
 
-### Fase 4: Arquitetura UI, Revamp Visual e Navegação `0.4.x` (Planejado)
+### Fase 4: Arquitetura UI, Revamp Visual e Navegação `0.4.x` (Em Andamento)
 
-- [ ] Melhoria geral de UI/UX no TUI para torná-lo mais organizado.
-- [ ] Melhorar sistema de navegação e fluxos entre telas.
+- [x] Melhoria geral de UI/UX no TUI para torná-lo mais organizado.
+- [x] Melhorar sistema de navegação e fluxos entre telas.
 - [ ] Refatoração e separação profissional dos componentes React/Ink (cuidando rigorosamente para não remover lógicas importantes).
 - [ ] Polimento de design, responsividade estendida e feedback visual.
 
@@ -57,7 +57,16 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Modificado (Changed)
 
+- A navegação da sidebar passou a atualizar a seção ativa diretamente, eliminando o cursor separado e fazendo o conteúdo mudar junto com a seleção.
+- O TUI adotou uma direção visual mais monocromática, com azul reservado para destaque, foco e seleção importantes.
+- A sidebar passou a expor Dashboard, Packages, Cleanup, Scripts, Registry, Search e Settings como superfície principal da navegação.
+- A command palette, os painéis, os stat cards e o shell superior receberam polimento para reduzir ruído visual e reforçar hierarquia.
+- As telas de projetos e cleanup passaram a destacar a seleção ativa em azul e a seguir a mesma linguagem visual mais limpa do restante da interface.
+- A responsividade do TUI foi refinada com truncamento consistente, caminhos encurtados, sidebar mais estável e símbolos sem emoji para reduzir quebras visuais em terminais variados.
+
 ### Corrigido (Fixed)
+
+- O estado da sidebar deixou de divergir da seção ativa, o que eliminou a necessidade de Enter/Right para enxergar a tela selecionada.
 
 ---
 

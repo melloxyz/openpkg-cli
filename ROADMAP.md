@@ -8,7 +8,7 @@ OpenPkg está em desenvolvimento ativo. A v1 prioriza estabilidade do núcleo, p
 
 Construir um Developer Operating Center de terminal para ambientes locais de desenvolvimento: rápido, modular, bonito, seguro para operações destrutivas e útil em fluxos reais de manutenção.
 
-## Estado Atual
+## Estado Inicial (Concluído)
 
 A primeira release pública planejada é `0.1.0`, formalizada em `2026-05-12`.
 
@@ -25,7 +25,7 @@ O projeto já possui:
 - Doctor com package managers, runtimes e sinais iniciais de Docker/Python.
 - Testes unitários e fluxos de CI.
 
-## `0.1.0` Entregue
+## `0.1.0` Entregue (Concluído)
 
 ### Fundação
 
@@ -67,7 +67,7 @@ O projeto já possui:
 - [x] Adicionar checagem automática de updates no `Doctor` para `npm`, `pnpm`, `yarn`, `bun` e `Node`.
 - [x] Criar comando `/updates` para uso TUI e headless com cache remoto de versões.
 
-### `0.3.x`: UX e Operação Pública
+### `0.3.x`: UX e Operação Pública (Concluído)
 
 - [x] Melhorar paginação e drill-down em terminais pequenos.
 - [x] Adicionar filtros e ordenações em projetos e cleanup.
@@ -77,12 +77,12 @@ O projeto já possui:
 - [x] Validar release workflow com tag `vX.X.X` e notas extraídas do changelog.
 - [x] Preparar templates de issue e PR para contribuições externas.
 
-### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação
+### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação (em Desenvolvimento)
 
-- [ ] Melhoria geral de UI/UX no TUI para torná-lo mais bonito e organizado.
-- [ ] Melhorar sistema de navegação e fluxos entre telas.
-- [ ] Refatoração e separação profissional dos componentes React/Ink (cuidando rigorosamente para não remover lógicas importantes).
-- [ ] Polimento de design, responsividade estendida e feedback visual.
+- [x] Melhoria geral de UI/UX no TUI para torná-lo mais bonito e organizado.
+- [x] Melhorar sistema de navegação e fluxos entre telas.
+- [x] Polimento de design, responsividade estendida e feedback visual.
+- [ ] Sistemas de tips (dicas), para auxiliar e dar dicas para o user sempre que ele abrir a ferramentas e troca com as ações deles, isso de uma forma facil de adicionar varias dicas ao longo do tempo e da evolução da ferramenta.
 - [ ] Tela de informações da ferramenta, versão, ultima release, infos importantes, creditos ao autor e colaboradores.
 
 ### `1.0.0`: Estável
@@ -94,7 +94,7 @@ O projeto já possui:
 - [ ] Congelar contratos públicos principais de comandos e snapshots.
 - [ ] Publicar release estável com changelog versionado, tag GitHub e pacote npm.
 
-## Pós-v1
+## Planejamento Pós `v1.0.0` (Desenvolvimento Futuro e Sujeito a Alterações)
 
 ### Docker
 
@@ -117,6 +117,7 @@ O projeto já possui:
 
 ### Plugins e Perfis
 
+- Sistema completo de plugins e gerenciamento
 - Modelo de carregamento de plugins.
 - Comandos de terceiros.
 - Scanners externos.
@@ -129,6 +130,17 @@ O projeto já possui:
 - Rescans delta-based.
 - Diagnósticos assistidos por IA.
 - Sugestões de correção e detecção de anomalias.
+- Suporte completo para LLMs conseguirem usar a ferramenta.
+
+### MCP e Skills
+
+- Criação de um MCP para ferramenta.
+- Criação de Skills para agentes usarem com maestria a ferramenta.
+
+### Documentação e Site Oficial
+
+- Criação de uma documentação completa para comunidade.
+- Site oficial para ferramenta.
 
 ## Princípios de Produto
 
