@@ -63,6 +63,22 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Modificado (Changed)
 
+### Corrigido (Fixed)
+
+---
+
+## [0.4.0] - 2026-05-14
+
+### Adicionado (Added)
+
+- Novas abas de navegação: Scripts, Registry, Search e Info.
+- Tela "About/Info" detalhando release atual, metadados e status do roadmap.
+- Comando `/info` e atalho de teclado `i` para acesso rápido à nova tela About.
+- Novo sistema de "Tips" contextuais visíveis no Dashboard para orientar o usuário sobre sua próxima ação segura.
+- Utilitários internos de layout de texto para truncamento inteligente baseado na largura do terminal.
+
+### Modificado (Changed)
+
 - O roadmap passou a reservar uma fase exclusiva `0.5.x` para expansão de ecossistemas e package managers antes da `1.0.0`, em vez de empurrar esse trabalho inteiro para depois da v1.
 - A navegação da sidebar passou a atualizar a seção ativa diretamente, eliminando o cursor separado e fazendo o conteúdo mudar junto com a seleção.
 - O TUI adotou uma direção visual mais monocromática, com azul reservado para destaque, foco e seleção importantes.
