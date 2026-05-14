@@ -2,7 +2,7 @@
 
 Este roteiro reflete o estado atual do OpenPkg e o caminho objetivo até uma versão `1.0.0` estável.
 
-OpenPkg está em desenvolvimento ativo. A v1 prioriza estabilidade do núcleo, previsibilidade operacional, documentação, testes, CI e publicação pública. Módulos profundos de Docker, Python, plugins e indexação em background permanecem planejados para depois do hardening inicial.
+OpenPkg está em desenvolvimento ativo. A v1 prioriza estabilidade do núcleo, previsibilidade operacional, documentação, testes, CI e publicação pública. A expansão de suporte para ecossistemas e package managers além de JS/Node passa a ter uma fase dedicada antes da `1.0.0`, enquanto módulos profundos de plugins e indexação em background permanecem planejados para depois do hardening inicial.
 
 ## Visão
 
@@ -77,13 +77,23 @@ O projeto já possui:
 - [x] Validar release workflow com tag `vX.X.X` e notas extraídas do changelog.
 - [x] Preparar templates de issue e PR para contribuições externas.
 
-### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação (em Desenvolvimento)
+### `0.4.x`: Arquitetura UI, Revamp Visual e Navegação (Concluído)
 
 - [x] Melhoria geral de UI/UX no TUI para torná-lo mais bonito e organizado.
 - [x] Melhorar sistema de navegação e fluxos entre telas.
 - [x] Polimento de design, responsividade estendida e feedback visual.
-- [ ] Sistemas de tips (dicas), para auxiliar e dar dicas para o user sempre que ele abrir a ferramentas e troca com as ações deles, isso de uma forma facil de adicionar varias dicas ao longo do tempo e da evolução da ferramenta.
-- [ ] Tela de informações da ferramenta, versão, ultima release, infos importantes, creditos ao autor e colaboradores.
+- [x] Sistemas de tips (dicas), para auxiliar e dar dicas para o user sempre que ele abrir a ferramentas e troca com as ações deles, isso de uma forma facil de adicionar varias dicas ao longo do tempo e da evolução da ferramenta.
+- [x] Tela de informações da ferramenta, versão, ultima release, infos importantes, creditos ao autor e colaboradores.
+- [x] Reduzir overflow vertical entre seções principais com compactação progressiva, footer mais útil e viewport interno navegável em `Dashboard` e `Info`.
+
+### `0.5.x`: Expansão de Ecossistemas e Package Managers (Planejado)
+
+- [ ] Criar uma fase exclusiva para ampliar suporte a ecossistemas além de JS/Node sem quebrar o fluxo atual de `scan`, `doctor` e snapshots.
+- [ ] Expandir detecção e classificação de projetos para `Python` (`pip`, `poetry`, `uv`), `Deno`, `Cargo`, `RubyGems`, `NuGet` e sinais reais de `Docker` quando houver artefatos ou manifests válidos.
+- [ ] Ampliar o `Doctor` para reportar disponibilidade, versão e saúde básica de ferramentas como `python`, `pip`, `docker`, `bun`, `deno`, `cargo`, `gem`, `dotnet`, `brew` e `choco`, respeitando plataforma e disponibilidade real.
+- [ ] Expor o inventário desses ecossistemas em TUI e headless usando o fluxo atual `CommandDefinition -> CommandRegistry -> DashboardController -> services -> DashboardDataSnapshot`.
+- [ ] Adicionar testes focados para detecção, classificação, compatibilidade por plataforma e integração dos novos sinais ao snapshot.
+- [ ] Manter esta fase não-destrutiva: priorizar inventário, diagnóstico e discoverability; evitar automações profundas ou limpezas específicas por ecossistema antes da `1.0.0`.
 
 ### `1.0.0`: Estável
 
@@ -98,7 +108,7 @@ O projeto já possui:
 
 ### Docker
 
-- Inspeção de engine, daemon, imagens, volumes, redes e contêineres.
+- Inspeção profunda de engine, daemon, imagens, volumes, redes e contêineres.
 - Visualizações de uso de disco e cache Docker.
 - Fluxos seguros de limpeza para artefatos Docker.
 

@@ -37,12 +37,18 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Fase 4: Arquitetura UI, Revamp Visual e Navegação `0.4.x` (Em Andamento)
 
-- [x] Melhoria geral de UI/UX no TUI para torná-lo mais organizado.
+- [x] Melhoria geral de UI/UX no TUI para torná-lo mais bonito e organizado.
 - [x] Melhorar sistema de navegação e fluxos entre telas.
-- [ ] Refatoração e separação profissional dos componentes React/Ink (cuidando rigorosamente para não remover lógicas importantes).
-- [ ] Polimento de design, responsividade estendida e feedback visual.
+- [x] Polimento de design, responsividade estendida e feedback visual.
 
-### Fase 5: Estável `1.0.0` (Planejado)
+### Fase 5: Expansão de Ecossistemas e Package Managers `0.5.x` (Planejado)
+
+- [ ] Ampliar o suporte de inventário e diagnóstico para ecossistemas além de JS/Node.
+- [ ] Consolidar sinais úteis para Python, Docker, Bun, Deno, Cargo, RubyGems, NuGet, Homebrew, Chocolatey e afins.
+- [ ] Expor esses ecossistemas no fluxo atual de scan, doctor, TUI e headless sem regressão.
+- [ ] Cobrir a expansão com testes focados e escopo não-destrutivo.
+
+### Fase 6: Estável `1.0.0` (Planejado)
 
 - [ ] Congelar contratos públicos principais de comandos e snapshots.
 - [ ] Fechar matriz mínima de testes para Windows, macOS e Linux.
@@ -57,12 +63,15 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Modificado (Changed)
 
+- O roadmap passou a reservar uma fase exclusiva `0.5.x` para expansão de ecossistemas e package managers antes da `1.0.0`, em vez de empurrar esse trabalho inteiro para depois da v1.
 - A navegação da sidebar passou a atualizar a seção ativa diretamente, eliminando o cursor separado e fazendo o conteúdo mudar junto com a seleção.
 - O TUI adotou uma direção visual mais monocromática, com azul reservado para destaque, foco e seleção importantes.
 - A sidebar passou a expor Dashboard, Packages, Cleanup, Scripts, Registry, Search e Settings como superfície principal da navegação.
 - A command palette, os painéis, os stat cards e o shell superior receberam polimento para reduzir ruído visual e reforçar hierarquia.
 - As telas de projetos e cleanup passaram a destacar a seleção ativa em azul e a seguir a mesma linguagem visual mais limpa do restante da interface.
 - A responsividade do TUI foi refinada com truncamento consistente, caminhos encurtados, sidebar mais estável e símbolos sem emoji para reduzir quebras visuais em terminais variados.
+- O Dashboard passou a esconder sugestões redundantes, mover ações rápidas para o footer global e priorizar apenas o próximo guidance mais acionável.
+- Dashboard e Info passaram a usar viewport interno por blocos quando a altura aperta, permitindo navegar `j/k`, `PgUp/PgDn`, `Home/End` dentro da section sem amputar conteúdo.
 
 ### Corrigido (Fixed)
 
