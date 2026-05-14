@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import { Sidebar } from '../components/Sidebar.js';
 import { NAVIGATION_ITEMS, OPENPKG_BOX_MARK } from '../../shared/constants.js';
+import { APP_VERSION } from '../../shared/app-metadata.js';
 import { theme } from '../../shared/theme.js';
 import type { NavigationSection } from '../../types/index.js';
 import { truncateText } from '../../utils/text-layout.js';
@@ -40,8 +41,8 @@ export const AppShell = ({
     NAVIGATION_ITEMS.find((item) => item.key === activeSection) ?? fallbackItem;
   const focusLabel =
     focusArea === 'sidebar' ? 'navigate' : focusArea === 'content' ? 'inspect' : 'command';
-  const meta = `v0.3.0 | node ${process.version.slice(1)} | pnpm | workspace active`;
-  const compactMeta = `v0.3.0 | node ${process.version.slice(1)} | pnpm`;
+  const meta = `${APP_VERSION} | node ${process.version.slice(1)} | pnpm | workspace active`;
+  const compactMeta = `${APP_VERSION} | node ${process.version.slice(1)} | pnpm`;
   const topbarWidth = Math.max(24, terminalWidth - 8);
 
   return (

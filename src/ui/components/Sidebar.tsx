@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { NAVIGATION_ITEMS, OPENPKG_BOX_EASTER_EGG } from '../../shared/constants.js';
+import { NAVIGATION_ITEMS } from '../../shared/constants.js';
 import { theme } from '../../shared/theme.js';
 import type { NavigationSection } from '../../types/index.js';
 
@@ -47,17 +47,6 @@ export const Sidebar = ({ activeSection, hasFocus, width, compact }: SidebarProp
         })}
       </Box>
       <Box flexGrow={1} />
-      {!compact ? (
-        <Box flexDirection="column" alignItems="center" marginBottom={1}>
-          {OPENPKG_BOX_EASTER_EGG.map((line) => (
-            <Text key={line} color={hasFocus ? theme.primary : theme.muted}>
-              {line}
-            </Text>
-          ))}
-          <Text color={theme.muted}>OpenPkg CLI</Text>
-          <Text color={theme.muted}>No giant deps.</Text>
-        </Box>
-      ) : null}
       <Box>
         <Text color={theme.muted}>{compact ? 'j/k Enter /' : '/ palette  ? help  q quit'}</Text>
       </Box>

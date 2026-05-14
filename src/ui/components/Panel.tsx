@@ -9,9 +9,18 @@ type PanelProps = {
   width?: number | string;
   minHeight?: number;
   flexGrow?: number;
+  compact?: boolean;
 };
 
-export const Panel = ({ title, children, footer, width, minHeight, flexGrow }: PanelProps) => (
+export const Panel = ({
+  title,
+  children,
+  footer,
+  width,
+  minHeight,
+  flexGrow,
+  compact = false
+}: PanelProps) => (
   <Box
     width={width}
     minHeight={minHeight}
@@ -21,16 +30,16 @@ export const Panel = ({ title, children, footer, width, minHeight, flexGrow }: P
     borderColor={theme.panelBorder}
     backgroundColor={theme.panel}
     paddingX={1}
-    paddingY={1}
+    paddingY={compact ? 0 : 1}
   >
     <Text color={theme.primary} bold>
       {title.toUpperCase()}
     </Text>
-    <Box marginTop={1} flexDirection="column" flexGrow={1}>
+    <Box marginTop={compact ? 0 : 1} flexDirection="column" flexGrow={1}>
       {children}
     </Box>
     {footer ? (
-      <Box marginTop={1}>
+      <Box marginTop={compact ? 0 : 1}>
         <Text color={theme.muted}>{footer}</Text>
       </Box>
     ) : null}

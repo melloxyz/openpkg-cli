@@ -3,6 +3,7 @@ import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { Spinner } from '@inkjs/ui';
 import { DashboardController } from '../modules/dashboard/dashboard-controller.js';
 import { NAVIGATION_ITEMS } from '../shared/constants.js';
+import { APP_NAME } from '../shared/app-metadata.js';
 import { theme } from '../shared/theme.js';
 import type {
   CleanupTargetRecord,
@@ -18,6 +19,7 @@ import { useCommandSuggestions } from '../hooks/useCommandInput.js';
 import { AppShell } from '../ui/layout/AppShell.js';
 import { CommandPalette } from '../ui/components/CommandPalette.js';
 import { ProgressBar } from '../ui/components/ProgressBar.js';
+import { AboutScreen } from '../ui/screens/AboutScreen.js';
 import { CleanupScreen } from '../ui/screens/CleanupScreen.js';
 import { OperationsScreen } from '../ui/screens/OperationsScreen.js';
 import { OverviewScreen } from '../ui/screens/OverviewScreen.js';
@@ -34,6 +36,7 @@ import {
   type CleanupFilterMode,
   type CleanupSortMode
 } from '../utils/cleanup-view.js';
+import { getDashboardPrimarySuggestion } from '../shared/tips.js';
 import { nextNavigationSection } from '../utils/navigation.js';
 import { truncateText } from '../utils/text-layout.js';
 
@@ -97,11 +100,13 @@ export const OpenPkgApp = () => {
   const [projectSort, setProjectSort] = useState<ProjectSortMode>('recent');
   const [cleanupFilter, setCleanupFilter] = useState<CleanupFilterMode>('all');
   const [cleanupSort, setCleanupSort] = useState<CleanupSortMode>('largest');
+  const [dashboardBlockIndex, setDashboardBlockIndex] = useState(0);
+  const [aboutBlockIndex, setAboutBlockIndex] = useState(0);
   const [terminalWidth, setTerminalWidth] = useState(stdout?.columns ?? 120);
   const [terminalHeight, setTerminalHeight] = useState(stdout?.rows ?? 40);
 
   const suggestions = useCommandSuggestions(controller.commandRegistry, commandInput);
-  const activeTitle = 'OpenPkg';
+  const activeTitle = APP_NAME;
   const compactLayout = terminalWidth < 110;
   const [contentViewMode, setContentViewMode] = useState<'split' | 'list' | 'detail'>(
     getDefaultContentViewMode(compactLayout)
@@ -152,6 +157,31 @@ export const OpenPkgApp = () => {
     () => visibleCleanupTargets.reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
     [visibleCleanupTargets]
   );
+  const denseDashboardLayout = compactLayout || contentWidth < 108;
+  const dashboardPrimarySuggestion = useMemo(
+    () =>
+      getDashboardPrimarySuggestion({
+        inactiveProjectCount: projects.filter(
+          (project) => project.activityStatus === 'inactive' || project.activityStatus === 'stale'
+        ).length,
+        projectCount: projects.length,
+        safeCandidateCount: cleanupTargets.filter((target) => target.recommendation === 'safe').length,
+        scope,
+        ...(health?.recommendations[0] ? { firstHealthRecommendation: health.recommendations[0] } : {})
+      }),
+    [cleanupTargets, health?.recommendations, projects, scope]
+  );
+  const dashboardBlockCount = denseDashboardLayout ? 4 : 3 + Number(Boolean(dashboardPrimarySuggestion));
+  const aboutBlockCount = 3;
+  const sectionViewportSize = compactLayout ? 2 : terminalHeight < 38 ? 2 : 3;
+  const footerShortcutLabel =
+    activeSection === 'dashboard'
+      ? compactLayout
+        ? '/ i ? q | s c d u'
+        : '/ Command Palette    i Info    ? Help    q Quit    s Scan    c Cleanup    d Doctor    u Updates'
+      : compactLayout
+        ? '/ Palette  i Info  q Quit'
+        : '/ Command Palette    i Info    ? Help    q Quit';
 
   const activateSection = (
     section: NavigationSection,
@@ -277,6 +307,16 @@ export const OpenPkgApp = () => {
   };
 
   const moveContentCursor = (direction: 1 | -1) => {
+    if (activeSection === 'dashboard') {
+      setDashboardBlockIndex((current) => clampIndex(current + direction, dashboardBlockCount));
+      return;
+    }
+
+    if (activeSection === 'about') {
+      setAboutBlockIndex((current) => clampIndex(current + direction, aboutBlockCount));
+      return;
+    }
+
     if (activeSection === 'packages') {
       const currentIndex = clampIndex(selectedProjectIndex, visibleProjects.length);
       selectVisibleProject(clampIndex(currentIndex + direction, visibleProjects.length));
@@ -292,6 +332,20 @@ export const OpenPkgApp = () => {
   };
 
   const pageContentCursor = (direction: 1 | -1) => {
+    if (activeSection === 'dashboard') {
+      setDashboardBlockIndex((current) =>
+        clampIndex(current + direction * sectionViewportSize, dashboardBlockCount)
+      );
+      return;
+    }
+
+    if (activeSection === 'about') {
+      setAboutBlockIndex((current) =>
+        clampIndex(current + direction * sectionViewportSize, aboutBlockCount)
+      );
+      return;
+    }
+
     if (activeSection === 'packages') {
       const currentIndex = clampIndex(selectedProjectIndex, visibleProjects.length);
       selectVisibleProject(
@@ -464,6 +518,14 @@ export const OpenPkgApp = () => {
   }, [activeSection, compactLayout]);
 
   useEffect(() => {
+    setDashboardBlockIndex((current) => clampIndex(current, dashboardBlockCount));
+  }, [dashboardBlockCount]);
+
+  useEffect(() => {
+    setAboutBlockIndex((current) => clampIndex(current, aboutBlockCount));
+  }, [aboutBlockCount]);
+
+  useEffect(() => {
     setContentViewMode((current) => {
       if (compactLayout) {
         return current === 'split' ? 'list' : current;
@@ -516,6 +578,11 @@ export const OpenPkgApp = () => {
 
     if (!commandPaletteVisible && input === 'g') {
       activateSection('dashboard');
+      return;
+    }
+
+    if (!commandPaletteVisible && input === 'i') {
+      activateSection('about');
       return;
     }
 
@@ -590,7 +657,7 @@ export const OpenPkgApp = () => {
       return;
     }
 
-    if (/^[1-7]$/.test(input)) {
+    if (/^[1-8]$/.test(input)) {
       const item = NAVIGATION_ITEMS[Number(input) - 1];
       if (item) {
         activateSection(item.key);
@@ -598,7 +665,12 @@ export const OpenPkgApp = () => {
       return;
     }
 
-    if (focusArea !== 'content' || activeSection === 'dashboard' || activeSection === 'scripts') {
+    if (
+      focusArea !== 'content' ||
+      activeSection === 'dashboard' ||
+      activeSection === 'scripts' ||
+      activeSection === 'about'
+    ) {
       if (input === 's') {
         void executeCommand('/scan');
         return;
@@ -679,6 +751,14 @@ export const OpenPkgApp = () => {
       }
 
       if (key.home) {
+        if (activeSection === 'dashboard') {
+          setDashboardBlockIndex(0);
+        }
+
+        if (activeSection === 'about') {
+          setAboutBlockIndex(0);
+        }
+
         if (activeSection === 'packages') {
           selectVisibleProject(0);
         }
@@ -690,6 +770,14 @@ export const OpenPkgApp = () => {
       }
 
       if (key.end) {
+        if (activeSection === 'dashboard') {
+          setDashboardBlockIndex(Math.max(0, dashboardBlockCount - 1));
+        }
+
+        if (activeSection === 'about') {
+          setAboutBlockIndex(Math.max(0, aboutBlockCount - 1));
+        }
+
         if (activeSection === 'packages') {
           selectVisibleProject(Math.max(0, visibleProjects.length - 1));
         }
@@ -842,6 +930,21 @@ export const OpenPkgApp = () => {
             contentWidth={contentWidth}
           />
         );
+      case 'about':
+        return (
+          <AboutScreen
+            health={health}
+            currentScope={scope}
+            roots={roots}
+            projectCount={projects.length}
+            cleanupCount={cleanupTargets.length}
+            contentWidth={contentWidth}
+            compact={compactLayout}
+            selectedBlockIndex={aboutBlockIndex}
+            viewportSize={sectionViewportSize}
+            isFocused={focusArea === 'content'}
+          />
+        );
       case 'dashboard':
       default:
         return (
@@ -852,6 +955,10 @@ export const OpenPkgApp = () => {
             statusLine={`${statusLine} Scope: ${scope}. Roots: ${roots.length}.`}
             compact={compactLayout}
             contentWidth={contentWidth}
+            scope={scope}
+            selectedBlockIndex={dashboardBlockIndex}
+            viewportSize={sectionViewportSize}
+            isFocused={focusArea === 'content'}
           />
         );
     }
@@ -891,9 +998,7 @@ export const OpenPkgApp = () => {
             paddingX={1}
             justifyContent="space-between"
           >
-            <Text color={theme.text}>
-              {compactLayout ? '/ Palette  ? Help  q Quit' : '/ Command Palette    ? Help    q Quit'}
-            </Text>
+            <Text color={theme.text}>{truncateText(footerShortcutLabel, Math.max(18, terminalWidth - 36))}</Text>
             <Text color={pendingDeletionIds ? theme.danger : isBusy ? theme.primary : theme.success}>
               ● {pendingDeletionIds ? 'delete pending' : isBusy ? '1 task running' : 'ready'}
             </Text>
