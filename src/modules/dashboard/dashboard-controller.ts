@@ -162,16 +162,23 @@ export class DashboardController {
       packages: `/projects --scope=${scope}`,
       cleanup: `/cleanup --scope=${scope}`,
       scripts: '/doctor',
-      search: '/help'
+      search: '/help',
+      about: '/info'
     };
 
-    if (section === 'settings' || section === 'registry' || section === 'scripts' || section === 'search') {
+    if (
+      section === 'settings' ||
+      section === 'registry' ||
+      section === 'scripts' ||
+      section === 'search' ||
+      section === 'about'
+    ) {
       const roots = await this.#getRoots(scope);
       return {
         roots,
         scope,
         activeSection: section,
-        settings: await this.#buildSettingsSnapshot(scope, roots),
+        ...(section === 'about' ? {} : { settings: await this.#buildSettingsSnapshot(scope, roots) }),
         ...(section === 'search' ? { helpLines: this.getHelpLines() } : {}),
         statusLine:
           section === 'settings'
@@ -180,7 +187,9 @@ export class DashboardController {
               ? 'Registry panel refreshed.'
             : section === 'scripts'
               ? 'Scripts panel refreshed.'
-              : 'Search panel refreshed.'
+              : section === 'search'
+                ? 'Search panel refreshed.'
+                : 'About panel refreshed.'
       } satisfies DashboardDataSnapshot;
     }
 

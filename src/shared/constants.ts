@@ -1,9 +1,9 @@
+import { APP_NAME } from './app-metadata.js';
 import type { CleanupTargetKind, NavigationSection } from '../types/index.js';
 
-export const APP_NAME = 'OpenPkg';
+export { APP_NAME };
 
 export const OPENPKG_BOX_MARK = ['◇'] as const;
-export const OPENPKG_BOX_EASTER_EGG = ['╭─╮', '╰─╯'] as const;
 
 export const NAVIGATION_ITEMS: Array<{
   key: NavigationSection;
@@ -60,6 +60,13 @@ export const NAVIGATION_ITEMS: Array<{
     shortcut: '7',
     icon: '=',
     description: 'Workspace defaults, scope, and preferences.'
+  },
+  {
+    key: 'about',
+    label: 'Info',
+    shortcut: '8',
+    icon: 'i',
+    description: 'Version, links, roadmap, and credits.'
   }
 ];
 

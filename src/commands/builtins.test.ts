@@ -31,8 +31,11 @@ describe('createBuiltInCommands', () => {
       'cache',
       'cleanup',
       'help',
-      'settings'
+      'settings',
+      'info'
     ]);
+
+    expect(getCommand('info').aliases).toEqual(['about']);
   });
 
   it('publishes completion hints for scope and flags', () => {
@@ -160,14 +163,16 @@ describe('createBuiltInCommands', () => {
     expect(result.scope).toBe('machine');
   });
 
-  it('returns help and settings command payloads', async () => {
+  it('returns help, settings, and info command payloads', async () => {
     const help = getCommand('help');
     const settings = getCommand('settings');
+    const info = getCommand('info');
     const updates = getCommand('updates');
 
-    const [helpResult, settingsResult, updatesResult] = await Promise.all([
+    const [helpResult, settingsResult, infoResult, updatesResult] = await Promise.all([
       help.execute(baseParsed({ name: 'help', raw: '/help' }), commandContext),
       settings.execute(baseParsed({ name: 'settings', raw: '/settings' }), commandContext),
+      info.execute(baseParsed({ name: 'info', raw: '/info' }), commandContext),
       updates.execute(
         baseParsed({
           name: 'updates',
@@ -184,6 +189,9 @@ describe('createBuiltInCommands', () => {
     });
     expect(settingsResult).toMatchObject({
       targetSection: 'settings'
+    });
+    expect(infoResult).toMatchObject({
+      targetSection: 'about'
     });
     expect(updatesResult).toMatchObject({
       targetSection: 'scripts',

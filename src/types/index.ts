@@ -5,7 +5,8 @@ export type NavigationSection =
   | 'scripts'
   | 'registry'
   | 'search'
-  | 'settings';
+  | 'settings'
+  | 'about';
 
 export type ScanScope = 'workspace' | 'developer-home' | 'machine' | 'custom';
 

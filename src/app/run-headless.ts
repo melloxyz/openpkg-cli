@@ -1,6 +1,17 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
 import { DashboardController } from '../modules/dashboard/dashboard-controller.js';
+import {
+  APP_AUTHOR,
+  APP_DESCRIPTION,
+  APP_HOMEPAGE,
+  APP_ISSUES_URL,
+  APP_LATEST_RELEASE,
+  APP_NAME,
+  APP_REPOSITORY_URL,
+  APP_ROADMAP_STATUS,
+  APP_VERSION
+} from '../shared/app-metadata.js';
 import { formatBytes } from '../utils/format.js';
 import { renderBrandTitle, theme } from '../shared/theme.js';
 
@@ -25,6 +36,22 @@ export const runHeadlessCli = async (commandInput: string): Promise<void> => {
           .map((tool) => `${tool.name}:${tool.available ? 'ok' : 'missing'}`)
           .join('  ')}`
       ),
+      ''
+    );
+  }
+
+  if (snapshot.activeSection === 'about') {
+    lines.push(
+      chalk.hex(theme.accent)('About'),
+      `• ${APP_NAME} ${APP_VERSION}`,
+      `• ${APP_DESCRIPTION}`,
+      `• Latest release: ${APP_LATEST_RELEASE}`,
+      `• Roadmap status: ${APP_ROADMAP_STATUS}`,
+      `• Repository: ${APP_REPOSITORY_URL}`,
+      `• Homepage: ${APP_HOMEPAGE}`,
+      `• Issues: ${APP_ISSUES_URL}`,
+      `• Author: ${APP_AUTHOR}`,
+      `• Runtime: node ${process.version.slice(1)}  platform ${process.platform}`,
       ''
     );
   }

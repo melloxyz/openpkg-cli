@@ -4,11 +4,12 @@ import { nextNavigationSection } from './navigation.js';
 describe('nextNavigationSection', () => {
   it('moves forward through the navigation order and wraps around', () => {
     expect(nextNavigationSection('dashboard', 1)).toBe('packages');
-    expect(nextNavigationSection('settings', 1)).toBe('dashboard');
+    expect(nextNavigationSection('settings', 1)).toBe('about');
+    expect(nextNavigationSection('about', 1)).toBe('dashboard');
   });
 
   it('moves backward through the navigation order and wraps around', () => {
-    expect(nextNavigationSection('dashboard', -1)).toBe('settings');
+    expect(nextNavigationSection('dashboard', -1)).toBe('about');
     expect(nextNavigationSection('packages', -1)).toBe('dashboard');
   });
 });

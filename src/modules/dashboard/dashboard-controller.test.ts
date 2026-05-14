@@ -101,6 +101,20 @@ describe('DashboardController', () => {
     });
   });
 
+  it('refreshes about section without scan side-effects', async () => {
+    const home = await mkdtemp(path.join(os.tmpdir(), 'openpkg-dashboard-about-'));
+    tempDirectories.push(home);
+    vi.spyOn(os, 'homedir').mockReturnValue(home);
+    const controller = new DashboardController();
+    const snapshot = await controller.refreshSection('about', 'workspace');
+
+    expect(snapshot.activeSection).toBe('about');
+    expect(snapshot.scope).toBe('workspace');
+    expect(snapshot.statusLine).toBe('About panel refreshed.');
+    expect(snapshot.settings).toBeUndefined();
+    expect(snapshot.helpLines).toBeUndefined();
+  });
+
   it('keeps explicit command scope ahead of the UI default scope', async () => {
     const workspaceRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-dashboard-explicit-'));
     tempDirectories.push(workspaceRoot);
@@ -122,6 +136,7 @@ describe('DashboardController', () => {
     expect(helpLines.length).toBeGreaterThan(0);
     expect(helpLines.some((line) => line.startsWith('/scan'))).toBe(true);
     expect(helpLines.some((line) => line.startsWith('/updates'))).toBe(true);
+    expect(helpLines.some((line) => line.startsWith('/info'))).toBe(true);
   });
 
   it('scans the workspace scope with incremental progress updates', async () => {

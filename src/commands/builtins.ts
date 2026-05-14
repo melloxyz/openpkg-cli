@@ -356,5 +356,15 @@ export const createBuiltInCommands = (): CommandDefinition[] => [
       message: 'Settings panel opened.',
       targetSection: 'settings'
     })
+  },
+  {
+    name: 'info',
+    description: 'Open the tool information and credits panel.',
+    aliases: ['about'],
+    usage: '/info',
+    execute: async () => ({
+      message: 'About panel opened.',
+      targetSection: 'about'
+    })
   }
 ];
