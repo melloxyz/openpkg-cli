@@ -19,10 +19,13 @@ export const Panel = ({ title, children, footer, width, minHeight, flexGrow }: P
     flexDirection="column"
     borderStyle="round"
     borderColor={theme.panelBorder}
+    backgroundColor={theme.panel}
     paddingX={1}
     paddingY={1}
   >
-    <Text color={theme.primary}>{title}</Text>
+    <Text color={theme.primary} bold>
+      {title.toUpperCase()}
+    </Text>
     <Box marginTop={1} flexDirection="column" flexGrow={1}>
       {children}
     </Box>

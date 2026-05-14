@@ -3,7 +3,7 @@ import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { Spinner } from '@inkjs/ui';
 import { DashboardController } from '../modules/dashboard/dashboard-controller.js';
 import { NAVIGATION_ITEMS } from '../shared/constants.js';
-import { renderBrandTitle, theme } from '../shared/theme.js';
+import { theme } from '../shared/theme.js';
 import type {
   CleanupTargetRecord,
   DashboardDataSnapshot,
@@ -19,7 +19,7 @@ import { AppShell } from '../ui/layout/AppShell.js';
 import { CommandPalette } from '../ui/components/CommandPalette.js';
 import { ProgressBar } from '../ui/components/ProgressBar.js';
 import { CleanupScreen } from '../ui/screens/CleanupScreen.js';
-import { DoctorScreen } from '../ui/screens/DoctorScreen.js';
+import { OperationsScreen } from '../ui/screens/OperationsScreen.js';
 import { OverviewScreen } from '../ui/screens/OverviewScreen.js';
 import { ProjectsScreen } from '../ui/screens/ProjectsScreen.js';
 import { SettingsScreen } from '../ui/screens/SettingsScreen.js';
@@ -34,17 +34,11 @@ import {
   type CleanupFilterMode,
   type CleanupSortMode
 } from '../utils/cleanup-view.js';
+import { nextNavigationSection } from '../utils/navigation.js';
+import { truncateText } from '../utils/text-layout.js';
 
-const sectionOrder = NAVIGATION_ITEMS.map((item) => item.key);
 const scanScopes: ScanScope[] = ['workspace', 'developer-home', 'machine'];
-const cacheKinds = new Set(['.pnpm-store', '.npm', '.turbo', '.next', 'dist', 'build']);
 const controller = new DashboardController();
-
-const nextSection = (current: NavigationSection, direction: 1 | -1) => {
-  const currentIndex = sectionOrder.indexOf(current);
-  const nextIndex = (currentIndex + direction + sectionOrder.length) % sectionOrder.length;
-  return sectionOrder[nextIndex] ?? 'overview';
-};
 
 const nextValue = <TValue,>(values: TValue[], currentIndex: number, direction: 1 | -1) => {
   if (values.length === 0) {
@@ -80,7 +74,7 @@ const getDefaultContentViewMode = (isCompact: boolean) => (isCompact ? 'list' : 
 export const OpenPkgApp = () => {
   const { exit } = useApp();
   const { stdout } = useStdout();
-  const [activeSection, setActiveSection] = useState<NavigationSection>('overview');
+  const [activeSection, setActiveSection] = useState<NavigationSection>('dashboard');
   const [focusArea, setFocusArea] = useState<'sidebar' | 'content' | 'command'>('sidebar');
   const [statusLine, setStatusLine] = useState('Ready. Press / to open the command palette.');
   const [commandInput, setCommandInput] = useState('');
@@ -107,21 +101,20 @@ export const OpenPkgApp = () => {
   const [terminalHeight, setTerminalHeight] = useState(stdout?.rows ?? 40);
 
   const suggestions = useCommandSuggestions(controller.commandRegistry, commandInput);
-  const activeTitle = renderBrandTitle(`OpenPkg\nDeveloper Operating Center`);
+  const activeTitle = 'OpenPkg';
   const compactLayout = terminalWidth < 110;
   const [contentViewMode, setContentViewMode] = useState<'split' | 'list' | 'detail'>(
     getDefaultContentViewMode(compactLayout)
   );
-  const sidebarWidth = compactLayout ? Math.max(24, terminalWidth - 4) : 24;
+  const sidebarWidth = compactLayout
+    ? Math.max(1, terminalWidth - 4)
+    : Math.min(28, Math.max(18, Math.round(terminalWidth / 6)));
+  const contentWidth = compactLayout
+    ? Math.max(1, terminalWidth - 4)
+    : Math.max(32, terminalWidth - sidebarWidth - 8);
   const visibleRows = Math.max(5, Math.min(14, terminalHeight - (compactLayout ? 22 : 14)));
   const selectedCleanupIdSet = useMemo(() => new Set(selectedCleanupIds), [selectedCleanupIds]);
-  const baseCleanupTargets = useMemo(
-    () =>
-      activeSection === 'cache'
-        ? cleanupTargets.filter((target) => cacheKinds.has(target.kind))
-        : cleanupTargets,
-    [activeSection, cleanupTargets]
-  );
+  const baseCleanupTargets = useMemo(() => cleanupTargets, [cleanupTargets]);
   const visibleProjects = useMemo(
     () => getVisibleProjects(projects, projectFilter, projectSort),
     [projects, projectFilter, projectSort]
@@ -159,6 +152,18 @@ export const OpenPkgApp = () => {
     () => visibleCleanupTargets.reduce((total, target) => total + (target.sizeInBytes ?? 0), 0),
     [visibleCleanupTargets]
   );
+
+  const activateSection = (
+    section: NavigationSection,
+    nextFocus: 'sidebar' | 'content' = 'content'
+  ) => {
+    setActiveSection(section);
+    setFocusArea(nextFocus);
+  };
+
+  const focusSidebar = () => {
+    setFocusArea('sidebar');
+  };
 
   const applySnapshot = (snapshot: DashboardDataSnapshot) => {
     setRoots(snapshot.roots);
@@ -237,8 +242,8 @@ export const OpenPkgApp = () => {
     try {
       const snapshot = await controller.deleteCleanupTargets(targets, scope, setOperationProgress);
       applySnapshot(snapshot);
-      if (activeSection === 'cache') {
-        setActiveSection('cache');
+      if (activeSection === 'cleanup') {
+        setActiveSection('cleanup');
       }
       setSelectedCleanupIds((current) => current.filter((id) => !targetIds.includes(id)));
       setPendingDeletionIds(null);
@@ -272,13 +277,13 @@ export const OpenPkgApp = () => {
   };
 
   const moveContentCursor = (direction: 1 | -1) => {
-    if (activeSection === 'projects') {
+    if (activeSection === 'packages') {
       const currentIndex = clampIndex(selectedProjectIndex, visibleProjects.length);
       selectVisibleProject(clampIndex(currentIndex + direction, visibleProjects.length));
       return;
     }
 
-    if (activeSection === 'cleanup' || activeSection === 'cache') {
+    if (activeSection === 'cleanup') {
       const currentIndex = clampIndex(selectedCleanupIndex, visibleCleanupTargets.length);
       selectVisibleCleanupTarget(
         clampIndex(currentIndex + direction, visibleCleanupTargets.length)
@@ -287,7 +292,7 @@ export const OpenPkgApp = () => {
   };
 
   const pageContentCursor = (direction: 1 | -1) => {
-    if (activeSection === 'projects') {
+    if (activeSection === 'packages') {
       const currentIndex = clampIndex(selectedProjectIndex, visibleProjects.length);
       selectVisibleProject(
         clampIndex(currentIndex + direction * visibleRows, visibleProjects.length)
@@ -295,7 +300,7 @@ export const OpenPkgApp = () => {
       return;
     }
 
-    if (activeSection === 'cleanup' || activeSection === 'cache') {
+    if (activeSection === 'cleanup') {
       const currentIndex = clampIndex(selectedCleanupIndex, visibleCleanupTargets.length);
       selectVisibleCleanupTarget(
         clampIndex(currentIndex + direction * visibleRows, visibleCleanupTargets.length)
@@ -404,7 +409,10 @@ export const OpenPkgApp = () => {
     void controller
       .runCommand('/doctor', { onProgress: setOperationProgress })
       .then((snapshot) => {
-        applySnapshot(snapshot);
+        applySnapshot({
+          ...snapshot,
+          activeSection: 'dashboard'
+        });
       })
       .catch((error: unknown) => {
         setStatusLine(error instanceof Error ? error.message : 'Initial doctor scan failed.');
@@ -449,7 +457,7 @@ export const OpenPkgApp = () => {
   useEffect(() => {
     if (
       compactLayout &&
-      (activeSection === 'projects' || activeSection === 'cleanup' || activeSection === 'cache')
+      (activeSection === 'packages' || activeSection === 'cleanup')
     ) {
       setContentViewMode('list');
     }
@@ -493,6 +501,21 @@ export const OpenPkgApp = () => {
 
     if (!commandPaletteVisible && input === '/') {
       openCommandPalette();
+      return;
+    }
+
+    if (!commandPaletteVisible && input === 'q') {
+      exit();
+      return;
+    }
+
+    if (!commandPaletteVisible && input === '?') {
+      void executeCommand('/help');
+      return;
+    }
+
+    if (!commandPaletteVisible && input === 'g') {
+      activateSection('dashboard');
       return;
     }
 
@@ -558,7 +581,7 @@ export const OpenPkgApp = () => {
     }
 
     if (key.leftArrow || input === 'h') {
-      setFocusArea('sidebar');
+      focusSidebar();
       return;
     }
 
@@ -567,12 +590,34 @@ export const OpenPkgApp = () => {
       return;
     }
 
-    if (/^[1-6]$/.test(input)) {
+    if (/^[1-7]$/.test(input)) {
       const item = NAVIGATION_ITEMS[Number(input) - 1];
       if (item) {
-        setActiveSection(item.key);
+        activateSection(item.key);
       }
       return;
+    }
+
+    if (focusArea !== 'content' || activeSection === 'dashboard' || activeSection === 'scripts') {
+      if (input === 's') {
+        void executeCommand('/scan');
+        return;
+      }
+
+      if (input === 'c') {
+        void executeCommand('/cleanup');
+        return;
+      }
+
+      if (input === 'd') {
+        void executeCommand('/doctor');
+        return;
+      }
+
+      if (input === 'u') {
+        void executeCommand('/updates');
+        return;
+      }
     }
 
     if (input === 'r') {
@@ -582,12 +627,12 @@ export const OpenPkgApp = () => {
 
     if (focusArea === 'sidebar') {
       if (key.upArrow || input === 'k') {
-        setActiveSection((current) => nextSection(current, -1));
+        activateSection(nextNavigationSection(activeSection, -1), 'sidebar');
         return;
       }
 
       if (key.downArrow || input === 'j') {
-        setActiveSection((current) => nextSection(current, 1));
+        activateSection(nextNavigationSection(activeSection, 1), 'sidebar');
         return;
       }
 
@@ -599,13 +644,17 @@ export const OpenPkgApp = () => {
     }
 
     if (focusArea === 'content') {
-      if (
-        key.escape &&
-        compactLayout &&
-        contentViewMode === 'detail' &&
-        (activeSection === 'projects' || activeSection === 'cleanup' || activeSection === 'cache')
-      ) {
-        setContentViewMode('list');
+      if (key.escape) {
+        if (
+          compactLayout &&
+          contentViewMode === 'detail' &&
+          (activeSection === 'packages' || activeSection === 'cleanup')
+        ) {
+          setContentViewMode('list');
+          return;
+        }
+
+        focusSidebar();
         return;
       }
 
@@ -630,22 +679,22 @@ export const OpenPkgApp = () => {
       }
 
       if (key.home) {
-        if (activeSection === 'projects') {
+        if (activeSection === 'packages') {
           selectVisibleProject(0);
         }
 
-        if (activeSection === 'cleanup' || activeSection === 'cache') {
+        if (activeSection === 'cleanup') {
           selectVisibleCleanupTarget(0);
         }
         return;
       }
 
       if (key.end) {
-        if (activeSection === 'projects') {
+        if (activeSection === 'packages') {
           selectVisibleProject(Math.max(0, visibleProjects.length - 1));
         }
 
-        if (activeSection === 'cleanup' || activeSection === 'cache') {
+        if (activeSection === 'cleanup') {
           selectVisibleCleanupTarget(Math.max(0, visibleCleanupTargets.length - 1));
         }
         return;
@@ -661,42 +710,37 @@ export const OpenPkgApp = () => {
         return;
       }
 
-      if ((activeSection === 'cleanup' || activeSection === 'cache') && input === ' ') {
+      if (activeSection === 'cleanup' && input === ' ') {
         toggleCleanupSelection();
         return;
       }
 
-      if ((activeSection === 'cleanup' || activeSection === 'cache') && input === 'a') {
+      if (activeSection === 'cleanup' && input === 'a') {
         selectSafeCleanupTargets();
         return;
       }
 
-      if ((activeSection === 'cleanup' || activeSection === 'cache') && input === 's') {
+      if (activeSection === 'cleanup' && input === 's') {
         selectAllCleanupTargets();
         return;
       }
 
-      if ((activeSection === 'cleanup' || activeSection === 'cache') && input === 'c') {
+      if (activeSection === 'cleanup' && input === 'c') {
         setSelectedCleanupIds([]);
         setStatusLine('Cleanup selection cleared.');
         return;
       }
 
-      if ((activeSection === 'cleanup' || activeSection === 'cache') && input === 'x') {
+      if (activeSection === 'cleanup' && input === 'x') {
         armDeletion();
         return;
       }
 
-      if (
-        (activeSection === 'projects' ||
-          activeSection === 'cleanup' ||
-          activeSection === 'cache') &&
-        input === 'f'
-      ) {
-        if (activeSection === 'projects') {
+      if ((activeSection === 'packages' || activeSection === 'cleanup') && input === 'f') {
+        if (activeSection === 'packages') {
           const nextFilter = cycleProjectFilter(projectFilter);
           setProjectFilter(nextFilter);
-          setStatusLine(`Projects filtered to ${nextFilter}.`);
+          setStatusLine(`Packages filtered to ${nextFilter}.`);
         } else {
           const nextFilter = cycleCleanupFilter(cleanupFilter);
           setCleanupFilter(nextFilter);
@@ -705,16 +749,11 @@ export const OpenPkgApp = () => {
         return;
       }
 
-      if (
-        (activeSection === 'projects' ||
-          activeSection === 'cleanup' ||
-          activeSection === 'cache') &&
-        input === 'o'
-      ) {
-        if (activeSection === 'projects') {
+      if ((activeSection === 'packages' || activeSection === 'cleanup') && input === 'o') {
+        if (activeSection === 'packages') {
           const nextSort = cycleProjectSort(projectSort);
           setProjectSort(nextSort);
-          setStatusLine(`Projects sorted by ${nextSort}.`);
+          setStatusLine(`Packages sorted by ${nextSort}.`);
         } else {
           const nextSort = cycleCleanupSort(cleanupSort);
           setCleanupSort(nextSort);
@@ -724,13 +763,9 @@ export const OpenPkgApp = () => {
       }
 
       if (key.return && compactLayout) {
-        if (
-          activeSection === 'projects' ||
-          activeSection === 'cleanup' ||
-          activeSection === 'cache'
-        ) {
+        if (activeSection === 'packages' || activeSection === 'cleanup') {
           const hasSelection =
-            activeSection === 'projects'
+            activeSection === 'packages'
               ? visibleProjects.length > 0
               : visibleCleanupTargets.length > 0;
 
@@ -747,35 +782,18 @@ export const OpenPkgApp = () => {
 
   const mainContent = (() => {
     switch (activeSection) {
-      case 'projects':
+      case 'packages':
         return (
           <ProjectsScreen
             projects={visibleProjects}
             selectedIndex={clampIndex(selectedProjectIndex, visibleProjects.length)}
             isFocused={focusArea === 'content'}
             compact={compactLayout}
+            contentWidth={contentWidth}
             visibleRows={visibleRows}
             viewMode={compactLayout ? contentViewMode : 'split'}
             filterMode={projectFilter}
             sortMode={projectSort}
-          />
-        );
-      case 'cache':
-        return (
-          <CleanupScreen
-            cleanupTargets={visibleCleanupTargets}
-            title="Cache Inventory"
-            selectedIndex={clampIndex(selectedCleanupIndex, visibleCleanupTargets.length)}
-            selectedIds={selectedCleanupIdSet}
-            isFocused={focusArea === 'content'}
-            pendingDeletionCount={pendingDeletionIds?.length ?? 0}
-            compact={compactLayout}
-            visibleRows={visibleRows}
-            previewReclaimableBytes={previewReclaimableBytes}
-            totalSizeBytes={visibleCleanupTotalBytes}
-            viewMode={compactLayout ? contentViewMode : 'split'}
-            filterMode={cleanupFilter}
-            sortMode={cleanupSort}
           />
         );
       case 'cleanup':
@@ -787,6 +805,7 @@ export const OpenPkgApp = () => {
             isFocused={focusArea === 'content'}
             pendingDeletionCount={pendingDeletionIds?.length ?? 0}
             compact={compactLayout}
+            contentWidth={contentWidth}
             visibleRows={visibleRows}
             previewReclaimableBytes={previewReclaimableBytes}
             totalSizeBytes={visibleCleanupTotalBytes}
@@ -795,8 +814,20 @@ export const OpenPkgApp = () => {
             sortMode={cleanupSort}
           />
         );
-      case 'doctor':
-        return <DoctorScreen health={health} />;
+      case 'scripts':
+      case 'registry':
+      case 'search':
+        return (
+          <OperationsScreen
+            mode={activeSection}
+            helpLines={helpLines}
+            settings={settingsSnapshot}
+            health={health}
+            projectCount={projects.length}
+            cleanupCount={cleanupTargets.length}
+            contentWidth={contentWidth}
+          />
+        );
       case 'settings':
         return (
           <SettingsScreen
@@ -808,9 +839,10 @@ export const OpenPkgApp = () => {
             projectCount={projects.length}
             cleanupCount={cleanupTargets.length}
             healthLoaded={Boolean(health)}
+            contentWidth={contentWidth}
           />
         );
-      case 'overview':
+      case 'dashboard':
       default:
         return (
           <OverviewScreen
@@ -818,7 +850,8 @@ export const OpenPkgApp = () => {
             cleanupTargets={cleanupTargets}
             health={health}
             statusLine={`${statusLine} Scope: ${scope}. Roots: ${roots.length}.`}
-            helpLines={helpLines}
+            compact={compactLayout}
+            contentWidth={contentWidth}
           />
         );
     }
@@ -829,11 +862,21 @@ export const OpenPkgApp = () => {
       activeSection={activeSection}
       focusArea={focusArea}
       title={activeTitle}
-      subtitle="Fast scans, modular services, and premium keyboard-first workflows."
+      subtitle="Developer Operating Center"
       compact={compactLayout}
+      terminalWidth={terminalWidth}
       sidebarWidth={sidebarWidth}
       footer={
         <Box flexDirection="column" width="100%">
+          <Box justifyContent="center">
+            <CommandPalette
+              input={commandInput}
+              suggestions={suggestions}
+              visible={commandPaletteVisible}
+              selectedIndex={commandSuggestionIndex}
+              width={Math.max(1, terminalWidth - 6)}
+            />
+          </Box>
           {isBusy ? (
             <Box flexDirection="column">
               <Spinner label="Working..." />
@@ -841,15 +884,26 @@ export const OpenPkgApp = () => {
                 <ProgressBar progress={operationProgress} width={Math.max(20, terminalWidth - 4)} />
               ) : null}
             </Box>
-          ) : (
-            <Text color={pendingDeletionIds ? theme.danger : theme.muted}>{statusLine}</Text>
-          )}
-          <CommandPalette
-            input={commandInput}
-            suggestions={suggestions}
-            visible={commandPaletteVisible}
-            selectedIndex={commandSuggestionIndex}
-          />
+          ) : null}
+          <Box
+            borderStyle="single"
+            borderColor={theme.panelBorder}
+            paddingX={1}
+            justifyContent="space-between"
+          >
+            <Text color={theme.text}>
+              {compactLayout ? '/ Palette  ? Help  q Quit' : '/ Command Palette    ? Help    q Quit'}
+            </Text>
+            <Text color={pendingDeletionIds ? theme.danger : isBusy ? theme.primary : theme.success}>
+              ● {pendingDeletionIds ? 'delete pending' : isBusy ? '1 task running' : 'ready'}
+            </Text>
+            <Text color={theme.muted}>
+              {compactLayout ? '↑↓ Enter Esc' : 'Navigate: ↑↓    Select: Enter    Back: Esc'}
+            </Text>
+          </Box>
+          {!isBusy && statusLine ? (
+            <Text color={theme.muted}>{truncateText(statusLine, Math.max(24, terminalWidth - 4))}</Text>
+          ) : null}
         </Box>
       }
     >

@@ -5,6 +5,7 @@ import type { CleanupTargetRecord } from '../../types/index.js';
 import { formatBytes, formatRelativeDate } from '../../utils/format.js';
 import { getWindowedRows } from '../../utils/list-view.js';
 import type { CleanupFilterMode, CleanupSortMode } from '../../utils/cleanup-view.js';
+import { fitText, truncatePath, truncateText } from '../../utils/text-layout.js';
 import { Panel } from '../components/Panel.js';
 
 type CleanupScreenProps = {
@@ -15,6 +16,7 @@ type CleanupScreenProps = {
   isFocused: boolean;
   pendingDeletionCount: number;
   compact: boolean;
+  contentWidth: number;
   visibleRows: number;
   previewReclaimableBytes: number;
   totalSizeBytes: number;
@@ -23,17 +25,15 @@ type CleanupScreenProps = {
   sortMode: CleanupSortMode;
 };
 
-const truncate = (value: string, length: number) =>
-  value.length > length ? `${value.slice(0, length - 1)}…` : value;
-
 export const CleanupScreen = ({
   cleanupTargets,
-  title = 'Cleanup Candidates',
+  title = 'Cleanup',
   selectedIndex,
   selectedIds,
   isFocused,
   pendingDeletionCount,
   compact,
+  contentWidth,
   visibleRows,
   previewReclaimableBytes,
   totalSizeBytes,
@@ -49,19 +49,24 @@ export const CleanupScreen = ({
   const pageCount = Math.max(1, Math.ceil(Math.max(1, cleanupTargets.length) / pageSize));
   const pageNumber = Math.min(pageCount, Math.floor(Math.max(0, selectedIndex) / pageSize) + 1);
   const statusSummary = `${filterMode === 'all' ? 'all risk' : filterMode} • ${sortMode}`;
+  const listWidth = compact || viewMode === 'list' ? contentWidth : Math.floor(contentWidth * 0.6);
+  const detailWidth =
+    compact || viewMode === 'detail' ? contentWidth : Math.floor(contentWidth * 0.4);
+  const kindWidth = Math.max(4, Math.min(12, listWidth - 44));
+  const pathWidth = compact ? Math.max(1, listWidth - 42) : Math.max(1, listWidth - 58);
   const listFooter = isFocused
-    ? 'j/k move, PgUp/PgDn page, f filter, o sort, space toggle, a safe, s all, c clear, x delete.'
+    ? 'j/k move, Pg page, f/o tune, Space select, a safe, x delete, Esc sidebar.'
     : 'Tab into content to manage cleanup targets.';
   const detailFooter = compact
-    ? 'Enter or Esc returns to the list. PgUp/PgDn keeps paging through the current selection.'
+    ? 'Enter/Esc returns to list. Esc again returns to sidebar.'
     : 'Use the current selection to inspect recommendation, size and path details.';
 
   const listPanel = (
     <Panel
-      title={`${title} (${cleanupTargets.length}) · ${statusSummary}`}
+      title={`${title} ${cleanupTargets.length} · ${statusSummary}`}
       {...(viewMode === 'detail' && compact ? { flexGrow: 1 } : compact ? {} : { width: '60%' })}
       flexGrow={1}
-      footer={`${listFooter} Page ${pageNumber}/${pageCount}.`}
+      footer={truncateText(`${listFooter} Page ${pageNumber}/${pageCount}.`, Math.max(1, listWidth - 4))}
     >
       {cleanupTargets.length === 0 ? (
         <Text color={theme.muted}>Run /cleanup or /cache to populate cleanup candidates.</Text>
@@ -69,8 +74,8 @@ export const CleanupScreen = ({
         <Box flexDirection="column">
           <Text color={theme.muted}>
             {compact
-              ? 'Sel Kind         Size      Modified   Path'
-              : 'Sel Kind         Recommendation Size      Modified   Path'}
+              ? `Sel ${fitText('Kind', kindWidth)} Size      Modified   Path`
+              : `Sel ${fitText('Kind', kindWidth)} Recommendation Size      Modified   Path`}
           </Text>
           {rows.map(({ value: record, index }) => {
             const isActive = index === selectedIndex;
@@ -83,21 +88,22 @@ export const CleanupScreen = ({
                   : theme.text;
 
             return (
-              <Text key={record.id} color={isActive ? theme.accent : theme.text}>
+              <Text key={record.id} color={isActive ? theme.primary : theme.text}>
                 {compact ? (
                   <>
-                    {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'} {record.kind.padEnd(12)}{' '}
-                    {formatBytes(record.sizeInBytes).padEnd(9)}{' '}
-                    {formatRelativeDate(record.lastModifiedAt).padEnd(10)}{' '}
-                    {truncate(record.path, 20)}
+                    {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'}{' '}
+                    {fitText(record.kind, kindWidth)} {fitText(formatBytes(record.sizeInBytes), 9)}{' '}
+                    {fitText(formatRelativeDate(record.lastModifiedAt), 10)}{' '}
+                    {truncatePath(record.path, pathWidth)}
                   </>
                 ) : (
                   <>
-                    {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'} {record.kind.padEnd(12)}{' '}
-                    <Text color={tone}>{record.recommendation.padEnd(14)}</Text>{' '}
-                    {formatBytes(record.sizeInBytes).padEnd(9)}{' '}
-                    {formatRelativeDate(record.lastModifiedAt).padEnd(10)}{' '}
-                    {truncate(record.path, 28)}
+                    {isActive ? '›' : ' '} {isSelected ? '[x]' : '[ ]'}{' '}
+                    {fitText(record.kind, kindWidth)}{' '}
+                    <Text color={tone}>{fitText(record.recommendation, 14)}</Text>{' '}
+                    {fitText(formatBytes(record.sizeInBytes), 9)}{' '}
+                    {fitText(formatRelativeDate(record.lastModifiedAt), 10)}{' '}
+                    {truncatePath(record.path, pathWidth)}
                   </>
                 )}
               </Text>
@@ -115,10 +121,16 @@ export const CleanupScreen = ({
       flexGrow={1}
       footer={
         pendingDeletionCount > 0
-          ? `Deletion armed for ${pendingDeletionCount} target(s). Preview: ${formatBytes(previewReclaimableBytes)}. Press y to confirm or Esc to cancel.`
+          ? truncateText(
+              `Deletion armed for ${pendingDeletionCount} target(s). Preview: ${formatBytes(previewReclaimableBytes)}. Press y to confirm or Esc to cancel.`,
+              Math.max(1, detailWidth - 4)
+            )
           : selectedTarget
-            ? detailFooter
-            : `${safeCount} safe candidate(s). ${selectedCount} selected. Total: ${formatBytes(totalSizeBytes)}. Preview: ${formatBytes(previewReclaimableBytes)}`
+            ? truncateText(detailFooter, Math.max(1, detailWidth - 4))
+            : truncateText(
+                `${safeCount} safe candidate(s). ${selectedCount} selected. Total: ${formatBytes(totalSizeBytes)}. Preview: ${formatBytes(previewReclaimableBytes)}`,
+                Math.max(1, detailWidth - 4)
+              )
       }
     >
       {selectedTarget ? (
@@ -130,7 +142,9 @@ export const CleanupScreen = ({
             Last Modified: {formatRelativeDate(selectedTarget.lastModifiedAt)}
           </Text>
           <Text color={theme.muted}>Path</Text>
-          <Text color={theme.text}>{selectedTarget.path}</Text>
+          <Text color={theme.text}>
+            {truncatePath(selectedTarget.path, Math.max(1, detailWidth - 4))}
+          </Text>
         </Box>
       ) : (
         <Text color={theme.muted}>Select a cleanup target to inspect risk and path details.</Text>
