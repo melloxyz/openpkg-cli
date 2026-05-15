@@ -37,6 +37,12 @@ describe('EnvironmentService', () => {
           return Promise.resolve({ exitCode: 0, all: '8.0.100' });
         case 'poetry':
           return Promise.resolve({ exitCode: 0, all: 'Poetry (version 1.8.0)' });
+        case 'pip':
+          return Promise.resolve({ exitCode: 0, all: 'pip 24.0' });
+        case 'brew':
+          return Promise.resolve({ exitCode: 0, all: 'Homebrew 4.2.0' });
+        case 'choco':
+          return Promise.resolve({ exitCode: 0, all: '2.1.0' });
         case 'yarn':
         case 'bun':
         case 'python':

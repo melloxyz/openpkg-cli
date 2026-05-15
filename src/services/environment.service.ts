@@ -75,7 +75,11 @@ export class EnvironmentService {
         getCommandVersion('cargo', ['--version'], 'package-manager'),
         getCommandVersion('deno', ['--version'], 'runtime'),
         getCommandVersion('gem', ['--version'], 'package-manager'),
-        getCommandVersion('dotnet', ['--version'], 'runtime')
+        getCommandVersion('dotnet', ['--version'], 'runtime'),
+        getCommandVersion('pip', ['--version'], 'package-manager'),
+        ...(os.platform() === 'win32'
+          ? [getCommandVersion('choco', ['-v'], 'package-manager')]
+          : [getCommandVersion('brew', ['--version'], 'package-manager')])
       ]))
     ];
 

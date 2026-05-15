@@ -56,8 +56,21 @@ const detectFramework = (
   return 'unknown';
 };
 
-const getProjectName = (manifest: ProjectManifest | undefined, projectPath: string) =>
-  manifest?.name?.trim() ? manifest.name : path.basename(projectPath);
+const getProjectName = async (manifest: ProjectManifest | undefined, projectPath: string, projectFiles: Set<string>) => {
+  if (manifest?.name?.trim()) {
+    return manifest.name;
+  }
+
+  if (projectFiles.has('pyproject.toml')) {
+    const pyprojectContent = await fs.readFile(path.join(projectPath, 'pyproject.toml'), 'utf8').catch(() => undefined);
+    const nameMatch = pyprojectContent?.match(/^name\s*=\s*"([^"]+)"/m) ?? pyprojectContent?.match(/^name\s*=\s*'([^']+)'/m);
+    if (nameMatch?.[1]) {
+      return nameMatch[1];
+    }
+  }
+
+  return path.basename(projectPath);
+};
 
 const getProjectActivityStatus = (
   lastActivityAt?: string
@@ -108,7 +121,7 @@ const getLatestProjectActivity = async (projectPath: string, projectFiles: Set<s
     .sort((left, right) => right.localeCompare(left))[0];
 };
 
-const getProjectSignals = (projectFiles: Set<string>) => {
+const getProjectSignals = async (projectPath: string, projectFiles: Set<string>) => {
   const signals: string[] = [];
 
   if (
@@ -119,10 +132,39 @@ const getProjectSignals = (projectFiles: Set<string>) => {
     projectFiles.has('compose.yaml')
   ) {
     signals.push('docker');
+
+    const composeFile = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yml', 'compose.yaml'].find(f => projectFiles.has(f));
+    if (composeFile) {
+      const composeContent = await fs.readFile(path.join(projectPath, composeFile), 'utf8').catch(() => undefined);
+      if (composeContent) {
+        const servicesMatch = [...composeContent.matchAll(/^  [a-zA-Z0-9_-]+:/gm)];
+        if (servicesMatch.length > 0) {
+          signals.push(`docker:services:${servicesMatch.length}`);
+        } else {
+          signals.push('docker:compose');
+        }
+      }
+    }
   }
 
   if (projectFiles.has('pyproject.toml') || projectFiles.has('requirements.txt')) {
     signals.push('python');
+
+    if (projectFiles.has('requirements.txt')) {
+      const reqContent = await fs.readFile(path.join(projectPath, 'requirements.txt'), 'utf8').catch(() => undefined);
+      if (reqContent) {
+        const lines = reqContent.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+        if (lines.length > 0) {
+          signals.push(`python:deps:${lines.length}`);
+        }
+      }
+    }
+
+    const hasVenv = await fs.stat(path.join(projectPath, '.venv')).then(s => s.isDirectory()).catch(() => false);
+    const hasVenvFallback = await fs.stat(path.join(projectPath, 'venv')).then(s => s.isDirectory()).catch(() => false);
+    if (hasVenv || hasVenvFallback) {
+      signals.push('python:venv');
+    }
   }
 
   if (projectFiles.has('Cargo.toml')) {
@@ -201,11 +243,11 @@ export class ProjectScannerService {
         const stats = await fs.stat(projectPath).catch(() => undefined);
         const lastActivityAt =
           (await getLatestProjectActivity(projectPath, projectFiles)) ?? stats?.mtime.toISOString();
-        const signals = getProjectSignals(projectFiles);
+        const signals = await getProjectSignals(projectPath, projectFiles);
 
         return {
           id: projectPath,
-          name: getProjectName(manifest, projectPath),
+          name: await getProjectName(manifest, projectPath, projectFiles),
           path: projectPath,
           framework: detectFramework(manifest, projectFiles),
           packageManager,

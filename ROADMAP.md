@@ -86,14 +86,14 @@ O projeto já possui:
 - [x] Tela de informações da ferramenta, versão, ultima release, infos importantes, creditos ao autor e colaboradores.
 - [x] Reduzir overflow vertical entre seções principais com compactação progressiva, footer mais útil e viewport interno navegável em `Dashboard` e `Info`.
 
-### `0.5.x`: Expansão de Ecossistemas e Package Managers (Em Desenvolvimento)
+### `0.5.x`: Expansão de Ecossistemas e Package Managers (Concluído)
 
 - [x] Criar uma fase exclusiva para ampliar suporte a ecossistemas além de JS/Node sem quebrar o fluxo atual de `scan`, `doctor` e snapshots.
 - [x] Expandir detecção e classificação de projetos para `Python` (`pip`, `poetry`, `uv`), `Deno`, `Cargo`, `RubyGems`, `NuGet` e sinais reais de `Docker` quando houver artefatos ou manifests válidos.
-- [ ] Ampliar o `Doctor` para reportar disponibilidade, versão e saúde básica de ferramentas como `python`, `pip`, `docker`, `bun`, `deno`, `cargo`, `gem`, `dotnet`, `brew` e `choco`, respeitando plataforma e disponibilidade real.
-- [ ] Expor o inventário desses ecossistemas em TUI e headless usando o fluxo atual `CommandDefinition -> CommandRegistry -> DashboardController -> services -> DashboardDataSnapshot`.
-- [ ] Adicionar testes focados para detecção, classificação, compatibilidade por plataforma e integração dos novos sinais ao snapshot.
-- [ ] Manter esta fase não-destrutiva: priorizar inventário, diagnóstico e discoverability; evitar automações profundas ou limpezas específicas por ecossistema antes da `1.0.0`.
+- [x] Ampliar o `Doctor` para reportar disponibilidade, versão e saúde básica de ferramentas como `python`, `pip`, `docker`, `bun`, `deno`, `cargo`, `gem`, `dotnet`, `brew` e `choco`, respeitando plataforma e disponibilidade real.
+- [x] Expor o inventário desses ecossistemas em TUI e headless usando o fluxo atual `CommandDefinition -> CommandRegistry -> DashboardController -> services -> DashboardDataSnapshot`.
+- [x] Adicionar testes focados para detecção, classificação, compatibilidade por plataforma e integração dos novos sinais ao snapshot.
+- [x] Manter esta fase não-destrutiva: priorizar inventário, diagnóstico e discoverability; evitar automações profundas ou limpezas específicas por ecossistema antes da `1.0.0`.
 
 ### `1.0.0`: Estável
 

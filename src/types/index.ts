@@ -75,7 +75,10 @@ export type EnvironmentToolName =
   | 'cargo'
   | 'deno'
   | 'gem'
-  | 'dotnet';
+  | 'dotnet'
+  | 'pip'
+  | 'brew'
+  | 'choco';
 
 export type EnvironmentToolUpdateStatus = 'current' | 'outdated' | 'unknown' | 'offline';
 

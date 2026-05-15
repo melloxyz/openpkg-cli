@@ -61,10 +61,23 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Adicionado (Added)
 
+### Modificado (Changed)
+
+### Corrigido (Fixed)
+
+---
+
+## [0.5.0] - 2026-05-15
+
+### Adicionado (Added)
+
 - Expansão do sistema de tipos e constantes para suportar `Cargo`, `Deno`, `RubyGems` (`gem`), `NuGet` (`dotnet`) e sinais consolidados de `Python` e `Docker`.
+- Extração avançada de metadados para Python (`requirements.txt`, identificação de ambientes virtuais `.venv` e nome no `pyproject.toml`) no scanner de projetos.
+- Extração avançada de metadados para Docker (leitura e estimativa de serviços via arquivos `docker-compose.yml` e similares) no scanner de projetos.
 - Suporte a novos manifestos (`Cargo.toml`, `deno.json`, `Gemfile`, `*.csproj`) no scanner de projetos.
 - Suporte a novos lockfiles (`Cargo.lock`, `deno.lock`, `Gemfile.lock`) para detecção de package manager e data de atividade.
 - Novas verificações automáticas no `EnvironmentService` (Doctor) para os binários `cargo`, `deno`, `gem` e `dotnet`.
+- Inventário de ferramentas do ambiente ampliado no Doctor para incluir disponibilidade e versão de `pip`, `brew` (macOS/Linux) e `choco` (Windows).
 
 ### Modificado (Changed)
 

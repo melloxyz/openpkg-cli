@@ -138,6 +138,39 @@ describe('ProjectScannerService', () => {
     expect(dotnet?.packageManager).toBe('nuget');
   });
 
+  it('extracts deeper signals for Python and Docker', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-deep-'));
+    tempDirectories.push(root);
+
+    const pythonPath = path.join(root, 'python-service');
+    const dockerPath = path.join(root, 'docker-app');
+
+    await mkdir(pythonPath, { recursive: true });
+    await writeFile(path.join(pythonPath, 'requirements.txt'), 'flask==3.0.0\n# comment\npandas', 'utf8');
+    await mkdir(path.join(pythonPath, '.venv'), { recursive: true });
+
+    await mkdir(dockerPath, { recursive: true });
+    await writeFile(
+      path.join(dockerPath, 'docker-compose.yml'),
+      'services:\n  web:\n    image: nginx\n  db:\n    image: postgres',
+      'utf8'
+    );
+
+    const scanner = new ProjectScannerService();
+    const summary = await scanner.scan([root]);
+
+    expect(summary.records).toHaveLength(2);
+
+    const python = summary.records.find((record) => record.name === 'python-service');
+    expect(python?.signals).toContain('python');
+    expect(python?.signals).toContain('python:deps:2');
+    expect(python?.signals).toContain('python:venv');
+
+    const docker = summary.records.find((record) => record.name === 'docker-app');
+    expect(docker?.signals).toContain('docker');
+    expect(docker?.signals).toContain('docker:services:2');
+  });
+
   it('handles invalid package.json by falling back to directory name and other available framework signals', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-'));
     tempDirectories.push(root);
