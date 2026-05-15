@@ -61,7 +61,14 @@ O formato se baseia em [Keep a Changelog](https://keepachangelog.com/) e segue v
 
 ### Adicionado (Added)
 
+- Expansão do sistema de tipos e constantes para suportar `Cargo`, `Deno`, `RubyGems` (`gem`), `NuGet` (`dotnet`) e sinais consolidados de `Python` e `Docker`.
+- Suporte a novos manifestos (`Cargo.toml`, `deno.json`, `Gemfile`, `*.csproj`) no scanner de projetos.
+- Suporte a novos lockfiles (`Cargo.lock`, `deno.lock`, `Gemfile.lock`) para detecção de package manager e data de atividade.
+- Novas verificações automáticas no `EnvironmentService` (Doctor) para os binários `cargo`, `deno`, `gem` e `dotnet`.
+
 ### Modificado (Changed)
+
+- O `ProjectScannerService` tornou-se tolerante e agnóstico ao `package.json`, classificando a linguagem principal e o package manager apenas pela existência dos manifestos específicos do ecossistema.
 
 ### Corrigido (Fixed)
 
