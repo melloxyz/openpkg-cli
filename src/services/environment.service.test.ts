@@ -27,6 +27,16 @@ describe('EnvironmentService', () => {
           return Promise.resolve({ exitCode: 0, all: 'rustc 1.82.0 (f6e511eec 2024-10-15)' });
         case 'java':
           return Promise.resolve({ exitCode: 0, all: 'openjdk version "23"' });
+        case 'cargo':
+          return Promise.resolve({ exitCode: 0, all: 'cargo 1.82.0' });
+        case 'deno':
+          return Promise.resolve({ exitCode: 0, all: 'deno 2.0.0' });
+        case 'gem':
+          return Promise.resolve({ exitCode: 0, all: '3.5.0' });
+        case 'dotnet':
+          return Promise.resolve({ exitCode: 0, all: '8.0.100' });
+        case 'poetry':
+          return Promise.resolve({ exitCode: 0, all: 'Poetry (version 1.8.0)' });
         case 'yarn':
         case 'bun':
         case 'python':

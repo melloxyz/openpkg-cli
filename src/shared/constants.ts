@@ -77,7 +77,10 @@ export const CLEANUP_TARGET_PATTERNS: Record<CleanupTargetKind, string[]> = {
   '.turbo': ['**/.turbo'],
   '.next': ['**/.next'],
   dist: ['**/dist'],
-  build: ['**/build']
+  build: ['**/build'],
+  target: ['**/target'],
+  bin: ['**/bin'],
+  obj: ['**/obj']
 };
 
 export const DEFAULT_SCAN_EXCLUDES = [
@@ -101,5 +104,10 @@ export const COMMON_PROJECT_FILENAMES = [
   '**/docker-compose.yml',
   '**/docker-compose.yaml',
   '**/compose.yml',
-  '**/compose.yaml'
+  '**/compose.yaml',
+  '**/Cargo.toml',
+  '**/deno.json',
+  '**/deno.jsonc',
+  '**/Gemfile',
+  '**/*.csproj'
 ];

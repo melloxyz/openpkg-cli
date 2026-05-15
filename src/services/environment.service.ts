@@ -41,11 +41,18 @@ const getCommandVersion = async (
 
 export class EnvironmentService {
   async getHealthSnapshot(): Promise<EnvironmentHealthSnapshot> {
-    const [npm, pnpm, yarn, bun] = await Promise.all([
+    const [npm, pnpm, yarn, bun, poetry, pip, uv, cargo, gem, nuget, deno] = await Promise.all([
       isPackageManagerAvailable('npm'),
       isPackageManagerAvailable('pnpm'),
       isPackageManagerAvailable('yarn'),
-      isPackageManagerAvailable('bun')
+      isPackageManagerAvailable('bun'),
+      isPackageManagerAvailable('poetry'),
+      isPackageManagerAvailable('pip'),
+      isPackageManagerAvailable('uv'),
+      isPackageManagerAvailable('cargo'),
+      isPackageManagerAvailable('gem'),
+      isPackageManagerAvailable('nuget'),
+      isPackageManagerAvailable('deno')
     ]);
 
     const toolAvailability = [
@@ -64,7 +71,11 @@ export class EnvironmentService {
         getCommandVersion('docker', ['--version'], 'container'),
         getCommandVersion('go', ['version'], 'runtime'),
         getCommandVersion('rustc', ['--version'], 'runtime'),
-        getCommandVersion('java', ['-version'], 'runtime')
+        getCommandVersion('java', ['-version'], 'runtime'),
+        getCommandVersion('cargo', ['--version'], 'package-manager'),
+        getCommandVersion('deno', ['--version'], 'runtime'),
+        getCommandVersion('gem', ['--version'], 'package-manager'),
+        getCommandVersion('dotnet', ['--version'], 'runtime')
       ]))
     ];
 
@@ -88,7 +99,7 @@ export class EnvironmentService {
     return {
       nodeVersion: process.version,
       platform: os.platform(),
-      packageManagers: { npm, pnpm, yarn, bun },
+      packageManagers: { npm, pnpm, yarn, bun, poetry, pip, uv, cargo, gem, nuget, deno },
       toolVersions,
       toolAvailability,
       recommendations

@@ -75,6 +75,26 @@ describe('PackageManagerDetectorService', () => {
     await expect(detector.detect(pipRoot)).resolves.toBe('pip');
   });
 
+  it('detects package manager from Cargo.toml, deno.json, Gemfile, and .csproj', async () => {
+    const cargoRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
+    const denoRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
+    const gemRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
+    const nugetRoot = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
+    tempDirectories.push(cargoRoot, denoRoot, gemRoot, nugetRoot);
+
+    await writeFile(path.join(cargoRoot, 'Cargo.toml'), '[package]\nname = "demo"');
+    await writeFile(path.join(denoRoot, 'deno.json'), '{}');
+    await writeFile(path.join(gemRoot, 'Gemfile'), 'source "https://rubygems.org"');
+    await writeFile(path.join(nugetRoot, 'app.csproj'), '<Project></Project>');
+
+    const detector = new PackageManagerDetectorService();
+
+    await expect(detector.detect(cargoRoot)).resolves.toBe('cargo');
+    await expect(detector.detect(denoRoot)).resolves.toBe('deno');
+    await expect(detector.detect(gemRoot)).resolves.toBe('gem');
+    await expect(detector.detect(nugetRoot)).resolves.toBe('nuget');
+  });
+
   it('returns unknown when no package-manager signals exist', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-pm-'));
     tempDirectories.push(root);

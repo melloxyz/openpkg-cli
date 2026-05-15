@@ -45,6 +45,13 @@ const detectFramework = (
   ) {
     return 'python';
   }
+  if (
+    projectFiles.has('Dockerfile') ||
+    projectFiles.has('docker-compose.yml') ||
+    projectFiles.has('compose.yml')
+  ) {
+    return 'docker';
+  }
 
   return 'unknown';
 };
@@ -79,7 +86,14 @@ const getLatestProjectActivity = async (projectPath: string, projectFiles: Set<s
     'pnpm-lock.yaml',
     'yarn.lock',
     'bun.lock',
-    'bun.lockb'
+    'bun.lockb',
+    'Cargo.lock',
+    'deno.lock',
+    'Gemfile.lock',
+    'Cargo.toml',
+    'deno.json',
+    'deno.jsonc',
+    'Gemfile'
   ].map((relativePath) => path.join(projectPath, relativePath));
 
   const timestamps = await Promise.all(
@@ -109,6 +123,22 @@ const getProjectSignals = (projectFiles: Set<string>) => {
 
   if (projectFiles.has('pyproject.toml') || projectFiles.has('requirements.txt')) {
     signals.push('python');
+  }
+
+  if (projectFiles.has('Cargo.toml')) {
+    signals.push('rust');
+  }
+
+  if (projectFiles.has('deno.json') || projectFiles.has('deno.jsonc')) {
+    signals.push('deno');
+  }
+
+  if (projectFiles.has('Gemfile')) {
+    signals.push('ruby');
+  }
+
+  if ([...projectFiles].some(f => f.endsWith('.csproj'))) {
+    signals.push('dotnet');
   }
 
   return signals;

@@ -10,7 +10,19 @@ export type NavigationSection =
 
 export type ScanScope = 'workspace' | 'developer-home' | 'machine' | 'custom';
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'poetry' | 'pip' | 'uv' | 'unknown';
+export type PackageManager =
+  | 'npm'
+  | 'pnpm'
+  | 'yarn'
+  | 'bun'
+  | 'poetry'
+  | 'pip'
+  | 'uv'
+  | 'cargo'
+  | 'gem'
+  | 'nuget'
+  | 'deno'
+  | 'unknown';
 
 export type ProjectFramework =
   | 'react'
@@ -20,6 +32,11 @@ export type ProjectFramework =
   | 'electron'
   | 'node-api'
   | 'python'
+  | 'django'
+  | 'rails'
+  | 'axum'
+  | 'aspnet'
+  | 'docker'
   | 'unknown';
 
 export type CleanupTargetKind =
@@ -29,7 +46,10 @@ export type CleanupTargetKind =
   | '.turbo'
   | '.next'
   | 'dist'
-  | 'build';
+  | 'build'
+  | 'target'
+  | 'bin'
+  | 'obj';
 
 export type CommandExecutionStatus = 'idle' | 'running' | 'success' | 'error';
 
@@ -51,7 +71,11 @@ export type EnvironmentToolName =
   | 'docker'
   | 'go'
   | 'rustc'
-  | 'java';
+  | 'java'
+  | 'cargo'
+  | 'deno'
+  | 'gem'
+  | 'dotnet';
 
 export type EnvironmentToolUpdateStatus = 'current' | 'outdated' | 'unknown' | 'offline';
 

@@ -97,7 +97,48 @@ describe('ProjectScannerService', () => {
     expect(path.normalize(python?.path ?? '')).toBe(path.normalize(pythonPath));
   });
 
-  it('handles invalid package.json by falling back to directory name and unknown framework', async () => {
+  it('detects additional framework signals (rust, deno, ruby, dotnet)', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-'));
+    tempDirectories.push(root);
+
+    const rustPath = path.join(root, 'rust-app');
+    const denoPath = path.join(root, 'deno-app');
+    const rubyPath = path.join(root, 'ruby-app');
+    const dotnetPath = path.join(root, 'dotnet-app');
+
+    await mkdir(rustPath, { recursive: true });
+    await mkdir(denoPath, { recursive: true });
+    await mkdir(rubyPath, { recursive: true });
+    await mkdir(dotnetPath, { recursive: true });
+
+    await writeFile(path.join(rustPath, 'Cargo.toml'), '');
+    await writeFile(path.join(denoPath, 'deno.json'), '');
+    await writeFile(path.join(rubyPath, 'Gemfile'), '');
+    await writeFile(path.join(dotnetPath, 'app.csproj'), '');
+
+    const scanner = new ProjectScannerService();
+    const summary = await scanner.scan([root]);
+
+    expect(summary.records).toHaveLength(4);
+
+    const rust = summary.records.find((record) => record.name === 'rust-app');
+    expect(rust?.signals).toContain('rust');
+    expect(rust?.packageManager).toBe('cargo');
+
+    const deno = summary.records.find((record) => record.name === 'deno-app');
+    expect(deno?.signals).toContain('deno');
+    expect(deno?.packageManager).toBe('deno');
+
+    const ruby = summary.records.find((record) => record.name === 'ruby-app');
+    expect(ruby?.signals).toContain('ruby');
+    expect(ruby?.packageManager).toBe('gem');
+
+    const dotnet = summary.records.find((record) => record.name === 'dotnet-app');
+    expect(dotnet?.signals).toContain('dotnet');
+    expect(dotnet?.packageManager).toBe('nuget');
+  });
+
+  it('handles invalid package.json by falling back to directory name and other available framework signals', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'openpkg-project-scan-'));
     tempDirectories.push(root);
 
@@ -112,7 +153,7 @@ describe('ProjectScannerService', () => {
     expect(summary.records).toHaveLength(1);
     expect(summary.records[0]).toMatchObject({
       name: 'broken-project',
-      framework: 'unknown',
+      framework: 'docker',
       packageManager: 'unknown'
     });
     expect(summary.records[0]?.signals).toContain('docker');

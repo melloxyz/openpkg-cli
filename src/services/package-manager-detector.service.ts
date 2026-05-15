@@ -9,7 +9,10 @@ const LOCKFILE_MATRIX: Array<{ filename: string; packageManager: PackageManager 
   { filename: 'bun.lockb', packageManager: 'bun' },
   { filename: 'bun.lock', packageManager: 'bun' },
   { filename: 'yarn.lock', packageManager: 'yarn' },
-  { filename: 'package-lock.json', packageManager: 'npm' }
+  { filename: 'package-lock.json', packageManager: 'npm' },
+  { filename: 'Cargo.lock', packageManager: 'cargo' },
+  { filename: 'deno.lock', packageManager: 'deno' },
+  { filename: 'Gemfile.lock', packageManager: 'gem' }
 ];
 
 const PACKAGE_MANAGER_PREFIXES: Array<{
@@ -89,6 +92,23 @@ export class PackageManagerDetectorService {
 
     if (await pathExists(path.join(projectPath, 'requirements.txt'))) {
       return 'pip';
+    }
+
+    if (await pathExists(path.join(projectPath, 'Cargo.toml'))) {
+      return 'cargo';
+    }
+
+    if (await pathExists(path.join(projectPath, 'deno.json')) || await pathExists(path.join(projectPath, 'deno.jsonc'))) {
+      return 'deno';
+    }
+
+    if (await pathExists(path.join(projectPath, 'Gemfile'))) {
+      return 'gem';
+    }
+
+    const files = await fs.readdir(projectPath).catch(() => []);
+    if (files.some(file => file.endsWith('.csproj'))) {
+      return 'nuget';
     }
 
     return 'unknown';
