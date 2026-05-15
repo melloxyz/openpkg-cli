@@ -137,7 +137,7 @@ const getProjectSignals = async (projectPath: string, projectFiles: Set<string>)
     if (composeFile) {
       const composeContent = await fs.readFile(path.join(projectPath, composeFile), 'utf8').catch(() => undefined);
       if (composeContent) {
-        const servicesMatch = [...composeContent.matchAll(/^  [a-zA-Z0-9_-]+:/gm)];
+        const servicesMatch = [...composeContent.matchAll(/^ {2}[a-zA-Z0-9_-]+:/gm)];
         if (servicesMatch.length > 0) {
           signals.push(`docker:services:${servicesMatch.length}`);
         } else {
