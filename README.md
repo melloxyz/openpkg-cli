@@ -25,7 +25,7 @@ Ele combina TUI interativa e comandos headless para gerenciar projetos, caches, 
 
 OpenPkg está em desenvolvimento ativo.
 
-A base atual já cobre o núcleo operacional do produto: scans reais, cache, diagnóstico, cleanup protegido, TUI responsiva, navegação por teclado e execução headless. As trilhas `0.2.x` e `0.3.x` já estão consolidadas no código atual, a `0.4.x` está focada em UX/TUI, e a nova `0.5.x` foi reservada para expansão de ecossistemas e package managers antes da `1.0.0`.
+A base atual já cobre o núcleo operacional do produto: scans reais, cache, diagnóstico, cleanup protegido, TUI responsiva, navegação por teclado e execução headless. As trilhas `0.2.x`, `0.3.x`, `0.4.x` (foco em UX/TUI) e a recém lançada `0.5.x` (expansão de ecossistemas) já estão consolidadas no código atual, pavimentando o caminho para a versão `1.0.0`.
 
 ## Visão Rápida
 
@@ -88,7 +88,7 @@ O objetivo é oferecer um Developer Operating Center multiplataforma para:
 
 ## Ecossistemas
 
-Esta seção resume o que o OpenPkg já consegue operar hoje e o que ainda está planejado para a fase `0.5.x`.
+Esta seção resume o que o OpenPkg já consegue operar hoje.
 
 ### Já Cobertos No Código Atual
 
@@ -99,27 +99,17 @@ Esta seção resume o que o OpenPkg já consegue operar hoje e o que ainda está
 | pnpm | forte | detecção no ambiente, versão, update check e sinais em projetos |
 | yarn | forte | detecção no ambiente, versão, update check e sinais em projetos |
 | Bun | bom | detecção em projetos, disponibilidade local e update check |
-| Python | parcial | sinais em projetos, `python --version` no doctor e detecção de `pyproject.toml`/`requirements.txt` |
-| pip | parcial | inferência em projetos por `requirements.txt` |
+| Python | bom | doctor (`python --version`), detecção detalhada (`pyproject.toml`, extração de `name`), contagem de deps (`requirements.txt`), detecção de ambientes virtuais (`.venv`, `venv`) |
+| pip | bom | visibilidade no ambiente via doctor, inferência em projetos |
 | Poetry | parcial | inferência em projetos por `pyproject.toml` |
 | uv | parcial | inferência em projetos por `pyproject.toml` |
-| Docker | parcial | sinais em projetos e disponibilidade no doctor |
-
-### Planejados Para A Fase `0.5.x`
-
-| Ecossistema | Status planejado | Escopo esperado |
-| --- | --- | --- |
-| Python | expansão | aprofundar inventário, saúde básica e melhorar a leitura do ecossistema |
-| pip | expansão | enriquecer diagnóstico e visibilidade no ambiente |
-| Poetry | expansão | enriquecer diagnóstico e visibilidade no ambiente |
-| uv | expansão | enriquecer diagnóstico e visibilidade no ambiente |
-| Docker | expansão | ampliar inventário e diagnóstico antes de qualquer limpeza profunda |
-| Deno | planejado | detecção, versão instalada e sinais de projeto |
-| Cargo / Rust | planejado | detecção, versão instalada e sinais de projeto |
-| RubyGems | planejado | sinais de ambiente e projeto quando fizer sentido |
-| NuGet / .NET | planejado | sinais de ambiente e projeto quando fizer sentido |
-| Homebrew | planejado | visibilidade de disponibilidade no ambiente, respeitando plataforma |
-| Chocolatey | planejado | visibilidade de disponibilidade no ambiente, respeitando plataforma |
+| Docker | bom | doctor (`docker --version`), parse de `docker-compose.yml` para estimativa de serviços |
+| Deno | parcial | detecção em ambiente, versão instalada e sinais de projeto (`deno.json`) |
+| Cargo / Rust | parcial | detecção em ambiente, versão instalada e sinais de projeto (`Cargo.toml`) |
+| RubyGems | parcial | detecção em ambiente e sinais de projeto (`Gemfile`) |
+| NuGet / .NET | parcial | detecção em ambiente e sinais de projeto (`.csproj`) |
+| Homebrew | parcial | visibilidade de disponibilidade no ambiente (macOS/Linux) |
+| Chocolatey | parcial | visibilidade de disponibilidade no ambiente (Windows) |
 
 ### Ainda Não É Objetivo Desta Fase
 
@@ -380,7 +370,7 @@ OpenPkg detecta projetos usando sinais como:
 
 A partir desses sinais, o scanner infere nome, framework, package manager, tamanho, atividade recente e metadados de ecossistema.
 
-Hoje a cobertura de projeto é mais madura para o ecossistema JS/Node. Python e Docker ainda aparecem como sinais e detecção inicial; a expansão dedicada desses ecossistemas está planejada para a `0.5.x`.
+Hoje a cobertura de projeto é madura para o ecossistema JS/Node. Já temos suporte consolidado para sinais de projetos Python (incluindo dependências e virtual envs), Docker (com contagem de serviços em arquivos compose), além de detecção inicial de projetos Cargo, Deno, RubyGems e .NET.
 
 ## Estrutura
 
